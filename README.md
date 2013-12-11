@@ -1,4 +1,4 @@
-* * *
+Moved info into wiki : https://gitlab.doc.ic.ac.uk/bjm113/group-project-master/wikis/home
 
 # Plant Recogniser Project
-Moved info into wiki
+
