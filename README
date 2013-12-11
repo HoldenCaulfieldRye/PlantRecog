@@ -20,7 +20,7 @@ What is the wow feature, we aim to show off with, which isnt a minimum?
 1. Create a UI for a plant recogniser (iOS... Android? is it too difficult?)
    1.1 Which can take photographs of plants
        1.1.1 Which has all of the functionality inbuilt, i.e. Zoom, flash etc
-AD:1.2 Which can prompt the user for a flower/fruit/trunk/bark photo, or to enable GPS, if our ML needs it
+   1.2 Which can prompt the user for a flower/fruit/trunk/bark photo, or to enable GPS, if our ML needs it
    1.3 Which can store the photograph along with time, location, orientation? focal length?
        1.3.1 Which can delete stored photos 
        1.3.2 Which can browse photos by date, tree, location (map view possible?)
@@ -39,8 +39,8 @@ AD:1.7 Which allows users to label their photos and upload them to feed our trai
    2.5 Which has a website which advertises the app and explains our methodology?
        2.5.1 Which contains the wiki we created during the project
        2.5.2 Which allows anyone to (batch) submit labelled data
-       2.5.2 Which allows experts to verify whether a leaf is what we label it as?
-       2.5.2 How do we check if they're experts?  Or just let anyone do it?
+       2.5.3 Which allows experts to verify whether a leaf is what we label it as?
+       2.5.4 How do we check if they're experts?  Or just let anyone do it?
 
 AD:3. Find labelled leaf/flower/fruit/bark data (world-class classifier performance requires very large amounts)
 AD:3.1. Sourcce datasets
@@ -53,20 +53,20 @@ AD:3.1. Sourcce datasets
     ADL3.1.7 Need more!
 AD:3.2. Integrate datasets so that they can all be fed into the ML program
 
-3. Create a machine learning based plant identifier
-   3.1 Which can run relatively efficiently for (multiple?) requests and can be hosted on the server
-AD:3.2 Which can accept information about characteristics included in our training data 
-AD:3.3 Adopt a suitable ML architecture
-    AD:3.3.1 Deep Learning
-    AD:3.3.2 Hand-coded feature recognition? (used by LeafSnap)
-AD:3.4 Batch-train the classifier
-    AD:3.4.1 If DL, fork Daniel Nouri's fork of cuda-convnet to optimise it for our data (using PyLearn2)
-    AD:3.4.2 GPU Implementation (if DL, using deepnet wrapper)
-AD:3.5 Test the classifier
-AD:3.6 Online-train the classifier?
-    AD:3.6.1 If our project succeeds in creating an ecosystem of (expert) contributors, would be great to indefinitely 
+4. Create a machine learning based plant identifier
+   4.1 Which can run relatively efficiently for (multiple?) requests and can be hosted on the server
+AD:4.2 Which can accept information about characteristics included in our training data 
+AD:4.3 Adopt a suitable ML architecture
+    AD:4.3.1 Deep Learning
+    AD:4.3.2 Hand-coded feature recognition? (used by LeafSnap)
+AD:4.4 Batch-train the classifier
+    AD:4.4.1 If DL, fork Daniel Nouri's fork of cuda-convnet to optimise it for our data (using PyLearn2)
+    AD:4.4.2 GPU Implementation (if DL, using deepnet wrapper)
+AD:4.5 Test the classifier
+AD:4.6 Online-train the classifier?
+    AD:4.6.1 If our project succeeds in creating an ecosystem of (expert) contributors, would be great to indefinitely 
              process future contributions
-    AD:3.6.2 Which hardware implementation?
+    AD:4.6.2 Which hardware implementation?
 
 -----------------------------------------------------------
 Software structure
