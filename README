@@ -1,0 +1,102 @@
+-----------------------------------------------------------
+GROUP PROJECT
+
+Don't leaf me nameless!
+ADD TO THE LIST OF POTENTIAL PROJECT/APP NAMES HERE:
+iLeaf
+
+
+
+==========================================================
+
+-----------------------------------------------------------
+Mandate
+-----------------------------------------------------------
+Some questions to be answered...
+Which are minimum we agree to include in initial project?
+What time scale/margin of error do their implementation entail?
+What is the wow feature, we aim to show off with, which isnt a minimum?
+
+1. Create a UI for a plant recogniser (iOS... Android? is it too difficult?)
+   1.1 Which can take photographs of leaves/trees
+       1.1.1 Which has all of the functionality inbuilt, i.e. Zoom, flash etc
+   1.2 Which can store the photograph along with time, location, orientation? focal length?
+       1.2.1 Which can delete stored photos 
+       1.2.2 Which can browse photos by date, tree, location (map view possible?)
+   1.3 Which can send photos to the server and receive leaf type?
+   1.4 Which stores the returned leaf type linked to the photo for future ref
+
+2. Create a server 
+   2.1 Which can accept and queue requests to analyse photos
+   2.2 Which can host our machine learning program
+   2.3 Which can interact with the UI, sending the most likely match
+       2.3.1 Also send back the next most likely match? error? certainty?
+   2.4 Which can aggregate information of photos?  Too big brothery?
+   2.5 Which has a website which advertises the app and explains our methodology?
+       2.5.1 Which also allows experts to verify whether a leaf is what we label it as?
+       2.5.2 How do we check if they're experts?  Or just let anyone do it?
+
+3. Create a machine learning based leaf identifier
+   3.1 Which can be trained to recognise and differentiate leaves based on an image
+   3.2 Which can run relative efficiently for (multiple?) requests and can be hosted on the server
+   3.3 Which can accept more information than the image itself?? 
+
+-----------------------------------------------------------
+Software structure
+-----------------------------------------------------------
+
+1. Create quick stub programs for each and setup standard interfaces to conform to
+2. Agreement on standard programming languages in use (C++ for one...)
+3. Development strategy? Agile, Scrum, XP Programming? Does it matter?
+4. Version control system will be git
+5. Heavy use of automated shell scripts for installs/testing/common tasks
+6. Separate git repos for the three mandates, linked into a master?
+7. Stable git repos to be linked, vs development repos for advancing progress individually
+8. Standard automated unit testing on every key module, with aim for complete coverage
+
+-----------------------------------------------------------
+Resource requirements
+-----------------------------------------------------------
+
+1. GPU for machine learning
+2. A server machine to host on
+3. iPhones/(Android?) devices for testing
+4. Lots of pictures of leaves...
+
+-----------------------------------------------------------
+Team Members and Roles
+-----------------------------------------------------------
+
+                Need!
+        Leader  Doc-Editor  Server  UI  Machine Learning
+Gerard  Y                   ?       ?   Y
+Alex                        ?       ?   Y
+Ashley                      ?       Y   ? 
+John                        ?       ?   Y 
+Simon                       Y       ?   ? 
+Stewart                     ?       ?   ? 
+
+If multiple people work on machine learning, should we:
+ 1. split up and try different approaches
+ 2. focus efforts on one methodology e.g. deep neural networks
+Option 1 is safer, especially if we set hard deadline on when basic prototyping ends and
+work on final system begins. This means we have less likelihood of investing in a system
+which we can't make work to an acceptable standard in the allotted time.
+
+-----------------------------------------------------------
+To Do List (Append as tasks arise)
+-----------------------------------------------------------
+=> Discuss project mandate, and remainder of this document, assign jobs
+=> Turn this into a wiki page on gitlab?
+
+-----------------------------------------------------------
+Deadlines, and those responsible for their achievement
+-----------------------------------------------------------
+
+Add other team decided deadlines here
+
+31.01.2014 INITIAL REPORT DUE 
+14.03.2014 INTERMEDIATE REPORT DUE
+16.05.2014 FINAL REPORT DUE
+19.05.2014 PRESENTATION DUE
+
