@@ -7,6 +7,7 @@
 //
 
 #import "BLEFAppDelegate.h"
+#import "ManagedObjects.h"
 
 @implementation BLEFAppDelegate
 
@@ -16,10 +17,23 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Override point for customization after application launch.
-    self.window.backgroundColor = [UIColor whiteColor];
-    [self.window makeKeyAndVisible];
+    NSManagedObjectContext *context = [self managedObjectContext];
+    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Set" ];
+    request.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name"
+                                                                                     ascending:YES
+                                                                                      selector:@selector(localizedCaseInsensitiveCompare:)]];
+    NSFetchedResultsController *results = [[NSFetchedResultsController alloc]
+                                           initWithFetchRequest:request
+                                           managedObjectContext:context
+                                           sectionNameKeyPath:nil
+                                           cacheName:nil];
+    [results performFetch:nil]; //nil NSError
+    if (![[results fetchedObjects] count] > 0) {
+        [self createDefaultSet];
+    } else {
+        NSLog(@"There's data in core data");
+    }
+    
     return YES;
 }
 
@@ -145,5 +159,24 @@
 {
     return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
+
+#pragma mark - beLeaf Core Data Methods
+
+- (void) createDefaultSet
+{
+    NSLog(@"createDefaultSet()");
+    
+    NSManagedObjectContext *context = [self managedObjectContext];
+    Set *set = [NSEntityDescription insertNewObjectForEntityForName:@"Set" inManagedObjectContext:context];
+    set.name = @"Default Set";
+    
+    Sample *sample = [NSEntityDescription insertNewObjectForEntityForName:@"Sample" inManagedObjectContext:context];
+    sample.name = @"Test Sample";
+    
+    [set addPhotosObject:sample];
+    
+    [self saveContext];
+}
+
 
 @end
