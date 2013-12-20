@@ -59,28 +59,29 @@
     NSError *error = nil;
     AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:inputDevice error:&error];
     
-    if ([captureSession canAddInput:deviceInput])
+    if ([captureSession canAddInput:deviceInput]){
         [captureSession addInput:deviceInput];
     
-    // Output
-    AVCaptureVideoDataOutput *dataOutput = [[AVCaptureVideoDataOutput alloc] init];
-    [dataOutput setAlwaysDiscardsLateVideoFrames:YES];
-    [dataOutput setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
-    
-    // Input > Output
-    [captureSession addOutput:dataOutput];
-    
-    // Display
-    AVCaptureVideoPreviewLayer *previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:captureSession];
-    [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
-    CALayer *rootLayer = [[self view] layer];
-    [rootLayer setMasksToBounds:YES];
-    [previewLayer setFrame:CGRectMake(0, 0, rootLayer.bounds.size.width, rootLayer.bounds.size.height)];
-    [rootLayer insertSublayer:previewLayer atIndex:0];
-    
-    // Start
-    [captureSession startRunning];
-    NSLog(@"Capture Session Started");
+        // Output
+        AVCaptureVideoDataOutput *dataOutput = [[AVCaptureVideoDataOutput alloc] init];
+        [dataOutput setAlwaysDiscardsLateVideoFrames:YES];
+        [dataOutput setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
+        
+        // Input > Output
+        [captureSession addOutput:dataOutput];
+        
+        // Display
+        AVCaptureVideoPreviewLayer *previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:captureSession];
+        [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
+        CALayer *rootLayer = [[self view] layer];
+        [rootLayer setMasksToBounds:YES];
+        [previewLayer setFrame:CGRectMake(0, 0, rootLayer.bounds.size.width, rootLayer.bounds.size.height)];
+        [rootLayer insertSublayer:previewLayer atIndex:0];
+        
+        // Start
+        [captureSession startRunning];
+        NSLog(@"Capture Session Started");
+    }
 }
 
 - (void) stopCaptureSession
@@ -89,6 +90,16 @@
         [self.captureSession stopRunning];
         NSLog(@"Capture Session Stopped");
     }
+}
+
+- (void) addVideoFrameToSet
+{
+    // Grab output buffer
+    // Process
+    // Grab context
+    // Add new sample
+    // save context
+    // inform uploader of new content
 }
 
 @end

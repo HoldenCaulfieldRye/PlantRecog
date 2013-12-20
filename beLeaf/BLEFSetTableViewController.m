@@ -38,7 +38,7 @@
     // self.clearsSelectionOnViewWillAppear = NO;
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    self.navigationItem.leftBarButtonItem = self.editButtonItem;
 }
 
 - (void)didReceiveMemoryWarning
@@ -74,13 +74,14 @@
     
     Sample *sample = [self.samples objectAtIndex:indexPath.row];
     cell.textLabel.text = sample.name;
+    [cell.imageView setImage:sample.thumbnail];
 
     return cell;
 }
 
 #pragma mark - Private Methods
 
-- (void) loadTableData
+- (void)loadTableData
 {
     BLEFAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
     // Grab context
@@ -101,6 +102,74 @@
     self.samples = [context executeFetchRequest:fetchRequest error:&error];
     [self.tableView reloadData];
 }
+
+- (void)addPhoto:(UIImage *)photo
+{
+    BLEFAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+    // Grab context
+    NSManagedObjectContext *context = [appDelegate managedObjectContext];
+    
+    // Grab default set
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entityType = [NSEntityDescription entityForName:@"Set"
+                                                            inManagedObjectContext:context];
+    [fetchRequest setEntity:entityType];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name==%@", @"Default Set"];
+    [fetchRequest setPredicate:predicate];
+    NSError *error = nil;
+    NSArray *fetchedObjects = [context executeFetchRequest:fetchRequest error:&error];
+    
+    Set *defaultSet = [fetchedObjects objectAtIndex:0];
+    
+    // Create new Sample
+    Sample *sample = [NSEntityDescription insertNewObjectForEntityForName:@"Sample" inManagedObjectContext:context];
+    sample.name = @"Photo";
+    
+    [defaultSet addPhotosObject:sample];
+    [sample setSet:defaultSet];
+    
+    // Create new Image
+    Image *image = [NSEntityDescription insertNewObjectForEntityForName:@"Image" inManagedObjectContext:context];
+    image.image = photo;
+    sample.image = image;
+    
+    // Create thumbnail
+    CGSize size = photo.size;
+    CGFloat ratio = 0;
+    if (size.width > size.height) {
+        ratio = 44.0 / size.width;
+    } else {
+        ratio = 44.0 /size.height;
+    }
+    CGRect rect = CGRectMake(0.0, 0.0, ratio * size.width, ratio *size.height);
+    
+    UIGraphicsBeginImageContext(rect.size);
+    [photo drawInRect:rect];
+    sample.thumbnail = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    [appDelegate saveContext];
+    [self loadTableData];
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    // If row is deleted, remove it from the list.
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        // Remove row's predicate from database
+        Sample *sample = [self.samples objectAtIndex:indexPath.row];
+        BLEFAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+        [appDelegate.managedObjectContext deleteObject:sample];
+        [appDelegate saveContext];
+        [self loadTableData];
+        
+        // Animage remove row from table
+        //[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        /* Error */
+        
+    }
+}
+
+
 
 /*
 // Override to support conditional editing of the table view.
@@ -141,16 +210,58 @@
 }
 */
 
+#pragma mark Photo Select
+
+- (IBAction)displayImageSourceMenu
+{
+    UIActionSheet *imageSourceMenu = [[UIActionSheet alloc] initWithTitle:@"Image Source"
+                                                            delegate:self
+                                                            cancelButtonTitle:@"Neither"
+                                                            destructiveButtonTitle:nil
+                                                            otherButtonTitles:@"Camera", @"Library", nil];
+    [imageSourceMenu showInView:self.view];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+    imagePicker.delegate = self;
+    imagePicker.allowsEditing = NO;
+    
+    
+    switch (buttonIndex) {
+        case 0:
+            imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+            break;
+        case 1:
+        default:
+            imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+            break;
+    }
+    [self presentViewController:imagePicker animated:YES completion:NULL];
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    UIImage *chosenImage = info[UIImagePickerControllerOriginalImage];
+    [self addPhoto:chosenImage];
+    [picker dismissViewControllerAnimated:YES completion:NULL];
+}
+
+-(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [picker dismissViewControllerAnimated:YES completion:NULL];
+}
 
 #pragma mark - Navigation
 /*
-// In a story board-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-
+ // In a story board-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+ {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ 
  */
 
 - (IBAction)unwindToTableView:(UIStoryboardSegue *)segue

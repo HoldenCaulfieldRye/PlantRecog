@@ -19,9 +19,10 @@
 {
     NSManagedObjectContext *context = [self managedObjectContext];
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Set" ];
-    request.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name"
-                                                                                     ascending:YES
-                                                                                      selector:@selector(localizedCaseInsensitiveCompare:)]];
+    request.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor
+                                                        sortDescriptorWithKey:@"name"
+                                                        ascending:YES
+                                                        selector:@selector(localizedCaseInsensitiveCompare:)]];
     NSFetchedResultsController *results = [[NSFetchedResultsController alloc]
                                            initWithFetchRequest:request
                                            managedObjectContext:context
@@ -169,11 +170,6 @@
     NSManagedObjectContext *context = [self managedObjectContext];
     Set *set = [NSEntityDescription insertNewObjectForEntityForName:@"Set" inManagedObjectContext:context];
     set.name = @"Default Set";
-    
-    Sample *sample = [NSEntityDescription insertNewObjectForEntityForName:@"Sample" inManagedObjectContext:context];
-    sample.name = @"Test Sample";
-    
-    [set addPhotosObject:sample];
     
     [self saveContext];
 }

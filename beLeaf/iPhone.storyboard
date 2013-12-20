@@ -26,7 +26,7 @@
                     <navigationItem key="navigationItem" title="Root View Controller" id="73Z-gT-FtP">
                         <barButtonItem key="rightBarButtonItem" systemItem="camera" id="xUQ-Jd-4LA">
                             <connections>
-                                <segue destination="ZG8-98-mW4" kind="push" id="BV5-Cz-2In"/>
+                                <action selector="displayImageSourceMenu" destination="nMu-pZ-mK1" id="d3I-a8-w6u"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
