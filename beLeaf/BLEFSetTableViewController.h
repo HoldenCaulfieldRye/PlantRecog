@@ -10,6 +10,8 @@
 
 @interface BLEFSetTableViewController : UITableViewController
 
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *cameraButton;
 @property (strong, nonatomic) NSArray *samples;
+
 
 @end

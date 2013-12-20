@@ -27,6 +27,8 @@
 		5E2AD5B31863CEFF00595828 /* Sample.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5B21863CEFF00595828 /* Sample.m */; };
 		5E2AD5B61863CF0000595828 /* Set.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5B51863CF0000595828 /* Set.m */; };
 		5E2AD5B91863CF0000595828 /* Image.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5B81863CF0000595828 /* Image.m */; };
+		E95C8538186452DF00CFEC40 /* BLEFSampleCollectViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E95C8537186452DF00CFEC40 /* BLEFSampleCollectViewController.m */; };
+		E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +70,9 @@
 		5E2AD5B51863CF0000595828 /* Set.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Set.m; sourceTree = "<group>"; };
 		5E2AD5B71863CF0000595828 /* Image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Image.h; sourceTree = "<group>"; };
 		5E2AD5B81863CF0000595828 /* Image.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Image.m; sourceTree = "<group>"; };
+		E95C8536186452DF00CFEC40 /* BLEFSampleCollectViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSampleCollectViewController.h; sourceTree = "<group>"; };
+		E95C8537186452DF00CFEC40 /* BLEFSampleCollectViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSampleCollectViewController.m; sourceTree = "<group>"; };
+		E95C85391864564000CFEC40 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */,
 				5E2AD5701863B6D900595828 /* CoreGraphics.framework in Frameworks */,
 				5E2AD5741863B6D900595828 /* CoreData.framework in Frameworks */,
 				5E2AD5721863B6D900595828 /* UIKit.framework in Frameworks */,
@@ -118,6 +124,7 @@
 		5E2AD56C1863B6D900595828 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E95C85391864564000CFEC40 /* AVFoundation.framework */,
 				5E2AD56D1863B6D900595828 /* Foundation.framework */,
 				5E2AD56F1863B6D900595828 /* CoreGraphics.framework */,
 				5E2AD5711863B6D900595828 /* UIKit.framework */,
@@ -133,6 +140,8 @@
 				5E2AD57E1863B6DA00595828 /* BLEFAppDelegate.h */,
 				5E2AD57F1863B6DA00595828 /* BLEFAppDelegate.m */,
 				5E2AD5A21863BB5A00595828 /* iPhone.storyboard */,
+				E95C8536186452DF00CFEC40 /* BLEFSampleCollectViewController.h */,
+				E95C8537186452DF00CFEC40 /* BLEFSampleCollectViewController.m */,
 				5E2AD5A41863BC4600595828 /* BLEFSetTableViewController.h */,
 				5E2AD5A51863BC4600595828 /* BLEFSetTableViewController.m */,
 				5E2AD5841863B6DA00595828 /* Images.xcassets */,
@@ -279,6 +288,7 @@
 				5E2AD5801863B6DA00595828 /* BLEFAppDelegate.m in Sources */,
 				5E2AD5B61863CF0000595828 /* Set.m in Sources */,
 				5E2AD5831863B6DA00595828 /* beLeaf.xcdatamodeld in Sources */,
+				E95C8538186452DF00CFEC40 /* BLEFSampleCollectViewController.m in Sources */,
 				5E2AD5A61863BC4600595828 /* BLEFSetTableViewController.m in Sources */,
 				5E2AD5B31863CEFF00595828 /* Sample.m in Sources */,
 				5E2AD5B91863CF0000595828 /* Image.m in Sources */,
@@ -486,6 +496,7 @@
 				5E2AD59E1863B6DA00595828 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5E2AD59F1863B6DA00595828 /* Build configuration list for PBXNativeTarget "beLeafTests" */ = {
 			isa = XCConfigurationList;
@@ -494,6 +505,7 @@
 				5E2AD5A11863B6DA00595828 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
