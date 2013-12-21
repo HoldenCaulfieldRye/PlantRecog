@@ -245,12 +245,17 @@
 
 - (IBAction)displayImageSourceMenu
 {
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+        
     UIActionSheet *imageSourceMenu = [[UIActionSheet alloc] initWithTitle:@"Image Source"
                                                             delegate:self
                                                             cancelButtonTitle:@"Neither"
                                                             destructiveButtonTitle:nil
                                                             otherButtonTitles:@"Camera", @"Library", nil];
     [imageSourceMenu showInView:self.view];
+    } else {
+        [self actionSheet:nil clickedButtonAtIndex:1];
+    }
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
@@ -269,6 +274,7 @@
             imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
             break;
     }
+    
     [self presentViewController:imagePicker animated:YES completion:NULL];
 }
 
