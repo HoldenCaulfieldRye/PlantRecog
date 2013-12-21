@@ -32,7 +32,9 @@
 {
     [super viewDidLoad];
     
+    self.tableView.rowHeight = 50;
     [self loadTableData];
+    [self.tableView reloadData];
 
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
@@ -73,8 +75,57 @@
     }
     
     Sample *sample = [self.samples objectAtIndex:indexPath.row];
-    cell.textLabel.text = sample.name;
     [cell.imageView setImage:sample.thumbnail];
+    UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    [activityIndicator setTranslatesAutoresizingMaskIntoConstraints:NO];
+    
+    [cell.contentView addSubview:activityIndicator];
+    NSLayoutConstraint *activityIndictatorConstraintX = [NSLayoutConstraint
+                                                        constraintWithItem:activityIndicator
+                                                        attribute:NSLayoutAttributeRight
+                                                        relatedBy:NSLayoutRelationEqual
+                                                        toItem:cell.contentView
+                                                        attribute:NSLayoutAttributeRight
+                                                        multiplier:1.0
+                                                        constant:-10];
+    NSLayoutConstraint *activityIndictatorConstraintY = [NSLayoutConstraint
+                                                        constraintWithItem:activityIndicator
+                                                        attribute:NSLayoutAttributeCenterY
+                                                        relatedBy:NSLayoutRelationEqual
+                                                        toItem:cell.contentView
+                                                        attribute:NSLayoutAttributeCenterY
+                                                        multiplier:1.0
+                                                        constant:0];
+    [cell.contentView addConstraints:@[activityIndictatorConstraintX, activityIndictatorConstraintY]];
+    
+    /* 
+    // 1 : Pending
+    // 2 : Uploading
+    // 3 : Uploaded
+    // 4 : Complete
+    */
+    
+    switch (sample.status) {
+        case 1:
+            [activityIndicator stopAnimating];
+            cell.textLabel.text = @"Pending...";
+            break;
+        case 2:
+            cell.textLabel.text = @"Uploading...";
+            [activityIndicator startAnimating];
+            break;
+        case 3:
+            cell.textLabel.text = @"Waiting Responce";
+            [activityIndicator stopAnimating];
+            break;
+        case 4:
+            [activityIndicator stopAnimating];
+            cell.accessoryType = UITableViewCellAccessoryCheckmark;
+            cell.textLabel.text = sample.name;
+            break;
+        default:
+            break;
+    }
 
     return cell;
 }
@@ -100,7 +151,6 @@
     // Fetch
     NSError *error = nil;
     self.samples = [context executeFetchRequest:fetchRequest error:&error];
-    [self.tableView reloadData];
 }
 
 - (void)addPhoto:(UIImage *)photo
@@ -123,7 +173,7 @@
     
     // Create new Sample
     Sample *sample = [NSEntityDescription insertNewObjectForEntityForName:@"Sample" inManagedObjectContext:context];
-    sample.name = @"Photo";
+    sample.name = @"Name of plant";
     
     [defaultSet addPhotosObject:sample];
     [sample setSet:defaultSet];
@@ -150,49 +200,30 @@
     
     [appDelegate saveContext];
     [self loadTableData];
+    [self.tableView reloadData];
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    // If row is deleted, remove it from the list.
+    // If row is being deleted
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         // Remove row's predicate from database
         Sample *sample = [self.samples objectAtIndex:indexPath.row];
         BLEFAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
         [appDelegate.managedObjectContext deleteObject:sample];
         [appDelegate saveContext];
+        
+        // Refresh table's source array to reflect change
         [self loadTableData];
         
-        // Animage remove row from table
-        //[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-        /* Error */
-        
+        // Animate remove row from table
+        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
     }
-}
-
-
-
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
-
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    }   
+    /*
     else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+    }
+    */
 }
-*/
 
 /*
 // Override to support rearranging the table view.
