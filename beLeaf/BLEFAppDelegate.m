@@ -32,7 +32,7 @@
     if (![[results fetchedObjects] count] > 0) {
         [self createDefaultSet];
     } else {
-        NSLog(@"There's data in core data");
+        NSLog(@"%d Sample sets loaded", [[context registeredObjects] count]);
     }
     
     return YES;
@@ -165,7 +165,7 @@
 
 - (void) createDefaultSet
 {
-    NSLog(@"createDefaultSet()");
+    NSLog(@"Creating a default set");
     
     NSManagedObjectContext *context = [self managedObjectContext];
     Set *set = [NSEntityDescription insertNewObjectForEntityForName:@"Set" inManagedObjectContext:context];

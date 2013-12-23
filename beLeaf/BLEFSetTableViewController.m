@@ -38,15 +38,34 @@
 
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
- 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    self.navigationItem.leftBarButtonItem = self.editButtonItem;
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark Navigation
+/*
+ // In a story board-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+ {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+     
+ }
+ */
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    // Return cells to their normal state
+    [self.tableView setEditing:NO];
+}
+
+- (IBAction)unwindToTableView:(UIStoryboardSegue *)segue
+{
+    //Return here from another scene
 }
 
 #pragma mark - Table view data source
@@ -130,8 +149,6 @@
     return cell;
 }
 
-#pragma mark - Private Methods
-
 - (void)loadTableData
 {
     BLEFAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
@@ -201,6 +218,7 @@
     [appDelegate saveContext];
     [self loadTableData];
     [self.tableView reloadData];
+    [self upload];
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -218,11 +236,6 @@
         // Animate remove row from table
         [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
     }
-    /*
-    else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }
-    */
 }
 
 /*
@@ -240,6 +253,38 @@
     return YES;
 }
 */
+
+#pragma mark Server
+
+- (void)upload
+{
+    NSString *urlString = @"http://localhost:7777/upload";
+    NSURL *url = [NSURL URLWithString:urlString];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"POST"];
+    NSString *post = @"&testdata=hello";
+    NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding];
+    NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
+    
+    [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
+    [request setHTTPBody:postData];
+    [request setURL:[NSURL URLWithString:urlString]];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Current-Type"];
+    
+    NSURLConnection *serverConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+    [serverConnection start];
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
+{
+    NSString *dataAsString = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+    NSLog(@"didReceiveData:%@", dataAsString);
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection
+{
+    NSLog(@"didFinishLoading");
+}
 
 #pragma mark Photo Select
 
@@ -290,19 +335,4 @@
     [picker dismissViewControllerAnimated:YES completion:NULL];
 }
 
-#pragma mark - Navigation
-/*
- // In a story board-based application, you will often want to do a little preparation before navigation
- - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
- {
- // Get the new view controller using [segue destinationViewController].
- // Pass the selected object to the new view controller.
- }
- 
- */
-
-- (IBAction)unwindToTableView:(UIStoryboardSegue *)segue
-{
-    
-}
 @end

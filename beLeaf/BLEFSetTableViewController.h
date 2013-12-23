@@ -9,7 +9,8 @@
 #import <UIKit/UIKit.h>
 
 @interface BLEFSetTableViewController : UITableViewController <UIActionSheetDelegate,
-                    UINavigationControllerDelegate, UIImagePickerControllerDelegate>
+                    UINavigationControllerDelegate, UIImagePickerControllerDelegate,
+                    NSURLConnectionDataDelegate>
 
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *cameraButton;
 @property (strong, nonatomic) NSArray *samples;
