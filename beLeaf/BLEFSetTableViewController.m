@@ -218,7 +218,6 @@
     [appDelegate saveContext];
     [self loadTableData];
     [self.tableView reloadData];
-    [self upload];
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -256,23 +255,46 @@
 
 #pragma mark Server
 
-- (void)upload
+- (void)uploadParameters:(NSDictionary *)parameters andFileData:(NSData *)fileData toUrl:(NSString *)urlString
 {
-    NSString *urlString = @"http://localhost:7777/upload";
     NSURL *url = [NSURL URLWithString:urlString];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     [request setHTTPMethod:@"POST"];
-    NSString *post = @"&testdata=hello";
-    NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding];
-    NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
     
-    [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
-    [request setHTTPBody:postData];
-    [request setURL:[NSURL URLWithString:urlString]];
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Current-Type"];
+    NSString *boundary = @"---------------------------14737809831466499882746641449";
+    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary];
+    [request addValue:contentType forHTTPHeaderField:@"Content-Type"];
+    NSMutableData *body = [NSMutableData data];
     
+    if (parameters){
+        [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
+            [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+            [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
+            [body appendData:[[NSString stringWithFormat:@"%@", value] dataUsingEncoding:NSUTF8StringEncoding]];
+        }];
+    }
+    
+    if (fileData){
+    [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"Content-Disposition: form-data; name=\"datafile\"; filename=\"test.dat\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"Content-Type: application/octet-stream\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[NSData dataWithData:fileData]];
+    [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+    
+    [request setHTTPBody:body];
     NSURLConnection *serverConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
     [serverConnection start];
+}
+
+- (NSNumber*)uploadImage:(UIImage*)image
+{
+    NSNumber *result = @1;
+    NSData *imageData = UIImageJPEGRepresentation(image, 10.0);
+    NSString *urlString = @"http://localhost:7777/upload";
+    NSDictionary *params = @{@"ID": @"1234", @"auth" : @"password"};
+    [self uploadParameters:params andFileData:imageData toUrl:urlString];
+    return result;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
@@ -290,7 +312,7 @@
 
 - (IBAction)displayImageSourceMenu
 {
-    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+    if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         
     UIActionSheet *imageSourceMenu = [[UIActionSheet alloc] initWithTitle:@"Image Source"
                                                             delegate:self
@@ -308,25 +330,28 @@
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate = self;
     imagePicker.allowsEditing = NO;
-    
-    
+    BOOL showPicker = TRUE;
     switch (buttonIndex) {
         case 0:
             imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
             break;
         case 1:
-        default:
             imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
             break;
+        default:
+            showPicker = FALSE;
+            break;
     }
-    
+    if (showPicker){
     [self presentViewController:imagePicker animated:YES completion:NULL];
+    }
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     UIImage *chosenImage = info[UIImagePickerControllerOriginalImage];
     [self addPhoto:chosenImage];
+    [self uploadImage:chosenImage];
     [picker dismissViewControllerAnimated:YES completion:NULL];
 }
 
