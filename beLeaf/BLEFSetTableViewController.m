@@ -12,6 +12,9 @@
 
 @interface BLEFSetTableViewController ()
 
+@property Sample *uploading;
+@property NSMutableDictionary *sampleUploads;
+
 @end
 
 @implementation BLEFSetTableViewController
@@ -31,11 +34,19 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    self.uploading = nil;
+    
+    UIRefreshControl *refresh = [[UIRefreshControl alloc] init];
+    refresh.attributedTitle = [[NSAttributedString alloc] initWithString:@"Pull to force upload"];
+    [refresh addTarget:self action:@selector(forceUpload:) forControlEvents:UIControlEventValueChanged];
+    self.refreshControl = refresh;
+    
     
     self.tableView.rowHeight = 50;
     [self loadTableData];
     [self.tableView reloadData];
-
+    [self uploadNextSample];
+    
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
 }
@@ -218,6 +229,7 @@
     [appDelegate saveContext];
     [self loadTableData];
     [self.tableView reloadData];
+    [self uploadNextSample];
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -235,6 +247,13 @@
         // Animate remove row from table
         [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
     }
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // Can't delete a sample mid-upload
+    Sample *sample = [self.samples objectAtIndex:indexPath.row];
+    return (sample.status != 2);
 }
 
 /*
@@ -255,7 +274,7 @@
 
 #pragma mark Server
 
-- (void)uploadParameters:(NSDictionary *)parameters andFileData:(NSData *)fileData toUrl:(NSString *)urlString
+- (void)uploadFields:(NSDictionary *)parameters andFileData:(NSData *)fileData toUrl:(NSString *)urlString
 {
     NSURL *url = [NSURL URLWithString:urlString];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
@@ -293,8 +312,32 @@
     NSData *imageData = UIImageJPEGRepresentation(image, 10.0);
     NSString *urlString = @"http://localhost:7777/upload";
     NSDictionary *params = @{@"ID": @"1234", @"auth" : @"password"};
-    [self uploadParameters:params andFileData:imageData toUrl:urlString];
+    [self uploadFields:params andFileData:imageData toUrl:urlString];
     return result;
+}
+
+- (void)uploadNextSample
+{
+    if (! self.uploading){
+        Sample *sample = nil;
+        for (Sample *sampleAtIndex in samples) {
+            if (sampleAtIndex.status == 1){
+                sample = sampleAtIndex;
+                break;
+            }
+        }
+        if (sample){
+            self.uploading = sample;
+            UIImage *image = sample.image.image;
+            [self uploadImage:image];
+        }
+    }
+}
+
+- (void)forceUpload:(UIRefreshControl *)refresh
+{
+    [refresh endRefreshing];
+    [self uploadNextSample];
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
@@ -303,16 +346,40 @@
     NSLog(@"didReceiveData:%@", dataAsString);
 }
 
+- (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
+{
+    NSLog(@"Connection didSendData");
+    if  (self.uploading.status != 2){
+        self.uploading.status = 2;
+        [self.tableView reloadData];
+    }
+    NSLog(@"%ld / %ld",(long)totalBytesWritten,(long)totalBytesExpectedToWrite);
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+{
+    NSLog(@"Connection Failed");
+    self.uploading = nil;
+}
+
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
     NSLog(@"didFinishLoading");
+    Sample *sample = self.uploading;
+    self.uploading = nil;
+    sample.status = 3;
+    
+    BLEFAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+    [appDelegate saveContext];
+    [self.tableView reloadData];
+    [self uploadNextSample];
 }
 
 #pragma mark Photo Select
 
 - (IBAction)displayImageSourceMenu
 {
-    if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         
     UIActionSheet *imageSourceMenu = [[UIActionSheet alloc] initWithTitle:@"Image Source"
                                                             delegate:self
@@ -350,9 +417,8 @@
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     UIImage *chosenImage = info[UIImagePickerControllerOriginalImage];
-    [self addPhoto:chosenImage];
-    [self uploadImage:chosenImage];
     [picker dismissViewControllerAnimated:YES completion:NULL];
+    [self addPhoto:chosenImage];
 }
 
 -(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
