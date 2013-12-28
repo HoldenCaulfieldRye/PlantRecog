@@ -8,5 +8,3 @@
 
 #import "Set.h"
 #import "Sample.h"
-#import "Image.h"
-

@@ -32,7 +32,7 @@
     if (![[results fetchedObjects] count] > 0) {
         [self createDefaultSet];
     } else {
-        NSLog(@"%d Sample sets loaded", [[context registeredObjects] count]);
+        NSLog(@"%lu Sample sets loaded", (unsigned long)[[context registeredObjects] count]);
     }
     
     return YES;

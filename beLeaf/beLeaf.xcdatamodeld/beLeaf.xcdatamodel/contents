@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="3396" systemVersion="13A603" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
-    <entity name="Image" representedClassName="Image" syncable="YES">
-        <attribute name="image" optional="YES" attributeType="Transformable" syncable="YES"/>
-        <relationship name="sample" maxCount="1" deletionRule="Nullify" destinationEntity="Sample" inverseName="image" inverseEntity="Sample" syncable="YES"/>
-    </entity>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="3401" systemVersion="13B42" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Sample" representedClassName="Sample" syncable="YES">
+        <attribute name="date" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="imagePath" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="latitude" optional="YES" attributeType="Float" minValueString="-90" maxValueString="90" defaultValueString="0.0" syncable="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Float" minValueString="-180" maxValueString="180" defaultValueString="0.0" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="status" optional="YES" attributeType="Integer 16" minValueString="0" maxValueString="5" defaultValueString="1" syncable="YES"/>
-        <attribute name="taken" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="thumbnail" optional="YES" attributeType="Transformable" syncable="YES"/>
-        <relationship name="image" maxCount="1" deletionRule="Cascade" destinationEntity="Image" inverseName="sample" inverseEntity="Image" syncable="YES"/>
         <relationship name="set" maxCount="1" deletionRule="Nullify" destinationEntity="Set" inverseName="photos" inverseEntity="Set" syncable="YES"/>
     </entity>
     <entity name="Set" representedClassName="Set" syncable="YES">
@@ -19,7 +15,6 @@
         <relationship name="photos" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Sample" inverseName="set" inverseEntity="Sample" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Image" positionX="0" positionY="0" width="0" height="0"/>
         <element name="Sample" positionX="0" positionY="0" width="0" height="0"/>
         <element name="Set" positionX="0" positionY="0" width="0" height="0"/>
     </elements>

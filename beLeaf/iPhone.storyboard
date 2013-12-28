@@ -19,6 +19,16 @@
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zpt-54-4LJ" id="laC-WJ-gPh">
                                     <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <activityIndicatorView hidden="YES" clipsSubviews="YES" tag="1" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="GIz-gq-G5u">
+                                            <rect key="frame" x="280" y="12" width="20" height="20"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        </activityIndicatorView>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstAttribute="centerY" secondItem="GIz-gq-G5u" secondAttribute="centerY" constant="-0.5" id="BOZ-mm-hE2"/>
+                                        <constraint firstAttribute="trailing" secondItem="GIz-gq-G5u" secondAttribute="trailing" constant="20" id="ZdS-Kd-gIB"/>
+                                    </constraints>
                                 </tableViewCellContentView>
                             </tableViewCell>
                         </prototypes>
@@ -37,33 +47,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qZo-Uv-g6N" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="643" y="196"/>
-        </scene>
-        <!--Sample Collect View Controller-->
-        <scene sceneID="jdr-YX-mxV">
-            <objects>
-                <viewController id="ZG8-98-mW4" customClass="BLEFSampleCollectViewController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="zy2-dH-P3T"/>
-                        <viewControllerLayoutGuide type="bottom" id="BmK-qw-NCg"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="LtQ-xJ-RLa">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                    </view>
-                    <navigationItem key="navigationItem" id="S5c-db-334">
-                        <barButtonItem key="leftBarButtonItem" systemItem="done" id="Zgl-xa-0bu">
-                            <connections>
-                                <segue destination="gZZ-C6-qXl" kind="unwind" unwindAction="unwindToTableView:" id="dFa-x8-M3u"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="hrj-30-D00"/>
-                    </navigationItem>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Iv9-7q-zJk" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <exit id="gZZ-C6-qXl" userLabel="Exit" sceneMemberID="exit"/>
-            </objects>
-            <point key="canvasLocation" x="1103" y="205"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Kky-bn-Re6">

@@ -14,6 +14,7 @@
 
 @property Sample *uploading;
 @property NSMutableDictionary *sampleUploads;
+@property UIImage *pickedImage;
 
 @end
 
@@ -35,6 +36,7 @@
 {
     [super viewDidLoad];
     self.uploading = nil;
+    self.pickedImage = nil;
     
     UIRefreshControl *refresh = [[UIRefreshControl alloc] init];
     refresh.attributedTitle = [[NSAttributedString alloc] initWithString:@"Pull to force upload"];
@@ -105,50 +107,47 @@
     }
     
     Sample *sample = [self.samples objectAtIndex:indexPath.row];
+    
+    // Thumbnail
     [cell.imageView setImage:sample.thumbnail];
-    UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    [activityIndicator setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [cell.imageView setHidden:false];
     
-    [cell.contentView addSubview:activityIndicator];
-    NSLayoutConstraint *activityIndictatorConstraintX = [NSLayoutConstraint
-                                                        constraintWithItem:activityIndicator
-                                                        attribute:NSLayoutAttributeRight
-                                                        relatedBy:NSLayoutRelationEqual
-                                                        toItem:cell.contentView
-                                                        attribute:NSLayoutAttributeRight
-                                                        multiplier:1.0
-                                                        constant:-10];
-    NSLayoutConstraint *activityIndictatorConstraintY = [NSLayoutConstraint
-                                                        constraintWithItem:activityIndicator
-                                                        attribute:NSLayoutAttributeCenterY
-                                                        relatedBy:NSLayoutRelationEqual
-                                                        toItem:cell.contentView
-                                                        attribute:NSLayoutAttributeCenterY
-                                                        multiplier:1.0
-                                                        constant:0];
-    [cell.contentView addConstraints:@[activityIndictatorConstraintX, activityIndictatorConstraintY]];
-    
+    // Activity Indicator
+    UIActivityIndicatorView *activityIndicator;
+    activityIndicator = (UIActivityIndicatorView *)[cell viewWithTag:1];
+    cell.textLabel.backgroundColor = [UIColor colorWithHue:0.0 saturation:0.0 brightness:0.0 alpha:0.0];
+
     /* 
-    // 1 : Pending
-    // 2 : Uploading
-    // 3 : Uploaded
-    // 4 : Complete
+    // 0 : Error
+    // 1 : Processing
+    // 2 : In upload queue
+    // 3 : Uploading
+    // 4 : Awaiting response
+    // 5 : Completed
     */
     
     switch (sample.status) {
-        case 1:
+        case 0:
             [activityIndicator stopAnimating];
-            cell.textLabel.text = @"Pending...";
+            cell.textLabel.text = @"Error";
+            break;
+        case 1:
+            [activityIndicator startAnimating];
+            cell.textLabel.text = @"Processing";
             break;
         case 2:
-            cell.textLabel.text = @"Uploading...";
-            [activityIndicator startAnimating];
-            break;
-        case 3:
-            cell.textLabel.text = @"Waiting Responce";
+            cell.textLabel.text = @"In upload queue";
             [activityIndicator stopAnimating];
             break;
+        case 3:
+            cell.textLabel.text = @"Uploading";
+            [activityIndicator startAnimating];
+            break;
         case 4:
+            cell.textLabel.text = @"Waiting responce";
+            [activityIndicator stopAnimating];
+            break;
+        case 5:
             [activityIndicator stopAnimating];
             cell.accessoryType = UITableViewCellAccessoryCheckmark;
             cell.textLabel.text = sample.name;
@@ -156,7 +155,6 @@
         default:
             break;
     }
-
     return cell;
 }
 
@@ -183,6 +181,7 @@
 
 - (void)addPhoto:(UIImage *)photo
 {
+    
     BLEFAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
     // Grab context
     NSManagedObjectContext *context = [appDelegate managedObjectContext];
@@ -206,30 +205,43 @@
     [defaultSet addPhotosObject:sample];
     [sample setSet:defaultSet];
     
-    // Create new Image
-    Image *image = [NSEntityDescription insertNewObjectForEntityForName:@"Image" inManagedObjectContext:context];
-    image.image = photo;
-    sample.image = image;
-    
-    // Create thumbnail
-    CGSize size = photo.size;
-    CGFloat ratio = 0;
-    if (size.width > size.height) {
-        ratio = 44.0 / size.width;
-    } else {
-        ratio = 44.0 /size.height;
-    }
-    CGRect rect = CGRectMake(0.0, 0.0, ratio * size.width, ratio *size.height);
-    
-    UIGraphicsBeginImageContext(rect.size);
-    [photo drawInRect:rect];
-    sample.thumbnail = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
     [appDelegate saveContext];
     [self loadTableData];
     [self.tableView reloadData];
-    [self uploadNextSample];
+    
+    // Process Sample on a background thread
+    dispatch_queue_t sampleProcessing = dispatch_queue_create("Sample Processing",NULL);
+    
+    dispatch_async(sampleProcessing, ^{
+        
+        // save image to FS
+        NSString *photoPath = [self saveImage:photo];
+        sample.imagePath = photoPath;
+        
+        // create thumbnail
+        CGSize size = photo.size;
+        CGFloat ratio = 0;
+        if (size.width > size.height) {
+            ratio = 44.0 / size.width;
+        } else {
+            ratio = 44.0 /size.height;
+        }
+        CGRect rect = CGRectMake(0.0, 0.0, ratio * size.width, ratio *size.height);
+        
+        UIGraphicsBeginImageContext(rect.size);
+        [photo drawInRect:rect];
+        sample.thumbnail = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            sample.status = 2;
+            [appDelegate saveContext];
+            [self loadTableData];
+            [self.tableView reloadData];
+            [self uploadNextSample];
+        });
+        
+    });
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -253,7 +265,7 @@
 {
     // Can't delete a sample mid-upload
     Sample *sample = [self.samples objectAtIndex:indexPath.row];
-    return (sample.status != 2);
+    return (sample.status != 1 && sample.status != 3);
 }
 
 /*
@@ -321,14 +333,14 @@
     if (! self.uploading){
         Sample *sample = nil;
         for (Sample *sampleAtIndex in samples) {
-            if (sampleAtIndex.status == 1){
+            if (sampleAtIndex.status == 2){
                 sample = sampleAtIndex;
                 break;
             }
         }
         if (sample){
             self.uploading = sample;
-            UIImage *image = sample.image.image;
+            UIImage *image = [self loadImageFromPath:sample.imagePath];
             [self uploadImage:image];
         }
     }
@@ -349,8 +361,8 @@
 - (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
 {
     NSLog(@"Connection didSendData");
-    if  (self.uploading.status != 2){
-        self.uploading.status = 2;
+    if  (self.uploading.status != 3){
+        self.uploading.status = 3;
         [self.tableView reloadData];
     }
     NSLog(@"%ld / %ld",(long)totalBytesWritten,(long)totalBytesExpectedToWrite);
@@ -367,7 +379,7 @@
     NSLog(@"didFinishLoading");
     Sample *sample = self.uploading;
     self.uploading = nil;
-    sample.status = 3;
+    sample.status = 4;
     
     BLEFAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
     [appDelegate saveContext];
@@ -416,14 +428,46 @@
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    UIImage *chosenImage = info[UIImagePickerControllerOriginalImage];
-    [picker dismissViewControllerAnimated:YES completion:NULL];
-    [self addPhoto:chosenImage];
+    self.pickedImage = info[UIImagePickerControllerOriginalImage];
+    [picker dismissViewControllerAnimated:YES completion:^{[self addPhoto:self.pickedImage]; self.pickedImage = nil;}];
 }
 
 -(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
     [picker dismissViewControllerAnimated:YES completion:NULL];
+}
+
+#pragma mark File System
+
+- (UIImage*)loadImageFromPath:(NSString *)path
+{
+    NSArray *directories = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                         NSUserDomainMask, YES);
+    NSString *documentsDirectory = [directories objectAtIndex:0];
+    NSString* fullPath = [documentsDirectory stringByAppendingPathComponent:path];
+    UIImage* image = [UIImage imageWithContentsOfFile:fullPath];
+    return image;
+}
+
+- (NSString *)saveImage: (UIImage*)image
+{
+    if (image != nil)
+    {
+        NSArray *directories = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                             NSUserDomainMask, YES);
+        NSString *documentsDirectory = [directories objectAtIndex:0];
+        
+        // Set photo name using current date and time
+        NSDate* now = [NSDate date];
+        NSTimeInterval unix_timestamp = [now timeIntervalSince1970];
+        NSString *name = [NSString stringWithFormat:@"%f.png",unix_timestamp];
+        
+        NSString* path = [documentsDirectory stringByAppendingPathComponent:name];
+        // get date
+        NSData* data = UIImagePNGRepresentation(image);
+        [data writeToFile:path atomically:YES];
+        return name;
+    } else return nil;
 }
 
 @end

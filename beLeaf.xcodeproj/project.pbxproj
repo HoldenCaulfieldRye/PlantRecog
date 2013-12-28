@@ -24,11 +24,9 @@
 		5E2AD5991863B6DA00595828 /* beLeafTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5981863B6DA00595828 /* beLeafTests.m */; };
 		5E2AD5A31863BB5A00595828 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
 		5E2AD5A61863BC4600595828 /* BLEFSetTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A51863BC4600595828 /* BLEFSetTableViewController.m */; };
-		5E2AD5B31863CEFF00595828 /* Sample.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5B21863CEFF00595828 /* Sample.m */; };
-		5E2AD5B61863CF0000595828 /* Set.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5B51863CF0000595828 /* Set.m */; };
-		E95C8538186452DF00CFEC40 /* BLEFSampleCollectViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E95C8537186452DF00CFEC40 /* BLEFSampleCollectViewController.m */; };
 		E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
-		E982E8191864C9A300D83ECC /* Image.m in Sources */ = {isa = PBXBuildFile; fileRef = E982E8181864C9A300D83ECC /* Image.m */; };
+		E9F70C66186E24B000213E16 /* Sample.m in Sources */ = {isa = PBXBuildFile; fileRef = E9F70C65186E24B000213E16 /* Sample.m */; };
+		E9F70C69186E24B000213E16 /* Set.m in Sources */ = {isa = PBXBuildFile; fileRef = E9F70C68186E24B000213E16 /* Set.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,15 +62,11 @@
 		5E2AD5A41863BC4600595828 /* BLEFSetTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSetTableViewController.h; sourceTree = "<group>"; };
 		5E2AD5A51863BC4600595828 /* BLEFSetTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSetTableViewController.m; sourceTree = "<group>"; };
 		5E2AD5B01863C2A400595828 /* ManagedObjects.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManagedObjects.h; sourceTree = "<group>"; };
-		5E2AD5B11863CEFF00595828 /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
-		5E2AD5B21863CEFF00595828 /* Sample.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sample.m; sourceTree = "<group>"; };
-		5E2AD5B41863CF0000595828 /* Set.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Set.h; sourceTree = "<group>"; };
-		5E2AD5B51863CF0000595828 /* Set.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Set.m; sourceTree = "<group>"; };
-		E95C8536186452DF00CFEC40 /* BLEFSampleCollectViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSampleCollectViewController.h; sourceTree = "<group>"; };
-		E95C8537186452DF00CFEC40 /* BLEFSampleCollectViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSampleCollectViewController.m; sourceTree = "<group>"; };
 		E95C85391864564000CFEC40 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		E982E8171864C9A300D83ECC /* Image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Image.h; sourceTree = "<group>"; };
-		E982E8181864C9A300D83ECC /* Image.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Image.m; sourceTree = "<group>"; };
+		E9F70C64186E24B000213E16 /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
+		E9F70C65186E24B000213E16 /* Sample.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sample.m; sourceTree = "<group>"; };
+		E9F70C67186E24B000213E16 /* Set.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Set.h; sourceTree = "<group>"; };
+		E9F70C68186E24B000213E16 /* Set.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Set.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,20 +134,16 @@
 				5E2AD57E1863B6DA00595828 /* BLEFAppDelegate.h */,
 				5E2AD57F1863B6DA00595828 /* BLEFAppDelegate.m */,
 				5E2AD5A21863BB5A00595828 /* iPhone.storyboard */,
-				E95C8536186452DF00CFEC40 /* BLEFSampleCollectViewController.h */,
-				E95C8537186452DF00CFEC40 /* BLEFSampleCollectViewController.m */,
 				5E2AD5A41863BC4600595828 /* BLEFSetTableViewController.h */,
 				5E2AD5A51863BC4600595828 /* BLEFSetTableViewController.m */,
 				5E2AD5841863B6DA00595828 /* Images.xcassets */,
 				5E2AD5811863B6DA00595828 /* beLeaf.xcdatamodeld */,
-				E982E8171864C9A300D83ECC /* Image.h */,
-				E982E8181864C9A300D83ECC /* Image.m */,
-				5E2AD5B41863CF0000595828 /* Set.h */,
-				5E2AD5B51863CF0000595828 /* Set.m */,
-				5E2AD5B11863CEFF00595828 /* Sample.h */,
-				5E2AD5B21863CEFF00595828 /* Sample.m */,
 				5E2AD5B01863C2A400595828 /* ManagedObjects.h */,
 				5E2AD5761863B6D900595828 /* Supporting Files */,
+				E9F70C67186E24B000213E16 /* Set.h */,
+				E9F70C68186E24B000213E16 /* Set.m */,
+				E9F70C64186E24B000213E16 /* Sample.h */,
+				E9F70C65186E24B000213E16 /* Sample.m */,
 			);
 			path = beLeaf;
 			sourceTree = "<group>";
@@ -235,6 +225,9 @@
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = DocMcs13group12;
 				TargetAttributes = {
+					5E2AD5691863B6D900595828 = {
+						DevelopmentTeam = BQWPGCX46D;
+					};
 					5E2AD5891863B6DA00595828 = {
 						TestTargetID = 5E2AD5691863B6D900595828;
 					};
@@ -286,12 +279,10 @@
 			files = (
 				5E2AD57C1863B6DA00595828 /* main.m in Sources */,
 				5E2AD5801863B6DA00595828 /* BLEFAppDelegate.m in Sources */,
-				5E2AD5B61863CF0000595828 /* Set.m in Sources */,
+				E9F70C69186E24B000213E16 /* Set.m in Sources */,
 				5E2AD5831863B6DA00595828 /* beLeaf.xcdatamodeld in Sources */,
-				E95C8538186452DF00CFEC40 /* BLEFSampleCollectViewController.m in Sources */,
-				E982E8191864C9A300D83ECC /* Image.m in Sources */,
+				E9F70C66186E24B000213E16 /* Sample.m in Sources */,
 				5E2AD5A61863BC4600595828 /* BLEFSetTableViewController.m in Sources */,
-				5E2AD5B31863CEFF00595828 /* Sample.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,11 +401,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "beLeaf/beLeaf-Prefix.pch";
 				INFOPLIST_FILE = "beLeaf/beLeaf-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -425,11 +419,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "beLeaf/beLeaf-Prefix.pch";
 				INFOPLIST_FILE = "beLeaf/beLeaf-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
