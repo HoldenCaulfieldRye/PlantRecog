@@ -15,10 +15,9 @@
 
 # CUDA toolkit installation directory.
 export CUDA_INSTALL_PATH=/usr/local/cuda
-export CUDA_INSTALL_PATH=/usr/lib/nvidia-cuda-toolkit
 
 # CUDA SDK installation directory.
-export CUDA_SDK_PATH=$HOME/NVIDIA_GPU_Computing_SDK
+export CUDA_SDK_PATH=$HOME/CUDA_SDK
 
 # Python include directory. This should contain the file Python.h, among others.
 export PYTHON_INCLUDE_PATH=/usr/include/python2.7

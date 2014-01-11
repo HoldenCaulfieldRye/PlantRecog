@@ -1,0 +1,1 @@
+python convnet.py --data-path=/homes/bjm113/CudaConv/datasets/cifar-10-py-colmajor/ --save-path=/homes/bjm113/CudaConv/saves/ --test-range=6 --train-range=1-5 --layer-def=/homes/bjm113/CudaConv/cuda-convnet/example-layers/layers-19pct.cfg --layer-params=/homes/bjm113/CudaConv/cuda-convnet/example-layers/layer-params-19pct.cfg --data-provider=cifar --test-freq=50 --epochs=500

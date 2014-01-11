@@ -21,7 +21,7 @@
 .SUFFIXES : .cu .cu_dbg.o .c_dbg.o .cpp_dbg.o .cu_rel.o .c_rel.o .cpp_rel.o .cubin .ptx
 
 # Add new SM Versions here as devices with new Compute Capability are released
-SM_VERSIONS   := 10 11 12 13 20 21
+SM_VERSIONS   := 10 11 12 13 20 21 30 35
 
 CUDA_INSTALL_PATH ?= /usr/local/cuda
 
@@ -50,9 +50,9 @@ ROOTDIR    ?= $(CUDA_SDK_PATH)
 ROOTBINDIR ?= bin
 BINDIR     ?= $(ROOTBINDIR)/$(OSLOWER)
 ROOTOBJDIR ?= obj
-LIBDIR     := $(ROOTDIR)/C/lib
-COMMONDIR  := $(ROOTDIR)/C/common
-SHAREDDIR  := $(ROOTDIR)/shared/
+LIBDIR     := $(ROOTDIR)/lib
+COMMONDIR  := $(ROOTDIR)/samples/common
+SHAREDDIR  := $(ROOTDIR)
 
 # Compilers
 NVCC       := $(CUDA_INSTALL_PATH)/bin/nvcc 
@@ -88,8 +88,7 @@ CWARN_FLAGS := $(CXXWARN_FLAGS) \
 
 # architecture flag for nvcc and gcc compilers build
 CUBIN_ARCH_FLAG :=
-CXX_ARCH_FLAGS  :=
-NVCCFLAGS       := --gpu-architecture compute_20 --gpu-code compute_20
+NVCCFLAGS := --gpu-architecture compute_20 --gpu-code compute_20
 LIB_ARCH        := $(OSARCH)
 
 # Determining the necessary Cross-Compilation Flags
@@ -329,7 +328,7 @@ ifneq ($(STATIC_LIB),)
 	LINKLINE  = ar rucv $(TARGET) $(OBJS)
 else
 	ifneq ($(OMIT_CUTIL_LIB),1)
-		LIB += -lcutil_$(LIB_ARCH)$(LIBSUFFIX) -lshrutil_$(LIB_ARCH)$(LIBSUFFIX)
+		#LIB += -lcutil_$(LIB_ARCH)$(LIBSUFFIX) -lshrutil_$(LIB_ARCH)$(LIBSUFFIX)
 	endif
 	# Device emulation configuration
 	ifeq ($(emu), 1)
