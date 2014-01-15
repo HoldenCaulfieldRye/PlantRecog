@@ -91,6 +91,13 @@ provider implementation that you want to use.  The default section may
 have an ``include`` parameter to include shared parameters from
 another file.
 
+Installation on a labmachine
+----------------------------
+
+For the lab machines, the easiest way to install is using the following command:
+
+  python setup.py install --user
+
 Installation in a virtualenv
 ----------------------------
 
@@ -106,6 +113,7 @@ scipy like this::
 
   #!shell
    apt-get install python-numpy python-scipy
+
 
 Scripts
 -------

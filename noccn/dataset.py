@@ -16,6 +16,9 @@ from noccn.script import get_options
 from noccn.script import random_seed
 from noccn.script import resolve
 
+# This is used to parse the xml files
+import xml.etree.ElementTree as ET # can be speeded up using lxml possibly
+
 
 N_JOBS = -1
 SIZE = (64, 64)
@@ -39,6 +42,9 @@ class BatchCreator(object):
 
         self.more_meta = more_meta or {}
         vars(self).update(**kwargs)  # O_o
+
+    def counter(message,count):
+        print message + '{0}\r'.format(count),
 
     def dot(self, d='.'):
         sys.stdout.write(d)
@@ -71,6 +77,7 @@ class BatchCreator(object):
         ids = [id for (id, fname) in ids_and_names]
         data = self.preprocess_data(data)
 
+        processed = 0
         for batch_start in range(0, len(names_and_labels), batch_size):
             batch = {'data': None, 'labels': [], 'metadata': []}
             batch_end = batch_start + batch_size
@@ -79,13 +86,17 @@ class BatchCreator(object):
             batch['labels'] = labels[batch_start:batch_end]
             batch['ids'] = ids[batch_start:batch_end]
             batches.append(batch)
-            self.dot()
+            processed += 1
+            self.counter('Created empty batches: ',processed)
+            
 
+        processed = 0
         for i, batch in enumerate(batches):
             path = os.path.join(self.output_path, 'data_batch_%s' % (i + 1))
             with open(path, 'wb') as f:
                 cPickle.dump(batch, f, -1)
-                self.dot()
+                processed += 1
+                self.counter('Created pickle dump: ',processed)
 
         batches_meta = {}
         batches_meta['label_names'] = labels_sorted
@@ -94,9 +105,10 @@ class BatchCreator(object):
         batches_meta['data_mean'] = data.mean(axis=0)
         batches_meta.update(self.more_meta)
 
+        processed = 0
         with open(os.path.join(self.output_path, 'batches.meta'), 'wb') as f:
             cPickle.dump(batches_meta, f, -1)
-            self.dot()
+            self.counter('Created batches.meta: ',processed)
 
         print
         print "Wrote to %s" % self.output_path
@@ -118,7 +130,7 @@ class BatchCreator(object):
         try:
             data = self.load(name)
             data = self.preprocess(data)
-            self.dot()
+            print "Processed %s\r" % name,
             return data
         except:
             print "Error processing %s" % name
@@ -136,12 +148,25 @@ def find(root, pattern):
                 yield os.path.join(path, fname)
 
 
+def get_info(fname,label_data_field,metadata_file_ext):
+    fname = os.path.splitext(fname)[0] + metadata_file_ext
+    tree = ET.parse(fname)
+    root = tree.getroot()
+    # note, much more information exists here and it should be be used, 
+    # e.g.multiple shots of the same leaf, type of shot, content of shot
+    # as well as the location and the date of the shot
+    # this info is accessedd via root.find('Content').text for example
+    return root.find(label_data_field).text
+
+
 def _collect_filenames_and_labels(cfg):
     path = cfg['input-path']
     pattern = cfg.get('pattern', '*.jpg')
+    metadata_file_ext = cfg.get('meta_data_file_ext', '.xml')
+    label_data_field = cfg.get('label_data_field', 'ClassId')
     filenames_and_labels = []
     for fname in find(path, pattern):
-        label = os.path.basename(os.path.split(fname)[-2])
+        label = get_info(fname,label_data_field,metadata_file_ext)
         filenames_and_labels.append((fname, label))
     random.shuffle(filenames_and_labels)
     return np.array(filenames_and_labels)
