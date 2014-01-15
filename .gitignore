@@ -1,6 +1,19 @@
+<<<<<<< HEAD
 *.pyc
 bin/
 obj/
 _ConvNet.so
 moredataproviders.py
 whales
+=======
+.coverage
+noccn.egg-info
+
+bin/
+dist/
+include/
+lib/
+local
+
+*pyc
+>>>>>>> noccn-master
