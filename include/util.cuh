@@ -50,7 +50,7 @@ enum PASS_TYPE {PASS_TRAIN, PASS_TEST, PASS_GC};
  * Store entire data matrix on GPU if its size does not exceed this many MB.
  * Otherwise store only one minibatch at a time.
  */ 
-#define MAX_DATA_ON_GPU             200 
+#define MAX_DATA_ON_GPU             300 
 
 typedef std::vector<Matrix*> MatrixV;
 typedef std::vector<NVMatrix*> NVMatrixV;

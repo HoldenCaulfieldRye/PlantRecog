@@ -190,6 +190,7 @@ class ConvNet(IGPUModel):
         op.options['dp_type'].default = None
         
         DataProvider.register_data_provider('cifar', 'CIFAR', CIFARDataProvider)
+        DataProvider.register_data_provider('john', 'John', JohnDataProvider)
         DataProvider.register_data_provider('dummy-cn-n', 'Dummy ConvNet', DummyConvNetDataProvider)
         DataProvider.register_data_provider('cifar-cropped', 'Cropped CIFAR', CroppedCIFARDataProvider)
         
