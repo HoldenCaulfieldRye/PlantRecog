@@ -69,7 +69,8 @@ class CIFARDataProvider(LabeledMemoryDataProvider):
         # labels are in single-precision floating point.
         for d in self.data_dic:
             # This converts the data matrix to single precision and makes sure that it is C-ordered
-            d['data'] = n.require((d['data'] - self.data_mean), dtype=n.single, requirements='C')
+            # d['data'] = n.require((d['data'] - self.data_mean), dtype=n.single, requirements='C')
+            d['data'] = n.require((d['data']), dtype=n.single, requirements='C')
             d['labels'] = n.require(d['labels'].reshape((1, d['data'].shape[1])), dtype=n.single, requirements='C')
 
     def get_next_batch(self):
