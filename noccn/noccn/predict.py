@@ -64,9 +64,10 @@ class PredictConvNet(convnet.ConvNet):
             preds, labels = make_predictions(self, data, labels, num_classes)
             all_preds = np.vstack([all_preds, preds])
             all_labels = np.vstack([all_labels, labels.T])
-            if db:
-                ids = self.test_data_provider.get_batch(batchnum).get('ids')
-                all_metadata.extend([db[id] for id in ids])
+            # A temporary change due to the lack of ids in our db
+            #if db:
+                #ids = self.test_data_provider.get_batch(batchnum).get('ids')
+                #all_metadata.extend([db[id] for id in ids])
 
         self._predictions = all_preds, all_labels, all_metadata
         return self._predictions
@@ -92,7 +93,7 @@ class PredictConvNet(convnet.ConvNet):
                 writer.writerow(record)
 
     def report(self):
-        from sklearn.metrics import auc_score
+        from sklearn.metrics import roc_auc_score
         from sklearn.metrics import classification_report
         from sklearn.metrics import confusion_matrix
         from sklearn.metrics import f1_score
@@ -101,11 +102,13 @@ class PredictConvNet(convnet.ConvNet):
         y_pred_probas, y_true, md = self.make_predictions()
         y_pred = y_pred_probas.argmax(1)
         y_pred_probas = y_pred_probas[:, 1]
+        print y_true
         y_true = y_true.reshape(-1)
+        print y_true
 
         print
-        print "AUC score:", auc_score(y_true, y_pred_probas)
-        print "AUC score (binary):", auc_score(y_true, y_pred)
+        print "AUC score:", roc_auc_score(y_true, y_pred_probas)
+        print "AUC score (binary):", roc_auc_score(y_true, y_pred)
         print
 
         print "Classification report:"

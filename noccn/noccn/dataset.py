@@ -5,6 +5,7 @@ import os
 import random
 import sys
 import traceback
+import math
 
 import numpy as np
 from PIL import Image
@@ -54,7 +55,6 @@ class BatchCreator(object):
         print '{0}                                   \r'.format(count),
 
     def __call__(self, all_names_and_labels, shuffle=False):
-
 	all_ids_and_info = []
 	for id, (name, label) in enumerate(all_names_and_labels):
 	    all_ids_and_info.append((id, name, label))
@@ -66,38 +66,30 @@ class BatchCreator(object):
 		names_and_labels, ids_and_names)
 
         batch_num = 1
-        batch_means = np.zeros((1,self.batch_size))
+        batch_means = np.zeros(((self.size[0]**2)*self.channels,1))
         for ids_and_info in list(chunks(all_ids_and_info,self.batch_size)):
             print "Generating data_batch_" + `batch_num`
 	    rows = Parallel(n_jobs=self.n_jobs)(
 		delayed(_process_item)(self, name)
 		for a_id, name, label in ids_and_info)
-	    names_and_labels = [v for (v, row) in zip(ids_and_info, rows)
-				if row is not None]
 	    data = np.vstack([r for r in rows if r is not None])
-	    labels = [labels_sorted.index(label)
-		      for a_id, name, label in ids_and_info]
-	    ids = [a_id for (a_id, fname, label) in ids_and_info]
 	    data = self.preprocess_data(data)
 	    batch = {'data': None, 'labels': [], 'metadata': []}
 	    batch['data'] = data.T
-	    batch['labels'] = labels
-	    batch['ids'] = ids;
-
-            batch_means = np.vstack((batch_means,batch['data'].mean(axis=0)))
-
+	    batch['labels'] = np.array([labels_sorted.index(label) for ((a_id, name, label), row) 
+                                in zip(ids_and_info, rows) if row is not None]).reshape((1,self.batch_size))
+            batch_means = np.hstack((batch_means,batch['data'].mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))))
 	    path = os.path.join(self.output_path, 'data_batch_%s' % batch_num)
 	    with open(path, 'wb') as f:
 	        cPickle.dump(batch, f, -1)
-
             batch_num += 1
 
 	batches_meta = {}
 	batches_meta['label_names'] = labels_sorted
 	batches_meta['metadata'] = dict(
 	    (a_id, {'name': name}) for (a_id, name, label) in all_ids_and_info)
-        batch_means = np.delete(batch_means,(0),axis=0)
-	batches_meta['data_mean'] = batch_means.mean(axis=0)
+        batch_means = np.delete(batch_means,(0),axis=1)
+	batches_meta['data_mean'] = batch_means.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
 	batches_meta.update(self.more_meta)
 	with open(os.path.join(self.output_path, 'batches.meta'), 'wb') as f:
 	    cPickle.dump(batches_meta, f, -1)
@@ -129,6 +121,30 @@ class BatchCreator(object):
     def preprocess_data(self, data):
         return data
 
+    def transform_image_into_many_of_size(im, size):
+	ims = []
+	# Get current and desired ratio for the images
+	im_ratio = im.size[0] / float(im.size[1])
+	ratio = size[0] / float(size[1])
+	# The image is scaled/cropped vertically or horizontally depending on the ratio
+	if ratio > im_ratio:
+	    im = im.resize((size[0], size[0] * im.size[1] / im.size[0]), Image.ANTIALIAS)
+	    sub_crops = math.ceil(im.size[1]/im.size[0])
+	    # And divide it into its subgroups
+	    for base in xrange(0,im.size[1]-size[1]+1,int((im.size[1]-size[1]+1)/sub_crops)):
+		box = (0,base,size[0],base+size[1])
+		ims.append(im.crop(box))
+	elif ratio < im_ratio:
+	    im = im.resize((size[1] * im.size[0] / im.size[1], size[1]), Image.ANTIALIAS)
+	    sub_crops = math.ceil(im.size[0]/im.size[1])
+	    # And divide it into its subgroups
+	    for base in xrange(0,im.size[0]-size[0]+1,int((im.size[0]-size[0]+1)/sub_crops)):
+		box = (base,0,base+size[0],size[1])
+		ims.append(im.crop(box))
+	else:
+	    im = im.resize((size[0], size[1]), Image.ANTIALIAS)
+	    ims.append(im)
+	return ims 
 
 def find(root, pattern):
     for path, folders, files in os.walk(root, followlinks=True):
@@ -197,3 +213,4 @@ def console():
         output_path=cfg.get('output-path', '/tmp/noccn-dataset'),
         )
     create(filenames_and_labels)
+

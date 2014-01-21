@@ -32,7 +32,7 @@ class JohnDataProvider(LabeledDataProvider):
         LabeledDataProvider.__init__(self, data_dir, batch_range, init_epoch, init_batchnum, dp_params, test)
         self.data_mean = self.batch_meta['data_mean']
         self.num_colors = 3
-        self.img_size = 256 
+        self.img_size = 256
 
     def get_next_batch(self):
         if self.data_dic is None or len(self.batch_range) > 1:
@@ -43,8 +43,7 @@ class JohnDataProvider(LabeledDataProvider):
         # labels are in single-precision floating point.
         # This converts the data matrix to single precision and makes sure that it is C-ordered
         self.data_dic['data'] = n.require((self.data_dic['data'] - self.data_mean), dtype=n.single, requirements='C')
-        self.data_dic['labels'] = n.array(self.data_dic['labels'])
-        self.data_dic['labels'] = n.require(self.data_dic['labels'].reshape((1, self.data_dic['data'].shape[1])), dtype=n.single, requirements='C')
+        self.data_dic['labels'] = n.require(self.data_dic['labels'].reshape((1,self.data_dic['data'].shape[1])), dtype=n.single, requirements='C')
         return epoch, batchnum, [self.data_dic['data'], self.data_dic['labels']]
 
     # Returns the dimensionality of the two data matrices returned by get_next_batch
@@ -69,8 +68,7 @@ class CIFARDataProvider(LabeledMemoryDataProvider):
         # labels are in single-precision floating point.
         for d in self.data_dic:
             # This converts the data matrix to single precision and makes sure that it is C-ordered
-            # d['data'] = n.require((d['data'] - self.data_mean), dtype=n.single, requirements='C')
-            d['data'] = n.require((d['data']), dtype=n.single, requirements='C')
+            d['data'] = n.require((d['data'] - self.data_mean), dtype=n.single, requirements='C')
             d['labels'] = n.require(d['labels'].reshape((1, d['data'].shape[1])), dtype=n.single, requirements='C')
 
     def get_next_batch(self):
