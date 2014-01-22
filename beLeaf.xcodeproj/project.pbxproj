@@ -24,6 +24,7 @@
 		5E2AD5991863B6DA00595828 /* beLeafTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5981863B6DA00595828 /* beLeafTests.m */; };
 		5E2AD5A31863BB5A00595828 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
 		5E2AD5A61863BC4600595828 /* BLEFSetTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A51863BC4600595828 /* BLEFSetTableViewController.m */; };
+		E909828918749EBB007B2562 /* BLEFSampleDataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E909828818749EBB007B2562 /* BLEFSampleDataViewController.m */; };
 		E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
 		E9F70C66186E24B000213E16 /* Sample.m in Sources */ = {isa = PBXBuildFile; fileRef = E9F70C65186E24B000213E16 /* Sample.m */; };
 		E9F70C69186E24B000213E16 /* Set.m in Sources */ = {isa = PBXBuildFile; fileRef = E9F70C68186E24B000213E16 /* Set.m */; };
@@ -62,6 +63,8 @@
 		5E2AD5A41863BC4600595828 /* BLEFSetTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSetTableViewController.h; sourceTree = "<group>"; };
 		5E2AD5A51863BC4600595828 /* BLEFSetTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSetTableViewController.m; sourceTree = "<group>"; };
 		5E2AD5B01863C2A400595828 /* ManagedObjects.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManagedObjects.h; sourceTree = "<group>"; };
+		E909828718749EBB007B2562 /* BLEFSampleDataViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSampleDataViewController.h; sourceTree = "<group>"; };
+		E909828818749EBB007B2562 /* BLEFSampleDataViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSampleDataViewController.m; sourceTree = "<group>"; };
 		E95C85391864564000CFEC40 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		E9F70C64186E24B000213E16 /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
 		E9F70C65186E24B000213E16 /* Sample.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sample.m; sourceTree = "<group>"; };
@@ -134,6 +137,8 @@
 				5E2AD57E1863B6DA00595828 /* BLEFAppDelegate.h */,
 				5E2AD57F1863B6DA00595828 /* BLEFAppDelegate.m */,
 				5E2AD5A21863BB5A00595828 /* iPhone.storyboard */,
+				E909828718749EBB007B2562 /* BLEFSampleDataViewController.h */,
+				E909828818749EBB007B2562 /* BLEFSampleDataViewController.m */,
 				5E2AD5A41863BC4600595828 /* BLEFSetTableViewController.h */,
 				5E2AD5A51863BC4600595828 /* BLEFSetTableViewController.m */,
 				5E2AD5841863B6DA00595828 /* Images.xcassets */,
@@ -277,6 +282,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E909828918749EBB007B2562 /* BLEFSampleDataViewController.m in Sources */,
 				5E2AD57C1863B6DA00595828 /* main.m in Sources */,
 				5E2AD5801863B6DA00595828 /* BLEFAppDelegate.m in Sources */,
 				E9F70C69186E24B000213E16 /* Set.m in Sources */,

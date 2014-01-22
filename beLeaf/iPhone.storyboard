@@ -12,6 +12,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="sectionIndexTrackingBackgroundColor" cocoaTouchSystemColor="tableCellGroupedBackgroundColor"/>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" id="zpt-54-4LJ">
                                 <rect key="frame" x="0.0" y="86" width="320" height="44"/>
@@ -42,11 +43,67 @@
                     </navigationItem>
                     <connections>
                         <outlet property="cameraButton" destination="xUQ-Jd-4LA" id="VR2-Zh-Lzg"/>
+                        <segue destination="1CW-Xk-KCZ" kind="push" identifier="tableViewtoSampleData" id="pKa-UJ-Hwm"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qZo-Uv-g6N" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="643" y="196"/>
+        </scene>
+        <!--Sample Data View Controller-->
+        <scene sceneID="FMA-iK-Upg">
+            <objects>
+                <viewController id="1CW-Xk-KCZ" customClass="BLEFSampleDataViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="oa4-ea-VEd"/>
+                        <viewControllerLayoutGuide type="bottom" id="PBe-kT-ymX"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="3Kc-ME-eU1">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="UDR-SO-4Qb">
+                                <rect key="frame" x="19" y="77" width="282" height="286"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            </imageView>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="78%    - Plant 1" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TZz-pc-ic1">
+                                <rect key="frame" x="100" y="386" width="121" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="15%    - Plant 2" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="P3d-Wc-PQg">
+                                <rect key="frame" x="100" y="415" width="121" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="02%    - Plant 3" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jzD-RK-8Yd">
+                                <rect key="frame" x="100" y="444" width="121" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="centerY" secondItem="UDR-SO-4Qb" secondAttribute="centerY" constant="64" id="1Il-mr-8Ft"/>
+                            <constraint firstAttribute="trailing" secondItem="UDR-SO-4Qb" secondAttribute="trailing" constant="19" id="q3x-rs-LEb"/>
+                            <constraint firstItem="UDR-SO-4Qb" firstAttribute="top" secondItem="oa4-ea-VEd" secondAttribute="bottom" constant="13" id="vFb-ni-RKj"/>
+                            <constraint firstItem="UDR-SO-4Qb" firstAttribute="leading" secondItem="3Kc-ME-eU1" secondAttribute="leading" constant="19" id="zlY-1U-ArU"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="gZh-Up-wQN">
+                        <barButtonItem key="backBarButtonItem" title="back" id="fj9-4e-ite"/>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="sampleImage" destination="UDR-SO-4Qb" id="dEF-nQ-s5g"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="57V-ij-FzJ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1080" y="196"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Kky-bn-Re6">

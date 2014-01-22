@@ -9,6 +9,7 @@
 #import "BLEFSetTableViewController.h"
 #import "ManagedObjects.h"
 #import "BLEFAppDelegate.h"
+#import "BLEFSampleDataViewController.h"
 
 @interface BLEFSetTableViewController ()
 
@@ -60,15 +61,15 @@
 }
 
 #pragma mark Navigation
-/*
- // In a story board-based application, you will often want to do a little preparation before navigation
+
+
  - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
  {
- // Get the new view controller using [segue destinationViewController].
- // Pass the selected object to the new view controller.
-     
+     if ([[segue identifier] isEqualToString:@"tableViewtoSampleData"]) {
+         BLEFSampleDataViewController *sampleView  = [segue destinationViewController];
+         sampleView.sample = sender;
+     }
  }
- */
 
 - (void)viewWillDisappear:(BOOL)animated
 {
@@ -268,6 +269,12 @@
     return (sample.status != 1 && sample.status != 3);
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    Sample *sample = [self.samples objectAtIndex:indexPath.row];
+    [self performSegueWithIdentifier:@"tableViewtoSampleData" sender:sample];
+}
+
 /*
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
@@ -307,7 +314,7 @@
     
     if (fileData){
     [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[@"Content-Disposition: form-data; name=\"datafile\"; filename=\"test.dat\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[@"Content-Disposition: form-data; name=\"datafile\"; filename=\"test.jpg\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[@"Content-Type: application/octet-stream\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[NSData dataWithData:fileData]];
     [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -322,7 +329,7 @@
 {
     NSNumber *result = @1;
     NSData *imageData = UIImageJPEGRepresentation(image, 10.0);
-    NSString *urlString = @"http://localhost:7777/upload";
+    NSString *urlString = @"http://sheltered-ridge-6203.herokuapp.com/upload";
     NSDictionary *params = @{@"ID": @"1234", @"auth" : @"password"};
     [self uploadFields:params andFileData:imageData toUrl:urlString];
     return result;
@@ -360,12 +367,13 @@
 
 - (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
 {
-    NSLog(@"Connection didSendData");
+    
     if  (self.uploading.status != 3){
+        NSLog(@"Connection didSendData");
         self.uploading.status = 3;
         [self.tableView reloadData];
     }
-    NSLog(@"%ld / %ld",(long)totalBytesWritten,(long)totalBytesExpectedToWrite);
+    //NSLog(@"%ld / %ld",(long)totalBytesWritten,(long)totalBytesExpectedToWrite);
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
@@ -460,11 +468,11 @@
         // Set photo name using current date and time
         NSDate* now = [NSDate date];
         NSTimeInterval unix_timestamp = [now timeIntervalSince1970];
-        NSString *name = [NSString stringWithFormat:@"%f.png",unix_timestamp];
+        NSString *name = [NSString stringWithFormat:@"%f.jpg",unix_timestamp];
         
         NSString* path = [documentsDirectory stringByAppendingPathComponent:name];
         // get date
-        NSData* data = UIImagePNGRepresentation(image);
+        NSData* data = UIImageJPEGRepresentation(image, 1.0);
         [data writeToFile:path atomically:YES];
         return name;
     } else return nil;
