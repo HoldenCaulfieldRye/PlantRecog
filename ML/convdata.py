@@ -27,12 +27,12 @@ import numpy.random as nr
 import numpy as n
 import random as r
 
-class JohnDataProvider(LabeledDataProvider):
+class BasicLeafDataProvider(LabeledDataProvider):
     def __init__(self, data_dir, batch_range, init_epoch=1, init_batchnum=None, dp_params={}, test=False):
         LabeledDataProvider.__init__(self, data_dir, batch_range, init_epoch, init_batchnum, dp_params, test)
         self.data_mean = self.batch_meta['data_mean']
         self.num_colors = 3
-        self.img_size = 256
+        self.img_size = 512
 
     def get_next_batch(self):
         if self.data_dic is None or len(self.batch_range) > 1:
