@@ -23,11 +23,13 @@
 		5E2AD5971863B6DA00595828 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5951863B6DA00595828 /* InfoPlist.strings */; };
 		5E2AD5991863B6DA00595828 /* beLeafTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5981863B6DA00595828 /* beLeafTests.m */; };
 		5E2AD5A31863BB5A00595828 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
-		5E2AD5A61863BC4600595828 /* BLEFSetTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A51863BC4600595828 /* BLEFSetTableViewController.m */; };
-		E909828918749EBB007B2562 /* BLEFSampleDataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E909828818749EBB007B2562 /* BLEFSampleDataViewController.m */; };
 		E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
-		E9F70C66186E24B000213E16 /* Sample.m in Sources */ = {isa = PBXBuildFile; fileRef = E9F70C65186E24B000213E16 /* Sample.m */; };
-		E9F70C69186E24B000213E16 /* Set.m in Sources */ = {isa = PBXBuildFile; fileRef = E9F70C68186E24B000213E16 /* Set.m */; };
+		E9B5BA3318982F5B000161F7 /* BLEFServerInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */; };
+		E9BD3A471898399E001B8570 /* BLEFSpecimenTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9BD3A461898399E001B8570 /* BLEFSpecimenTableViewController.m */; };
+		E9E396251897F8820067A991 /* BLEFImage.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396241897F8820067A991 /* BLEFImage.m */; };
+		E9E396281897F8830067A991 /* BLEFSpecimen.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396271897F8830067A991 /* BLEFSpecimen.m */; };
+		E9E3962B1897F8830067A991 /* BLEFGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962A1897F8830067A991 /* BLEFGroup.m */; };
+		E9E3962E1897F94F0067A991 /* BLEFDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962D1897F94F0067A991 /* BLEFDatabase.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,16 +62,19 @@
 		5E2AD5961863B6DA00595828 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5E2AD5981863B6DA00595828 /* beLeafTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = beLeafTests.m; sourceTree = "<group>"; };
 		5E2AD5A21863BB5A00595828 /* iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = iPhone.storyboard; sourceTree = "<group>"; };
-		5E2AD5A41863BC4600595828 /* BLEFSetTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSetTableViewController.h; sourceTree = "<group>"; };
-		5E2AD5A51863BC4600595828 /* BLEFSetTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSetTableViewController.m; sourceTree = "<group>"; };
-		5E2AD5B01863C2A400595828 /* ManagedObjects.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManagedObjects.h; sourceTree = "<group>"; };
-		E909828718749EBB007B2562 /* BLEFSampleDataViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSampleDataViewController.h; sourceTree = "<group>"; };
-		E909828818749EBB007B2562 /* BLEFSampleDataViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSampleDataViewController.m; sourceTree = "<group>"; };
 		E95C85391864564000CFEC40 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		E9F70C64186E24B000213E16 /* Sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sample.h; sourceTree = "<group>"; };
-		E9F70C65186E24B000213E16 /* Sample.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sample.m; sourceTree = "<group>"; };
-		E9F70C67186E24B000213E16 /* Set.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Set.h; sourceTree = "<group>"; };
-		E9F70C68186E24B000213E16 /* Set.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Set.m; sourceTree = "<group>"; };
+		E9B5BA3118982F5B000161F7 /* BLEFServerInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFServerInterface.h; sourceTree = "<group>"; };
+		E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFServerInterface.m; sourceTree = "<group>"; };
+		E9BD3A451898399E001B8570 /* BLEFSpecimenTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSpecimenTableViewController.h; sourceTree = "<group>"; };
+		E9BD3A461898399E001B8570 /* BLEFSpecimenTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSpecimenTableViewController.m; sourceTree = "<group>"; };
+		E9E396231897F8820067A991 /* BLEFImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFImage.h; sourceTree = "<group>"; };
+		E9E396241897F8820067A991 /* BLEFImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFImage.m; sourceTree = "<group>"; };
+		E9E396261897F8830067A991 /* BLEFSpecimen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSpecimen.h; sourceTree = "<group>"; };
+		E9E396271897F8830067A991 /* BLEFSpecimen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSpecimen.m; sourceTree = "<group>"; };
+		E9E396291897F8830067A991 /* BLEFGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFGroup.h; sourceTree = "<group>"; };
+		E9E3962A1897F8830067A991 /* BLEFGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFGroup.m; sourceTree = "<group>"; };
+		E9E3962C1897F94F0067A991 /* BLEFDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFDatabase.h; sourceTree = "<group>"; };
+		E9E3962D1897F94F0067A991 /* BLEFDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFDatabase.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,18 +142,21 @@
 				5E2AD57E1863B6DA00595828 /* BLEFAppDelegate.h */,
 				5E2AD57F1863B6DA00595828 /* BLEFAppDelegate.m */,
 				5E2AD5A21863BB5A00595828 /* iPhone.storyboard */,
-				E909828718749EBB007B2562 /* BLEFSampleDataViewController.h */,
-				E909828818749EBB007B2562 /* BLEFSampleDataViewController.m */,
-				5E2AD5A41863BC4600595828 /* BLEFSetTableViewController.h */,
-				5E2AD5A51863BC4600595828 /* BLEFSetTableViewController.m */,
+				E9B5BA3118982F5B000161F7 /* BLEFServerInterface.h */,
+				E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */,
 				5E2AD5841863B6DA00595828 /* Images.xcassets */,
 				5E2AD5811863B6DA00595828 /* beLeaf.xcdatamodeld */,
-				5E2AD5B01863C2A400595828 /* ManagedObjects.h */,
+				E9E396291897F8830067A991 /* BLEFGroup.h */,
+				E9E3962A1897F8830067A991 /* BLEFGroup.m */,
+				E9E396261897F8830067A991 /* BLEFSpecimen.h */,
+				E9E396271897F8830067A991 /* BLEFSpecimen.m */,
+				E9E396231897F8820067A991 /* BLEFImage.h */,
+				E9E396241897F8820067A991 /* BLEFImage.m */,
 				5E2AD5761863B6D900595828 /* Supporting Files */,
-				E9F70C67186E24B000213E16 /* Set.h */,
-				E9F70C68186E24B000213E16 /* Set.m */,
-				E9F70C64186E24B000213E16 /* Sample.h */,
-				E9F70C65186E24B000213E16 /* Sample.m */,
+				E9E3962C1897F94F0067A991 /* BLEFDatabase.h */,
+				E9E3962D1897F94F0067A991 /* BLEFDatabase.m */,
+				E9BD3A451898399E001B8570 /* BLEFSpecimenTableViewController.h */,
+				E9BD3A461898399E001B8570 /* BLEFSpecimenTableViewController.m */,
 			);
 			path = beLeaf;
 			sourceTree = "<group>";
@@ -282,13 +290,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E909828918749EBB007B2562 /* BLEFSampleDataViewController.m in Sources */,
+				E9E3962B1897F8830067A991 /* BLEFGroup.m in Sources */,
+				E9BD3A471898399E001B8570 /* BLEFSpecimenTableViewController.m in Sources */,
 				5E2AD57C1863B6DA00595828 /* main.m in Sources */,
+				E9E396251897F8820067A991 /* BLEFImage.m in Sources */,
 				5E2AD5801863B6DA00595828 /* BLEFAppDelegate.m in Sources */,
-				E9F70C69186E24B000213E16 /* Set.m in Sources */,
 				5E2AD5831863B6DA00595828 /* beLeaf.xcdatamodeld in Sources */,
-				E9F70C66186E24B000213E16 /* Sample.m in Sources */,
-				5E2AD5A61863BC4600595828 /* BLEFSetTableViewController.m in Sources */,
+				E9E396281897F8830067A991 /* BLEFSpecimen.m in Sources */,
+				E9E3962E1897F94F0067A991 /* BLEFDatabase.m in Sources */,
+				E9B5BA3318982F5B000161F7 /* BLEFServerInterface.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

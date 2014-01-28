@@ -7,7 +7,7 @@
 //
 
 #import "BLEFAppDelegate.h"
-#import "ManagedObjects.h"
+#import "BLEFDatabase.h"
 
 @implementation BLEFAppDelegate
 
@@ -17,24 +17,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    NSManagedObjectContext *context = [self managedObjectContext];
-    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Set" ];
-    request.sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor
-                                                        sortDescriptorWithKey:@"name"
-                                                        ascending:YES
-                                                        selector:@selector(localizedCaseInsensitiveCompare:)]];
-    NSFetchedResultsController *results = [[NSFetchedResultsController alloc]
-                                           initWithFetchRequest:request
-                                           managedObjectContext:context
-                                           sectionNameKeyPath:nil
-                                           cacheName:nil];
-    [results performFetch:nil]; //nil NSError
-    if (![[results fetchedObjects] count] > 0) {
-        [self createDefaultSet];
-    } else {
-        NSLog(@"%lu Sample sets loaded", (unsigned long)[[context registeredObjects] count]);
-    }
-    
+    NSLog(@"didFinishLaunching");
+    [BLEFDatabase ensureGroupsExist];
     return YES;
 }
 
@@ -163,16 +147,6 @@
 
 #pragma mark - beLeaf Core Data Methods
 
-- (void) createDefaultSet
-{
-    NSLog(@"Creating a default set");
-    
-    NSManagedObjectContext *context = [self managedObjectContext];
-    Set *set = [NSEntityDescription insertNewObjectForEntityForName:@"Set" inManagedObjectContext:context];
-    set.name = @"Default Set";
-    
-    [self saveContext];
-}
 
 
 @end
