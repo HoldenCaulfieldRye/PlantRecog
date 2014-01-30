@@ -7,11 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BLEFImage.h"
 
 @interface BLEFServerInterface : NSObject <NSURLConnectionDataDelegate>
 
 @property (strong, nonatomic) NSArray *queue;
 
-- (void) uploadImage;
+- (void) uploadImage:(BLEFImage *)image;
 
 @end

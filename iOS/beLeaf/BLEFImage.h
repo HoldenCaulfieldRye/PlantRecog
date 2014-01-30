@@ -21,6 +21,7 @@
 @property (nonatomic, retain) BLEFSpecimen *specimen;
 
 - (UIImage *)getImage;
+- (NSData *)getImageData;
 - (void)generateThumbnailFromImage:(UIImage *)image;
 - (BOOL)saveImage:(UIImage *)image;
 

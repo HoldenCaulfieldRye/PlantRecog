@@ -78,6 +78,15 @@
     return image;
 }
 
+- (NSData *)getImageData
+{
+    NSString *imageDirectory = [self getImageDirectory];
+    NSString* pathToFile = [imageDirectory stringByAppendingPathComponent:self.filename];
+    NSData* data = [NSData dataWithContentsOfFile:pathToFile];
+    return data;
+}
+
+
 - (void)generateThumbnailFromImage:(UIImage *)image
 {
     CGSize size = image.size;
