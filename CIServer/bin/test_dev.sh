@@ -1,0 +1,5 @@
+echo "*** INFO: Running test 1 (dev) ***"
+echo "*** INFO: Running test 2 (dev) ***"
+echo "*** INFO: Running test 3 (dev) ***"
+echo "*** INFO: Running test 4 (dev) ***"
+echo "*** INFO: Running test 5 (dev) ***"
