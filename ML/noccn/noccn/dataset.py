@@ -185,9 +185,11 @@ def _collect_filenames_and_labels(cfg):
         print '\nNumber of images found: ',
     else:
         limit_to_tag = cfg.get('limit_to_tag', 'None')
+        exclude = cfg.get('exclude', 'None')
         for fname in find(path, pattern):
             info_dict = get_info(fname,[limit_by_tag,label_data_field],metadata_file_ext)
-            if info_dict[limit_by_tag]  == limit_to_tag:
+            # This is to check whether it has an exclude set
+            if (limit_to_tag!='None' and info_dict[limit_by_tag]==limit_to_tag) or (exclude!='None' and info_dict[limit_by_tag]!=exclude) or (limit_to_tag == 'None' and exclude == 'None'):
                 label = info_dict[label_data_field]
                 filenames_and_labels.append((fname, label))
                 counter += 1
