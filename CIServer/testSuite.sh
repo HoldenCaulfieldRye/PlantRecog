@@ -42,7 +42,7 @@ git checkout $BRANCH
 echo "INFO: running test script: $TEST_SCRIPT"
 ./bin/$TEST_SCRIPT | mail -s $EMAIL_SUBJ $EMAIL_ADDR
 
-
+cd ../../
 #step four: clean up file system
 if [ -d $PROJ_NAME ]
 then
