@@ -1,4 +1,4 @@
-This is my fork of the ``cuda-convnet`` convolutional neural network
+This is our fork of the ``cuda-convnet`` convolutional neural network
 implementation written by Alex Krizhevsky.
 
 ``cuda-convnet`` has quite extensive documentation itself.  Find the
@@ -147,9 +147,11 @@ another file.
 Installation on a labmachine
 ----------------------------
 
-For the lab machines, the easiest way to install is using the following command:
+To install our fork of cuda-convnet on a lab machine:
 
-  python setup.py install --user
+  bash
+  ./build.sh
+
 
 Installation in a virtualenv
 ----------------------------
