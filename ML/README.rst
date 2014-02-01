@@ -152,6 +152,8 @@ To install our fork of cuda-convnet on a lab machine:
   bash
   ./build.sh
 
+That's all!
+
 
 Installation in a virtualenv
 ----------------------------
