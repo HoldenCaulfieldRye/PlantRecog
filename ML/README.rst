@@ -150,6 +150,7 @@ Installation on a labmachine
 To install our fork of cuda-convnet on a lab machine:
   
   bash  
+
   ./build.sh  
   
 
@@ -243,4 +244,3 @@ An example::
 
   #!shell
   bin/ccn-make-batches models/01/options.cfg
->>>>>>> noccn-master
