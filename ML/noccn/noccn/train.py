@@ -8,7 +8,7 @@ from .script import run_model
 
 
 class ConvNet(convnet.ConvNet):
-    give_up_epochs = 20
+    give_up_epochs = 100
     _option_parser = None
 
     def conditional_save(self):
