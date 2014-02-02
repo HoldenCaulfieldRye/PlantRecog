@@ -1,5 +1,5 @@
 //
-//  BLEFImage.h
+//  BLEFObservation.h
 //  beLeaf
 //
 //  Created by Ashley Cutmore on 28/01/2014.
@@ -11,18 +11,19 @@
 
 @class BLEFSpecimen;
 
-@interface BLEFImage : NSManagedObject
+@interface BLEFObservation : NSManagedObject
 
-@property (nonatomic, retain) NSString * filename;
-@property (nonatomic, retain) id thumbnail;
 @property (nonatomic) NSTimeInterval date;
-@property (nonatomic) BOOL uploaded;
+@property (nonatomic, retain) NSString * filename;
 @property (nonatomic) int16_t job;
+@property (nonatomic, retain) id thumbnail;
+@property (nonatomic) BOOL uploaded;
 @property (nonatomic, retain) BLEFSpecimen *specimen;
 
 - (UIImage *)getImage;
 - (NSData *)getImageData;
+- (UIImage *)getThumbnail;
 - (void)generateThumbnailFromImage:(UIImage *)image;
-- (BOOL)saveImage:(UIImage *)image;
+- (void)saveImage:(UIImage *)image;
 
 @end

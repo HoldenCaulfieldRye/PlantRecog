@@ -8,7 +8,7 @@
 
 #import "BLEFSpecimen.h"
 #import "BLEFGroup.h"
-#import "BLEFImage.h"
+#import "BLEFObservation.h"
 
 
 @implementation BLEFSpecimen
@@ -21,6 +21,6 @@
 @dynamic order;
 @dynamic id;
 @dynamic group;
-@dynamic images;
+@dynamic observations;
 
 @end

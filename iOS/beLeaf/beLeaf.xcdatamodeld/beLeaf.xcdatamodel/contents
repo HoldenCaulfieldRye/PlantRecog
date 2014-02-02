@@ -5,13 +5,13 @@
         <attribute name="order" attributeType="Integer 16" minValueString="1" defaultValueString="1" syncable="YES"/>
         <relationship name="specimens" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Specimen" inverseName="group" inverseEntity="Specimen" syncable="YES"/>
     </entity>
-    <entity name="Image" representedClassName="BLEFImage" syncable="YES">
+    <entity name="Observation" representedClassName="BLEFObservation" syncable="YES">
         <attribute name="date" optional="YES" attributeType="Date" syncable="YES"/>
-        <attribute name="filepath" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="filename" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="job" optional="YES" attributeType="Integer 16" syncable="YES"/>
         <attribute name="thumbnail" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="uploaded" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
-        <relationship name="specimen" maxCount="1" deletionRule="Nullify" destinationEntity="Specimen" inverseName="images" inverseEntity="Specimen" syncable="YES"/>
+        <relationship name="specimen" maxCount="1" deletionRule="Nullify" destinationEntity="Specimen" inverseName="observations" inverseEntity="Specimen" syncable="YES"/>
     </entity>
     <entity name="Specimen" representedClassName="BLEFSpecimen" syncable="YES">
         <attribute name="created" optional="YES" attributeType="Date" syncable="YES"/>
@@ -22,11 +22,11 @@
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="order" attributeType="Integer 16" minValueString="1" defaultValueString="1" syncable="YES"/>
         <relationship name="group" maxCount="1" deletionRule="Nullify" destinationEntity="Group" inverseName="specimens" inverseEntity="Group" syncable="YES"/>
-        <relationship name="images" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Image" inverseName="specimen" inverseEntity="Image" syncable="YES"/>
+        <relationship name="observations" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Observation" inverseName="specimen" inverseEntity="Observation" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Specimen" positionX="0" positionY="0" width="0" height="0"/>
         <element name="Group" positionX="0" positionY="0" width="0" height="0"/>
-        <element name="Image" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="Observation" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="Specimen" positionX="0" positionY="0" width="0" height="0"/>
     </elements>
 </model>

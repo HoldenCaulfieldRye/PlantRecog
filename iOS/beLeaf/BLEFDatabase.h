@@ -9,15 +9,18 @@
 #import <Foundation/Foundation.h>
 #import "BLEFGroup.h"
 #import "BLEFSpecimen.h"
-#import "BLEFImage.h"
+#import "BLEFObservation.h"
 
 @interface BLEFDatabase : NSObject
 
 + (NSArray*)getGroups;
 + (NSArray*)getSpecimensFromGroup:(BLEFGroup *)group;
-+ (NSArray*)getImagesFromSpecimen:(BLEFSpecimen *)specimen;
++ (NSArray*)getObservationsFromSpecimen:(BLEFSpecimen *)specimen;
 
 + (BLEFSpecimen*)addNewSpecimentToGroup:(BLEFGroup *)group;
++ (BLEFObservation*)addNewObservationToSpecimen:(BLEFSpecimen *)specimen;
+
++ (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID;
 
 + (void)saveChanges;
 

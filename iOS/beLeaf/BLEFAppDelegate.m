@@ -8,12 +8,14 @@
 
 #import "BLEFAppDelegate.h"
 #import "BLEFDatabase.h"
+#import "BLEFServerInterface.h"
 
 @implementation BLEFAppDelegate
 
 @synthesize managedObjectContext = _managedObjectContext;
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
+@synthesize serverinterface = _serverinterface;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -145,7 +147,16 @@
     return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
 
-#pragma mark - beLeaf Core Data Methods
+#pragma mark - Server Setup
+
+- (BLEFServerInterface *)serverinterface
+{
+    if (_serverinterface != nil) {
+        return _serverinterface;
+    }
+    _serverinterface = [[BLEFServerInterface alloc] init];
+    return _serverinterface;
+}
 
 
 

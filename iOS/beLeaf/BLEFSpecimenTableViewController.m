@@ -7,6 +7,7 @@
 //
 
 #import "BLEFSpecimenTableViewController.h"
+#import "BLEFSpeicmenObservationsViewController.h"
 #import "BLEFSpecimen.h"
 #import "BLEFDatabase.h"
 
@@ -36,7 +37,6 @@
 
     self.tableView.rowHeight = 50;
     [self loadTableData];
-    [self.tableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning
@@ -45,7 +45,7 @@
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark - Table view data source
+#pragma mark - Table View Methods
 
 - (void)loadTableData
 {
@@ -136,17 +136,32 @@
     [BLEFDatabase saveChanges];
     [self loadTableData];
     [self.tableView reloadData];
-    // refresh table
-    // go to specimen
+    // go to specimen ?
 }
 
-/*
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    if ([[segue identifier] isEqualToString:@"specimenToObservations"]) {
+        BLEFSpeicmenOberservationsViewController *destination = [segue destinationViewController];
+        [destination setSpecimen:sender];
+    }
 }
 
-*/
+- (void)viewWillDisappear:(BOOL)animated
+{
+    // Return cells to their normal state
+    //[self.tableView setEditing:NO];
+}
+
+- (IBAction)unwindToTableView:(UIStoryboardSegue *)segue
+{
+    //Return here from another scene
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    BLEFSpecimen* specimen = [self.Specimen objectAtIndex:indexPath.row];
+    [self performSegueWithIdentifier:@"specimenToObservations" sender:specimen];
+}
 
 @end

@@ -57,13 +57,21 @@
     return array;
 }
 
-+ (NSArray*)getImagesFromSpecimen:(BLEFSpecimen *)specimen
++ (NSArray*)getObservationsFromSpecimen:(BLEFSpecimen *)specimen
 {
     NSArray* array = nil;
     if (specimen != nil){
-        array = [specimen.images allObjects];
+        array = [specimen.observations allObjects];
     }
     return array;
+}
+
++ (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID
+{
+    NSManagedObjectContext *context = [self getContext];
+    NSError* error = nil;
+    NSManagedObject* object = [context existingObjectWithID:objectID error:&error];
+    return object;
 }
 
 + (BLEFSpecimen*)addNewSpecimentToGroup:(BLEFGroup *)group
@@ -78,6 +86,19 @@
     [specimen setGroup:group];
     
     return specimen;
+}
+
++ (BLEFObservation*)addNewObservationToSpecimen:(BLEFSpecimen *)specimen
+{
+    NSManagedObjectContext *context = [self getContext];
+    BLEFObservation *observation = [NSEntityDescription insertNewObjectForEntityForName:@"Observation" inManagedObjectContext:context];
+    
+    //date
+    
+    [observation setSpecimen:specimen];
+    [specimen addObservationsObject:observation];
+    
+    return observation;
 }
 
 + (void) ensureGroupsExist

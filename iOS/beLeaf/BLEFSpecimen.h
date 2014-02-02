@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class BLEFGroup, BLEFImage;
+@class BLEFGroup, BLEFObservation;
 
 @interface BLEFSpecimen : NSManagedObject
 
@@ -21,14 +21,14 @@
 @property (nonatomic) int16_t order;
 @property (nonatomic) int16_t id;
 @property (nonatomic, retain) BLEFGroup *group;
-@property (nonatomic, retain) NSSet *images;
+@property (nonatomic, retain) NSSet *observations;
 @end
 
 @interface BLEFSpecimen (CoreDataGeneratedAccessors)
 
-- (void)addImagesObject:(BLEFImage *)value;
-- (void)removeImagesObject:(BLEFImage *)value;
-- (void)addImages:(NSSet *)values;
-- (void)removeImages:(NSSet *)values;
+- (void)addObservationsObject:(BLEFObservation *)value;
+- (void)removeObservationsObject:(BLEFObservation *)value;
+- (void)addObservations:(NSSet *)values;
+- (void)removeObservations:(NSSet *)values;
 
 @end
