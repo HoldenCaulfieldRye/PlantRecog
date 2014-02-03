@@ -3,12 +3,12 @@ var fs = require('fs'),
 	MongoClient = require('mongodb').MongoClient,	//ensure the relevant packages have been installed and node.js mongo driver installed
 	format = require('util').format;
 
-var table = 'plants';
-var parser = new xml2js.Parser();			//ensure the xml2js package has been installed 'npm install xml2js'
-var mongod = 'mongodb://127.0.0.1:27017/';	//host and port of MongoDB server
+var table = 'plants',
+	parser = new xml2js.Parser(),			//ensure the xml2js package has been installed 'npm install xml2js'
+	mongod = 'mongodb://127.0.0.1:27017/';	//host and port of MongoDB server
 
 var NUM_PHOTOS = 55000;
-var imagedb_path = '/data/db2/';
+var imagedb_path = '/data2/leafdb/train/';
 
 // connect to mongod server, read xml files, parse into json, make some tweaks and insert into collection
 MongoClient.connect(mongod + table, function(err, db) {
@@ -30,7 +30,9 @@ MongoClient.connect(mongod + table, function(err, db) {
 					console.log('Done');
 	
 					// make some tweaks to result 	
-					var document = ...; 
+					var document = result.Image;
+					document.FileName = file; 
+					// do we add taxon tree at this stage ???
 	
 					// insert doc into mongo collection 
 					db.collection(table).insert(
