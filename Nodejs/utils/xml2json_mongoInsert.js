@@ -1,7 +1,7 @@
 var fs = require('fs'),
     xml2js = require('xml2js'),				//ensure the xml2js package has been installed 'npm install xml2js'
     MongoClient = require('mongodb').MongoClient,	//ensure the node.js mongodb driver is installed 'npm install mongodb'
-    format = require('util').format;
+    format = require('util').format;			//is this needed?
 
 var table = 'plants',
     mongod = 'mongodb://146.169.44.217:57017/',	//host and port of MongoDB server
@@ -10,17 +10,19 @@ var table = 'plants',
 /*
 // on VM server
 var NUM_PHOTOS = 15030;
-var imagedb_path = '/home/gerardh/data/';
+var IMAGE_DB_PATH = '/home/gerardh/data/';
 */
 // on graphic02
-var NUM_PHOTOS = 47815;
-var imagedb_path = '/data2/leafdb/train/';
+//var NUM_PHOTOS = 47815;
+var NUM_PHOTOS = 100000;
+var IMAGE_DB_PATH = '/home/gerardh/data/';
+//var IMAGE_DB_PATH = '/data2/leafdb/train/';
 
 // connect to mongod server, read xml files, parse into json, make some tweaks and insert into collection
 MongoClient.connect(conn, function(err, db) {
 	if(err) console.log(err);
 	for(var i = 1; i <= NUM_PHOTOS; i++){
-		var file = imagedb_path + i + '.xml';
+		var file = IMAGE_DB_PATH + i + '.xml';
 		if (fs.existsSync(file)) {
 			console.log('file exists ' + file);
 			//read xml file
@@ -29,7 +31,7 @@ MongoClient.connect(conn, function(err, db) {
 			parser.parseString(data, function (err, result) {
 			  // make some tweaks to result 	
 			  var document = result.Image;
-			  document.FileName = [ imagedb_path + document.FileName ]; 					
+			  document.FileName = [ IMAGE_DB_PATH + document.FileName ]; 					
 			  console.log(document);
 			  // add taxon tree at this stage ???
 			  // document.TaxonTree = ['Plant', 'Flowering Plant'];
