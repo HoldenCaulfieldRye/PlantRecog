@@ -15,7 +15,14 @@ GRAPHIC_SERVER_LOG="graphicserver_"${ENV}_${DATE}
 
 USAGE=$"Usage: $0 {start|stop} {dev|qa|prod}"
 
-HOSTNAME=
+#logic to deal with checking and ensuring user is on a doc host.
+HOSTNAME=`echo hostname -A | awk 'BEGIN {FS="/"}{print $2}'`
+if [ ! "$HOSTNAME" == "doc" ]
+then
+	echo "WARN:script must be run from a doc server"
+	exit
+fi
+
 
 case "$1" in
   start)
@@ -78,6 +85,14 @@ case "$1" in
         fi
 
 	ssh $USER@graphic02.doc.ic.ac.uk
+	
+	if [ ! -s /tmp/node_$ENV.pid ]
+        then
+                echo "graphic server is not running...therefore it can't be stopped"
+        else
+                echo "Stopping node server.." 
+                kill -9 `cat /tmp/node_$ENV.pid`
+        fi
 	
 	;;
   *)
