@@ -28,6 +28,12 @@
 	[self loadCollectionData];
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [self loadCollectionData];
+    [self.collectionView reloadData];
+}
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -48,12 +54,16 @@
 
 - (UICollectionViewCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
+    // Get Observation
+    BLEFObservation *observation = [self.observations objectAtIndex:indexPath.row];
+    NSManagedObjectID *objID = [observation objectID];
+    
+    // Get Cell
     static NSString *identifier = @"Cell";
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
     
     // Set Thumbnail
     UIImageView *cellImageView = (UIImageView *)[cell viewWithTag:100];
-    BLEFObservation* observation = [self.observations objectAtIndex:indexPath.row];
     cellImageView.image = [observation getThumbnail];
     
     // Set Progress Bar
@@ -67,12 +77,16 @@
                     usingBlock:^(NSNotification *notification)
      {
          NSDictionary* uploadInfo = notification.userInfo;
+         NSManagedObjectID *uploadID = [uploadInfo objectForKey:@"objectID"];
+         
+         if ([uploadID isEqual:objID]){
          NSNumber* progress = [uploadInfo objectForKey:@"percentage"];
          float progressF = [progress floatValue];
          dispatch_async(dispatch_get_main_queue(), ^{
              NSLog(@"Progress:%f", progressF);
              [progressbar setProgress:progressF animated:true];
          });
+         }
      }];
     
     return cell;
@@ -83,7 +97,8 @@
 - (IBAction)addPhotoButtonClicked:(id)sender
 {
     NSLog(@"Camera clicked");
-    [self displayImagePicker];
+    //[self displayImagePicker];
+    [self showCamerView];
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
@@ -96,15 +111,32 @@
     [serverInterface uploadObservation:[observation objectID]];
 }
 
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([[segue identifier] isEqualToString:@"ObservationToCamera"]) {
+        BLEFCameraViewController *destination = [segue destinationViewController];
+        [destination setDelegate:sender];
+    }
+}
+
 #pragma mark - New Photo Methods
+
+- (void)showCamerView
+{
+    [self performSegueWithIdentifier:@"ObservationToCamera" sender:self];
+}
 
 - (void)displayImagePicker
 {
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate = self;
-    imagePicker.allowsEditing = NO;
+    imagePicker.allowsEditing = YES;
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+        imagePicker.showsCameraControls = NO;
+        NSArray *cameraViews =  [[NSBundle mainBundle] loadNibNamed:@"BLEFCameraView" owner:self options:nil];
+        UIView *camerView = [cameraViews objectAtIndex:0];
+        imagePicker.cameraOverlayView = camerView;
     } else {
         imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     }
@@ -128,5 +160,20 @@
 {
     [picker dismissViewControllerAnimated:YES completion:^{NSLog(@"Image Picker Canceled");}];
 }
+
+-(void)blefCameraViewControllerDidDismiss:(BLEFCameraViewController *)cameraViewController
+{
+   [cameraViewController dismissViewControllerAnimated:YES completion:^{NSLog(@"blef image picker canceled");}];
+}
+
+-(void)blefCameraViewController:(BLEFCameraViewController *)cameraViewController tookPhoto:(UIImage *)photo withInfo:(NSDictionary *)info
+{
+    NSLog(@"Photo Taken delegate method");
+    BLEFObservation* observation = [BLEFDatabase addNewObservationToSpecimen:self.specimen];
+    [observation generateThumbnailFromImage:photo];
+    [BLEFDatabase saveChanges];
+    [observation saveImage:photo];
+}
+
 
 @end

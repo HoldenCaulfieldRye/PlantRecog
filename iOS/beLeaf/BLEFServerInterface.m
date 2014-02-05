@@ -10,17 +10,16 @@
 #import "BLEFDatabase.h"
 #import "BLEFAppDelegate.h"
 #import "BLEFObservation.h"
+#import "BLEFServerConnection.h"
+
+@interface BLEFServerInterface ()
+
+@property (strong, nonatomic) NSArray *queue;
+
+@end
 
 @implementation BLEFServerInterface
 
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        self.updates = 0;
-    }
-    return self;
-}
 
 NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNotification";
 
@@ -34,7 +33,9 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
         //NSString *urlString = @"http://sheltered-ridge-6203.herokuapp.com/upload";
         NSString *urlString = @"http://192.168.1.78:5000/upload";
         NSDictionary *params = @{@"ID": @"1234", @"auth" : @"password"};
-        [self uploadFields:params andFileData:imageData toUrl:urlString];
+        BLEFServerConnection *serverConnection = [self uploadFields:params andFileData:imageData toUrl:urlString];
+        [serverConnection setObjID:observationID];
+        [serverConnection start];
     } else {
         NSLog(@"Error fetching observation for upload");
     }
@@ -42,7 +43,7 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
 
 #pragma mark Private Methods
 
-- (void)uploadFields:(NSDictionary *)parameters andFileData:(NSData *)fileData toUrl:(NSString *)urlString
+- (BLEFServerConnection *)uploadFields:(NSDictionary *)parameters andFileData:(NSData *)fileData toUrl:(NSString *)urlString
 {
     NSURL *url = [NSURL URLWithString:urlString];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
@@ -70,8 +71,8 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
     }
     
     [request setHTTPBody:body];
-    NSURLConnection *serverConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-    [serverConnection start];
+    BLEFServerConnection *serverConnection = [[BLEFServerConnection alloc] initWithRequest:request delegate:self startImmediately:false];
+    return serverConnection;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
@@ -82,16 +83,20 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
 
 - (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
 {
+    BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
+    
     CGFloat dataSent = totalBytesWritten;
     CGFloat dataTotal = totalBytesExpectedToWrite;
-    NSNumber *progress = [NSNumber numberWithFloat:dataSent/dataTotal];
-    NSDictionary *uploadInfo = @{
-                                 @"percentage" : progress
-                                };
-    if (self.updates % 20 == 0) {
+    NSNumber *progress = [NSNumber numberWithFloat: round((dataSent/dataTotal) * 10)/10];
+    
+    if ([progress floatValue] > [serverConnection progress]) {
+        NSDictionary *uploadInfo = @{
+                                     @"percentage" : progress,
+                                     @"objectID"   : [serverConnection objID]
+                                     };
         [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
+        [serverConnection setProgress:[progress floatValue]];
     }
-    self.updates = self.updates + 1;
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
@@ -101,6 +106,7 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
+    
     NSLog(@"didFinishLoading");
 }
 

@@ -10,10 +10,9 @@
 
 @interface BLEFServerInterface : NSObject <NSURLConnectionDataDelegate>
 
-@property (strong, nonatomic) NSArray *queue;
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 extern NSString * const BLEFUploadDidSendDataNotification;
-@property (nonatomic) NSInteger updates;
+
 
 - (void) uploadObservation:(NSManagedObjectID *)observationID;
 

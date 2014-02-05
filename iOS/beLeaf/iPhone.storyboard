@@ -42,6 +42,38 @@
             </objects>
             <point key="canvasLocation" x="393" y="-73"/>
         </scene>
+        <!--Camera View Controller-->
+        <scene sceneID="NnB-n7-IJu">
+            <objects>
+                <viewController id="Ouh-a9-olT" customClass="BLEFCameraViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Zbp-ZX-fOG"/>
+                        <viewControllerLayoutGuide type="bottom" id="P3i-ol-5on"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="GbB-tz-sUW">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="7IV-RH-AQH">
+                                <rect key="frame" x="142" y="265" width="37" height="37"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="color" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            </activityIndicatorView>
+                        </subviews>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="centerY" secondItem="7IV-RH-AQH" secondAttribute="centerY" constant="0.5" id="CZO-Km-G9i"/>
+                            <constraint firstAttribute="centerX" secondItem="7IV-RH-AQH" secondAttribute="centerX" constant="-0.5" id="scH-vv-OYJ"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="activityIndicator" destination="7IV-RH-AQH" id="oaX-EG-wUI"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9bU-58-lj1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1305" y="-73"/>
+        </scene>
         <!--Speicmen Oberservations View Controller - Specimen Observations-->
         <scene sceneID="Nw7-M9-Vct">
             <objects>
@@ -88,6 +120,9 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <segue destination="Ouh-a9-olT" kind="modal" identifier="ObservationToCamera" modalTransitionStyle="crossDissolve" id="8EW-dc-C1M"/>
+                    </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Fe0-ww-Fsm" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
