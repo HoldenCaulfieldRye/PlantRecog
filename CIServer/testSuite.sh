@@ -16,7 +16,8 @@ BRANCH=`echo ${2} | awk 'BEGIN {FS="/"}{print $3}'`
 PROJ_NAME=`echo $1 | awk 'BEGIN {FS="/"}{print $2}' | awk 'BEGIN {FS="."}{print $1}'`
 TEST_SCRIPT="test_$BRANCH.sh"
 
-EMAIL_ADDR="plantrecognizer@gmail.com"
+EMAIL_ADDR="gerardhaughian@gmail.com"
+#EMAIL_ADDR="doc-g1353012-group@imperial.ac.uk"
 EMAIL_SUBJ_PREFIX="Test Suite Results - "
 EMAIL_SUBJ=${EMAIL_SUBJ_PREFIX}${PROJ_NAME}:${BRANCH}
 
