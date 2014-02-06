@@ -1,7 +1,0 @@
-{
-    "dependencies": {
-        "xml2js": "*",
-        "mongodb": "*" 
-    }   
-}
-
