@@ -47,6 +47,7 @@ setup(name='noccn',
       ccn-train = noccn.train:console
       ccn-show = noccn.show:console
       ccn-make-batches = noccn.dataset:console
+      ccn-tag = noccn.tag:console
       """,
       extras_require={
           'testing': tests_require,
