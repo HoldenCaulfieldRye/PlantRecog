@@ -7,17 +7,16 @@
 #	args: $2 = git ref
 #
 
-LOG_PREFIX="test"
-DATE=`date +"%Y.%m.%d"`
-LOGNAME=${LOG_PREFIX}${DATE}
-
 PROJ_NAME=`echo $1 | awk 'BEGIN {FS="/"}{print $2}' | awk 'BEGIN {FS="."}{print $1}'`
 
 VALID_BRANCHES="master qa dev"
 BRANCH=`echo $2 | awk 'BEGIN {FS="/"}{print $3}'`
 # if $BRANCH does not appear in the list of VALID_BRANCHES then exit
 echo $VALID_BRANCHES | grep $BRANCH
-if [ 1 -eq $? ]; then exit ; fi
+if [ 1 -eq $? ]; then 
+	echo "$(date) INFO: The previous git push is not to one of the following branches: $VALID_BRANCHES"
+	exit 0
+fi
 
 EMAIL_ADDR="gerardhaughian@gmail.com"
 #EMAIL_ADDR="doc-g1353012-group@imperial.ac.uk"
