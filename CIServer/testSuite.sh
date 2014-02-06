@@ -11,8 +11,11 @@ LOG_PREFIX="test"
 DATE=`date +"%Y.%m.%d"`
 LOGNAME=${LOG_PREFIX}${DATE}
 
-
+VALID_BRANCHES="master qa dev"
 BRANCH=`echo ${2} | awk 'BEGIN {FS="/"}{print $3}'`
+echo $VALID_BRANCHES | grep $BRANCH
+if [ 1 -eq $? ]; then exit ; fi
+
 PROJ_NAME=`echo $1 | awk 'BEGIN {FS="/"}{print $2}' | awk 'BEGIN {FS="."}{print $1}'`
 TEST_SCRIPT="test_$BRANCH.sh"
 
