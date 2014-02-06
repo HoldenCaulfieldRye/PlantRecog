@@ -30,6 +30,19 @@ if [ "$ENV" == "qa" -o "$ENV" == "prod" ]
 fi
 echo $DISTRIBUTED
 
+
+while getopts "s:" OPTION
+do
+    case $OPTION in
+        s)
+            STUBS=$OPTARG 
+        ;;
+    esac
+done
+
+echo "required stubs: $STUBS"
+
+
 #Handle the 2 options for running the script i.e start and stop
 case "$1" in
   start)
