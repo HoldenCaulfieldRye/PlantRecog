@@ -69,25 +69,22 @@ case "$1" in
         fi
 
 	if $DISTRIBUTED ; then 
-		ssh $USER@graphic02.doc.ic.ac.uk
-		if [ ! -d $HOME/group-project-master ] ; then 
+		CMD="ssh $USER@graphic02.doc.ic.ac.uk"
+: '		if [ ! -d $HOME/group-project-master ] ; then 
 			echo "Please ensure the group-project-master repo has been cloned to your home directory: $HOME/group-project-master"
 			exit
 		else 
 			cd $HOME/group-project-master/bin
 		fi
-	fi
-	git checkout $BRANCH
+'	fi
+	#git checkout $BRANCH
 
 	#start mongod server on VM
 	#TO-DO: ADD
 
 	#start node graphic server on graphic02
-	ps -ef | grep node | grep -v grep |  awk '{print $2}' > /tmp/node_graphic02_$ENV.pid
-        if [ -s /tmp/node_graphic02_$ENV.pid ] ;
-        then
-                echo "graphic server is already running...PID=`cat /tmp/node_graphic02_$ENV.pid`"
-        else
+	$CMD ps -ef | grep node | grep -v grep |  awk '{print $2}' > /tmp/node_graphic02_$ENV.pid
+        $CMD if [ -s /tmp/node_graphic02_$ENV.pid ] ; then echo "graphic server is already running...PID=`cat /tmp/node_graphic02_$ENV.pid`" ; else
 		nohup ../Nodejs/graphicserver.js > /tmp/$GRAPHIC_SERVER_LOG 2>&1 &
 		ps -ef | grep node | grep -v grep | awk '{print $2}' > /tmp/node_graphic02_$ENV.pid
         fi
@@ -119,8 +116,7 @@ case "$1" in
                 kill -9 `cat /tmp/node_vm_$ENV.pid`
         fi
 
-	if $DISTRIBUTED ; then ssh $USER@graphic02.doc.ic.ac.uk
-	fi
+	if $DISTRIBUTED ; then ssh $USER@graphic02.doc.ic.ac.uk ; fi
 
 	if [ ! -s /tmp/node_graphic02_$ENV.pid ]
         then
