@@ -11,6 +11,8 @@ LOG_PREFIX="test"
 DATE=`date +"%Y.%m.%d"`
 LOGNAME=${LOG_PREFIX}${DATE}
 
+PROJ_NAME=`echo $1 | awk 'BEGIN {FS="/"}{print $2}' | awk 'BEGIN {FS="."}{print $1}'`
+
 VALID_BRANCHES="master qa dev"
 BRANCH=`echo $2 | awk 'BEGIN {FS="/"}{print $3}'`
 # if $BRANCH does not appear in the list of VALID_BRANCHES then exit
@@ -24,9 +26,8 @@ EMAIL_SUBJ=${EMAIL_SUBJ_PREFIX}${PROJ_NAME}:${BRANCH}
 
 
 #step one: if the repo dir already exists remove it, we want to have a fresh clone from gitlab
-PROJ_NAME=`echo $1 | awk 'BEGIN {FS="/"}{print $2}' | awk 'BEGIN {FS="."}{print $1}'`
 if [ -d $PROJ_NAME ] ; then
-	echo "WARN: repo:$PROJ_NAME already exists, removing it."
+	echo "$(date) WARN: repo:$PROJ_NAME already exists, removing it."
 	rm -rf $PROJ_NAME
 fi
 
@@ -36,20 +37,20 @@ GIT_URL=`echo ${1/gitlab.doc.ic.ac.uk/146.169.13.187}`
 git clone $GIT_URL
 git pull  $GIT_URL $BRANCH
 
-echo "INFO: checking out branch: $BRANCH"
+echo "$(date) INFO: checking out branch: $BRANCH"
 cd "$PROJ_NAME/CIServer"
 git checkout $BRANCH
 
 
 #step three: run unit tests
 TEST_SCRIPT="test_$BRANCH.sh"
-echo "INFO: running test script: $TEST_SCRIPT"
+echo "$(date) INFO: running test script: $TEST_SCRIPT"
 ./bin/$TEST_SCRIPT | mail -s "$EMAIL_SUBJ" $EMAIL_ADDR
 
 
 cd ../../
 #step four: clean up file system
 if [ -d $PROJ_NAME ] ; then
-	echo "WARN: removing repo:$PROJ_NAME"
+	echo "$(date) WARN: removing repo:$PROJ_NAME"
 	rm -rf $PROJ_NAME
 fi
