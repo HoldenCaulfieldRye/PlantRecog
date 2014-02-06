@@ -13,6 +13,8 @@ LOGNAME=${LOG_PREFIX}${DATE}
 
 
 BRANCH=`echo ${2} | awk 'BEGIN {FS="/"}{print $3}'`
+if [ ! "$BRANCH" == "master" -o ! "$BRANCH" == "qa" -o ! "$BRANCH" == "dev" ]; then exit ; fi
+
 PROJ_NAME=`echo $1 | awk 'BEGIN {FS="/"}{print $2}' | awk 'BEGIN {FS="."}{print $1}'`
 TEST_SCRIPT="test_$BRANCH.sh"
 
