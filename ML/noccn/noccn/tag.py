@@ -99,10 +99,10 @@ class Tagger(object):
                     else:
                         count_incorrect +=1
             batch_num += 1
-            print 'Correct:' + `count_correct` + '\t\tIncorrect:' + `count_incorrect` + '\t\tRatio' + `count_correct/(count_correct+count_incorrect)`
+            print 'Correct:' + `count_correct` + '\t\t\tIncorrect:' + `count_incorrect` + '\t\t\tRatio' + `float(count_correct)/(count_correct+count_incorrect)`
             
         print 'Tagging complete'
-        print 'Correct:' + `count_correct` + '\t\tIncorrect:' + `count_incorrect` + '\t\tRatio' + `count_correct/(count_correct+count_incorrect)`
+        print 'Correct:' + `count_correct` + '\t\t\tIncorrect:' + `count_incorrect` + '\t\t\tRatio' + `float(count_correct)/(count_correct+count_incorrect)`
 
 
 class TagConvNet(convnet.ConvNet):
