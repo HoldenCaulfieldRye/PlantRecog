@@ -18,7 +18,7 @@ TEST_SCRIPT="test_$BRANCH.sh"
 
 EMAIL_ADDR="gerardhaughian@gmail.com"
 #EMAIL_ADDR="doc-g1353012-group@imperial.ac.uk"
-EMAIL_SUBJ_PREFIX="Test Suite Results - "
+EMAIL_SUBJ_PREFIX="Test Suite Results($ENV) - "
 EMAIL_SUBJ=${EMAIL_SUBJ_PREFIX}${PROJ_NAME}:${BRANCH}
 
 #if the repo dir already exists remove it, we want to have a fresh clone from github
