@@ -6,22 +6,21 @@
 #			   $2 = 'dev', 'qa', or 'prod'...the environment you wish to run
 #
 
-ENV=$2
-if [ "$ENV" == "prod" ] ; then BRANCH=master ; else BRANCH=$ENV ; fi
-USER=`whoami`
-DATE=`date +"%Y.%m.%d"`
+USAGE=$"Usage: $0 -a {start|stop} -e {dev|qa|prod} [-s {httpserver|graphicserver|classifier}]"
 
-HTTP_SERVER_LOG="httpserver_"${ENV}_${DATE}
-GRAPHIC_SERVER_LOG="graphicserver_"${ENV}_${DATE}
+while getopts "a:e:s:" OPTION
+do
+    case $OPTION in
+        a)	ACTION="$OPTARG";;
+	e)	ENV="$OPTARG";;
+	s)	STUBS="$OPTARG";;
+	?)	echo $USAGE; exit 2;;
+    esac
+done
 
-USAGE=$"Usage: $0 {start|stop} {dev|qa|prod}"
-
-#Check user is on a doc host before continuing.
-HOSTNAME=`hostname -A | awk 'BEGIN {FS="."}{print $2}'`
-if [ ! "$HOSTNAME" == "doc" ] ; then
-	echo "WARN:script must be run from a doc server"
-	exit
-fi
+echo "action = $ACTION"
+echo "environemnt = $ENV"
+echo "required stubs: $STUBS"
 
 #Do we need to set up a distributd system or a local one? (dev is always local)
 if [ "$ENV" == "qa" -o "$ENV" == "prod" ]
@@ -30,30 +29,46 @@ if [ "$ENV" == "qa" -o "$ENV" == "prod" ]
 fi
 echo $DISTRIBUTED
 
+echo "Are you sure you have cloned the latest version of the repo:"
+echo "    https://gitlab.doc.ic.ac.uk/bjm113/group-project-master.git "
+if $DISTRIBUTED ; then 
+	echo "In user:$USER's home directory on BOTH the VM and graphic machines? [yes|no]:" 
+else 
+	echo "In user:$USER's home directory on the VM machine? [yes|no]:" 
+fi
+read cloned
 
-while getopts "s:" OPTION
-do
-    case $OPTION in
-        s)
-            STUBS=$OPTARG 
-        ;;
-    esac
-done
+if [ "$cloned" == "no" ] ; then 
+	echo "Please clone the latest revision of the repo to your home directory on: "
+	if $DISTRIBUTED ; then echo "   both the VM and graphic machines" ; else echo "   on the VM machine" ; fi
+fi
 
-echo "required stubs: $STUBS"
+DATE=`date +"%Y.%m.%d"`
+HTTP_SERVER_LOG="httpserver_"${ENV}_${DATE}
+GRAPHIC_SERVER_LOG="graphicserver_"${ENV}_${DATE}
 
+#Check user is on a doc host before continuing.
+MACHINE=`hostname -A | awk 'BEGIN {FS="."}{print $2}'`
+if [ ! "$MACHINE" == "doc" ] ; then
+	echo "WARN:script must be run from a doc server"
+	exit 2
+fi
 
-#Handle the 2 options for running the script i.e start and stop
-case "$1" in
+if [ "`hostname -i`" == "146.169.44.217" ] ; then SSH=false ; else SSH=true ; fi
+SSH_VM="ssh -p 55022 $USER@146.169.44.217"
+SSH_GRAPHIC="ssh $USER@graphic02.doc.ic.ac.uk"
+
+if [ "$ENV" == "prod" ] ; then BRANCH=master ; else BRANCH=$ENV ; fi
+#Handle the requested action i.e start and stop
+case "$ACTION" in
   start)
         echo "Starting environment: $ENV "
-	
 	if $DISTRIBUTED ; then  
-		if [ ! "`hostname -i`" == "146.169.44.217" ] ; then 
-			ssh -p 55022 $USER@146.169.44.217
-			if [ ! -d $HOME/group-project-master ] ; then 
+		if [ $SSH ] ; then 
+			REPO=`$SSH_VM [ -d $HOME/group-project-master ] ` 
+			if [ ! $REPO ] ; then 
 				echo "Please ensure the group-project-master repo has been cloned to your home directory: $HOME/group-project-master"
-				exit
+				exit 2
 			else 
 				cd $HOME/group-project-master/bin
 			fi
@@ -82,8 +97,7 @@ case "$1" in
         fi
 
 	if $DISTRIBUTED ; then 
-		CMD="ssh $USER@graphic02.doc.ic.ac.uk"
-: '		if [ ! -d $HOME/group-project-master ] ; then 
+: '		`SSH_GRAPHIC [ ! -d $HOME/group-project-master ] ` 
 			echo "Please ensure the group-project-master repo has been cloned to your home directory: $HOME/group-project-master"
 			exit
 		else 
@@ -96,7 +110,7 @@ case "$1" in
 	#TO-DO: ADD
 
 	#start node graphic server on graphic02
-	$CMD ps -ef | grep node | grep -v grep |  awk '{print $2}' > /tmp/node_graphic02_$ENV.pid
+	`$SSH_GRAPHIC ps -ef | grep node | grep -v grep |  awk '{print $2}' > /tmp/node_graphic02_$ENV.pid`
         $CMD if [ -s /tmp/node_graphic02_$ENV.pid ] ; then echo "graphic server is already running...PID=`cat /tmp/node_graphic02_$ENV.pid`" ; else
 		nohup ../Nodejs/graphicserver.js > /tmp/$GRAPHIC_SERVER_LOG 2>&1 &
 		ps -ef | grep node | grep -v grep | awk '{print $2}' > /tmp/node_graphic02_$ENV.pid
