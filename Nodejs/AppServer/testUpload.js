@@ -27,8 +27,10 @@ var restler = require('restler');
 //  console.log(body);
 //}
 
+
+
 fs.stat("sample.jpg", function(err, stats) {
-    restler.post("http://plantrecogniser.no-ip.biz:55580/upload", {
+    restler.post("http://localhost:3000/upload", {
         multipart: true,
         data: {
             "folder_id": "0",

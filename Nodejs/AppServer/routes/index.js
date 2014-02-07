@@ -22,7 +22,7 @@ exports.upload = function(db) {
 			if (req.files.filename){
 				
 				/* output where we saved the file */
-			    console.log("req.files is: " + filePath);
+			    console.log("req.files is: " + req.files);
 			    
 		        // Set our collection
 		        var collection = db.get('usercollection');
