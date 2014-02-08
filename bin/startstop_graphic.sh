@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USAGE="Usage: $0 -a {start|stop} -e {dev|qa|prod} [-s {"httpserver graphicserver classifier"}]"
+USAGE="Usage: $0 -a {start|stop} -e {dev|qa|prod} [-s {'httpserver graphicserver classifier'}]"
 
 while getopts "a:e:s:" OPTION
 do
@@ -8,7 +8,7 @@ do
         a)	ACTION="$OPTARG";;
 	e)	ENV="$OPTARG";;
 	s)	STUBS="$OPTARG";;
-	?)	echo $USAGE; exit 2;;
+	*)	echo $USAGE; exit 2;;
     esac
 done
 
@@ -16,12 +16,14 @@ DATE=`date +"%Y.%m.%d"`
 HTTP_SERVER_LOG="/tmp/httpserver_${ENV}_${DATE}.log"
 GRAPHIC_SERVER_LOG="/tmp/graphicserver_${ENV}_${DATE}.log"
 
-GRAPHIC_MONGODB_CMD="nohup mongod --config $HOME/group-project-master/env/graphic_$ENV_env.conf &"
+cd $HOME/group-project-master
+
+GRAPHIC_MONGODB_CMD="nohup mongod --config ./env/graphic_$ENV_env.conf &"
 echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
-	GRAPHIC_SERVER_CMD="nohup node $HOME/group-project-master/bin/stubs/graphicserver_stub.js > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_$ENV_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 else
-	GRAPHIC_SERVER_CMD="nohup node $HOME/group-project-master/Nodejs/AppServer/app.js > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/graphic_$ENV_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 fi
 
 if [ "$ENV" == "prod" ] ; then BRANCH=master ; else BRANCH=$ENV ; fi
@@ -34,7 +36,6 @@ case "$ACTION" in
 	fi
 
 	echo "Starting environment: $ENV "
-	cd $HOME/group-project-master
 	#git checkout $BRANCH
 
 	ps -fC node | grep graphic_$ENV_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_graphic_$ENV.pid
