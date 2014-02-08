@@ -43,9 +43,14 @@ if [ "$cloned" == "no" ] ; then
 	if $DISTRIBUTED ; then echo "   both the VM and graphic machines" ; else echo "   on the VM machine" ; fi
 fi
 
+
 DATE=`date +"%Y.%m.%d"`
 HTTP_SERVER_LOG="httpserver_"${ENV}_${DATE}
 GRAPHIC_SERVER_LOG="graphicserver_"${ENV}_${DATE}
+
+MONGO_CMD="sudo nohup /usr/bin/mongod --config $HOME/group-project-master/env/mongodb_$ENV.conf &"
+HTTP_SERVER_CMD="nohup $HOME/group-project-master/Nodejs/httpserver.js > /tmp/$HTTP_SERVER_LOG 2>&1 &"
+GRAPHIC_SERVER_CMD="nohup ../Nodejs/graphicserver.js > /tmp/$GRAPHIC_SERVER_LOG 2>&1 &"
 
 #Check user is on a doc host before continuing.
 MACHINE=`hostname -A | awk 'BEGIN {FS="."}{print $2}'`
@@ -63,26 +68,17 @@ if [ "$ENV" == "prod" ] ; then BRANCH=master ; else BRANCH=$ENV ; fi
 case "$ACTION" in
   start)
         echo "Starting environment: $ENV "
-	if $DISTRIBUTED ; then  
-		if [ $SSH ] ; then 
-			REPO=`$SSH_VM [ -d $HOME/group-project-master ] ` 
-			if [ ! $REPO ] ; then 
-				echo "Please ensure the group-project-master repo has been cloned to your home directory: $HOME/group-project-master"
-				exit 2
-			else 
-				cd $HOME/group-project-master/bin
-			fi
-		fi
+	if [ -d $HOME/group-project-master ] ; then
+		echo "Please ensure the group-project-master repo has been cloned to your home directory: $HOME/group-project-master"
+		exit 2
 	fi
-	git checkout $BRANCH
 	
 	#start mongod server on VM
 	ps -ef | grep mongodb_$ENV.conf | grep -v grep |  awk '{print $2}' > /tmp/mongod_vm_$ENV.pid
-        if [ -s /tmp/mongod_vm_$ENV.pid ] ;
-        then
+        if [ -s /tmp/mongod_vm_$ENV.pid ] ; then
                 echo "MongoDB is already running...PID=`cat /tmp/mongod_vm_$ENV.pid`"
         else
-		sudo nohup /usr/bin/mongod --config ../env/mongodb_$ENV.conf &
+		${MONGO_CMD}
 		ps -ef | grep mongodb_$ENV.conf | grep -v grep | awk '{print $2}' > /tmp/mongod_vm_$ENV.pid
         fi
 
@@ -92,19 +88,21 @@ case "$ACTION" in
         then
                 echo "http server is already running...PID=`cat /tmp/node_vm_$ENV.pid`"
         else
-		nohup ../Nodejs/httpserver.js > /tmp/$HTTP_SERVER_LOG 2>&1 &
+		${HTTP_SERVER_CMD}
 		ps -ef | grep node | grep -v grep | awk '{print $2}' > /tmp/node_vm_$ENV.pid
         fi
 
 	if $DISTRIBUTED ; then 
-: '		`SSH_GRAPHIC [ ! -d $HOME/group-project-master ] ` 
+		REPO=`SSH_GRAPHIC [ -d $HOME/group-project-master ] ` 
+		if [ ! $REPO ] ; then 
 			echo "Please ensure the group-project-master repo has been cloned to your home directory: $HOME/group-project-master"
-			exit
+			exit 2
 		else 
-			cd $HOME/group-project-master/bin
+			`${SSH_GRAPHIC} ${GRAPHIC_SERVER_CMD}`
 		fi
-'	fi
-	#git checkout $BRANCH
+	else 
+		`${GRAPHIC_SERVER_CMD}`
+	fi
 
 	#start mongod server on VM
 	#TO-DO: ADD
@@ -112,7 +110,6 @@ case "$ACTION" in
 	#start node graphic server on graphic02
 	`$SSH_GRAPHIC ps -ef | grep node | grep -v grep |  awk '{print $2}' > /tmp/node_graphic02_$ENV.pid`
         $CMD if [ -s /tmp/node_graphic02_$ENV.pid ] ; then echo "graphic server is already running...PID=`cat /tmp/node_graphic02_$ENV.pid`" ; else
-		nohup ../Nodejs/graphicserver.js > /tmp/$GRAPHIC_SERVER_LOG 2>&1 &
 		ps -ef | grep node | grep -v grep | awk '{print $2}' > /tmp/node_graphic02_$ENV.pid
         fi
 
