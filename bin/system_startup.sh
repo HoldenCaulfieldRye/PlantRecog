@@ -134,7 +134,7 @@ case "$ACTION" in
                 echo "MongoDB is not running...therefore it can't be stopped"
         else
                 echo "Stopping MongoDB.."
-                sudo kill -9 `cat /tmp/mongodb_vm_$ENV.pid`
+                sudo kill `cat /tmp/mongodb_vm_$ENV.pid`
         fi
         
 	if [ ! -s /tmp/node_vm_$ENV.pid ] ; then
@@ -157,7 +157,7 @@ case "$ACTION" in
                 	echo "graphic02 instance of MongoDB is not running...therefore it can't be stopped"
         	else
                 	echo "Stopping 'graphic02' MongoDB.." 
-                	kill -9 `cat /tmp/mongodb_graphic_$ENV.pid`
+                	kill `cat /tmp/mongodb_graphic_$ENV.pid`
         	fi
 
 
@@ -167,6 +167,4 @@ case "$ACTION" in
         echo $USAGE
         exit 2
 esac
-
-
 
