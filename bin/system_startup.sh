@@ -45,20 +45,20 @@ GRAPHIC_SERVER_LOG="/tmp/graphicserver_${ENV}_${DATE}.log"
 
 cd $HOME/group-project-master
 
-VM_MONGODB_CMD="nohup mongod --config ./env/vm_$ENV_env.conf &"
-GRAPHIC_MONGODB_CMD="nohup mongod --config ./env/graphic_$ENV_env.conf &"
+VM_MONGODB_CMD="sudo su -c \"mongod --config ./env/vm_${ENV}_env.conf &\" -s /bin/sh mongodb"
+GRAPHIC_MONGODB_CMD="sudo su -c \"mongod --config ./env/graphic_${ENV}_env.conf &\" -s /bin/sh mongodb"
 
 echo $STUBS | grep httpserver
 if [ $? -eq 0 ]; then
-	HTTP_SERVER_CMD="nohup node ./bin/stubs/httpserver_stub.js ./env/vm_$ENV_env.conf > $HTTP_SERVER_LOG 2>&1 &"
+	HTTP_SERVER_CMD="nohup node ./bin/stubs/httpserver_stub.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
 else 
-	HTTP_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/vm_$ENV_env.conf > $HTTP_SERVER_LOG 2>&1 &"
+	HTTP_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
 fi
 echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
-	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_$ENV_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 else
-	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/graphic_$ENV_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 fi
 
 GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="$HOME/group-project-master/bin/startstop_graphic.sh -a $ACTION -e $ENV -s $STUBS"
@@ -74,75 +74,75 @@ case "$ACTION" in
 		exit 2
 	fi
         
-	echo "Starting environment: $ENV "
+	echo "Starting environment: ${ENV}"
 	#git checkout $BRANCH
 
 	#start mongod server on VM
-	ps -fC mongod | grep vm_$ENV_env.conf | grep -v grep |  awk '{print $2}' > /tmp/mongodb_vm_$ENV.pid
-        if [ -s /tmp/mongodb_vm_$ENV.pid ] ; then
-                echo "MongoDB is already running...PID=`cat /tmp/mongodb_vm_$ENV.pid`"
+	ps -fC mongod | grep vm_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/mongodb_vm_${ENV}.pid
+        if [ -s /tmp/mongodb_vm_${ENV}.pid ] ; then
+                echo "MongoDB is already running...PID=`cat /tmp/mongodb_vm_${ENV}.pid`"
         else
-		${VM_MONGODB_CMD}
-		ps -fC mongod | grep vm_$ENV_env.conf | grep -v grep | awk '{print $2}' > /tmp/mongodb_vm_$ENV.pid
+		eval $VM_MONGODB_CMD
+		ps -fC mongod | grep vm_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/mongodb_vm_${ENV}.pid
         fi
 
 	#start http server on VM
-	ps -fC node | grep vm_$ENV_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_vm_$ENV.pid
-        if [ -s /tmp/node_vm_$ENV.pid ] ;
+	ps -fC node | grep vm_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_vm_${ENV}.pid
+        if [ -s /tmp/node_vm_${ENV}.pid ] ;
         then
-                echo "app server is already running...PID=`cat /tmp/node_vm_$ENV.pid`"
+                echo "app server is already running...PID=`cat /tmp/node_vm_${ENV}.pid`"
         else
-		${HTTP_SERVER_CMD}
-		ps -fC node | grep vm_$ENV_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_vm_$ENV.pid
+		eval $HTTP_SERVER_CMD
+		ps -fC node | grep vm_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_vm_${ENV}.pid
         fi
 
 	if $DISTRIBUTED ; then 
-		`${SSH_GRAPHIC} ${GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD}`
+		eval `${SSH_GRAPHIC} ${GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD}`
 	else 	#start node graphic server locally
-		ps -fC node | grep graphic_$ENV_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_graphic_$ENV.pid
-        	if [ -s /tmp/node_graphic_$ENV.pid ] ; then echo "graphic server is already running...PID=`cat /tmp/node_graphic_$ENV.pid`" ; else
-			$GRAPHIC_SERVER_CMD
-			ps -fC node | grep graphic_$ENV_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_graphic_$ENV.pid
+		ps -fC node | grep graphic_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_graphic_${ENV}.pid
+        	if [ -s /tmp/node_graphic_${ENV}.pid ] ; then echo "graphic server is already running...PID=`cat /tmp/node_graphic_${ENV}.pid`" ; else
+			eval $GRAPHIC_SERVER_CMD
+			ps -fC node | grep graphic_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_graphic_${ENV}.pid
         	fi
 	 	#start graphic02 instance of MongoDB locally
-		ps -fC mongod | grep graphic_$ENV_env.conf | grep -v grep |  awk '{print $2}' > /tmp/mongodb_graphic_$ENV.pid
-        	if [ -s /tmp/mongodb_graphic_$ENV.pid ] ; then echo "graphic02 instance of MongoDB is already running...PID=`cat /tmp/mongodb_graphic_$ENV.pid`" ; else
-			$GRAPHIC_MONGODB_CMD
-			ps -fC mongod | grep graphic_$ENV_env.conf | grep -v grep | awk '{print $2}' > /tmp/mongodb_graphic_$ENV.pid
+		ps -fC mongod | grep graphic_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/mongodb_graphic_$ENV.pid
+        	if [ -s /tmp/mongodb_graphic_$PENV}.pid ] ; then echo "graphic02 instance of MongoDB is already running...PID=`cat /tmp/mongodb_graphic_${ENV}.pid`" ; else
+			eval $GRAPHIC_MONGODB_CMD
+			ps -fC mongod | grep graphic_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/mongodb_graphic_${ENV}.pid
         	fi
 	fi
         ;;
   stop)
 	echo "Stopping environment: $ENV"	
 	
-	if [ ! -s /tmp/mongodb_vm_$ENV.pid ] ; then
+	if [ ! -s /tmp/mongodb_vm_${ENV}.pid ] ; then
                 echo "MongoDB is not running...therefore it can't be stopped"
         else
                 echo "Stopping MongoDB.."
-                sudo kill `cat /tmp/mongodb_vm_$ENV.pid`
+                sudo kill `cat /tmp/mongodb_vm_${ENV}.pid`
         fi
         
-	if [ ! -s /tmp/node_vm_$ENV.pid ] ; then
+	if [ ! -s /tmp/node_vm_${ENV}.pid ] ; then
                 echo "http server is not running...therefore it can't be stopped"
         else
                 echo "Stopping http server.." 
-                kill -9 `cat /tmp/node_vm_$ENV.pid`
+                kill -9 `cat /tmp/node_vm_${ENV}.pid`
         fi
 
 	if $DISTRIBUTED ; then 
 		`$SSH_GRAPHIC $GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD`
 	else
-		if [ ! -s /tmp/node_graphic_$ENV.pid ] ; then
+		if [ ! -s /tmp/node_graphic_${ENV}.pid ] ; then
                 	echo "graphic server is not running...therefore it can't be stopped"
         	else
                 	echo "Stopping node server.." 
-                	kill -9 `cat /tmp/node_graphic02_$ENV.pid`
+                	kill -9 `cat /tmp/node_graphic_${ENV}.pid`
         	fi
-		if [ ! -s /tmp/mongodb_graphic_$ENV.pid ] ; then
+		if [ ! -s /tmp/mongodb_graphic_${ENV}.pid ] ; then
                 	echo "graphic02 instance of MongoDB is not running...therefore it can't be stopped"
         	else
                 	echo "Stopping 'graphic02' MongoDB.." 
-                	kill `cat /tmp/mongodb_graphic_$ENV.pid`
+                	sudo kill `cat /tmp/mongodb_graphic_${ENV}.pid`
         	fi
 	fi
 	;;
