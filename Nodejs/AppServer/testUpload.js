@@ -34,7 +34,7 @@ fs.stat("sample.jpg", function(err, stats) {
         multipart: true,
         data: {
             "folder_id": "0",
-            "filename": restler.file("sample.jpg", null, stats.size, null, "image/jpg")
+            "datafile": restler.file("sample.jpg", null, stats.size, null, "application/octet-stream")
         }
     }).on("complete", function(data) {
         console.log(data);

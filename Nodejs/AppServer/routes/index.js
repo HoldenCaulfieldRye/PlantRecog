@@ -17,12 +17,12 @@ exports.upload = function(db) {
 			/* log the body of this upload */
 			console.log(req.body);
 			
-			filePath = req.files.filename.path;
+			filePath = req.files.datafile.path;
 			
-			if (req.files.filename){
+			if (req.files.datafile){
 				
 				/* output where we saved the file */
-			    console.log("req.files is: " + req.files);
+			    console.log("req.files is: " + req.files.datafile.path);
 			    
 		        // Set our collection
 		        var collection = db.get('usercollection');
@@ -42,9 +42,9 @@ exports.upload = function(db) {
 		            else {
 		                // If it worked, return JSON object from collection to App//
 		                //res.json(doc);
-		            	res.json( { "id" : doc._id })
+		            	res.json( { "id" : doc._id });
 		            }
-		        })
+		        });
 			}
 		//},5000);
 	}
