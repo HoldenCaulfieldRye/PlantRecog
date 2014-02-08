@@ -6,7 +6,7 @@
 #			   $2 = 'dev', 'qa', or 'prod'...the environment you wish to run
 #
 
-USAGE="Usage: $0 -a {start|stop} -e {dev|qa|prod} [-s {"httpserver graphicserver classifier"}]"
+USAGE="Usage: $0 -a {start|stop} -e {dev|qa|prod} [-s {'httpserver graphicserver classifier'}]"
 
 while getopts "a:e:s:" OPTION
 do
@@ -14,7 +14,7 @@ do
         a)	ACTION="$OPTARG";;
 	e)	ENV="$OPTARG";;
 	s)	STUBS="$OPTARG";;
-	?)	echo $USAGE; exit 2;;
+	*)	echo $USAGE; exit 2;;
     esac
 done
 
@@ -30,7 +30,7 @@ if [ "$ENV" == "qa" -o "$ENV" == "prod" ]
   else DISTRIBUTED=false
 fi
 
-echo "Have you cloned the latest version of the repo to your home directory [yes|no]:"
+echo -n "Have you cloned the latest version of the repo to your home directory [yes|no]: "
 read cloned
 
 if [ "$cloned" == "no" ] ; then 
@@ -43,23 +43,25 @@ DATE=`date +"%Y.%m.%d"`
 HTTP_SERVER_LOG="/tmp/AppServer_${ENV}_${DATE}.log"
 GRAPHIC_SERVER_LOG="/tmp/graphicserver_${ENV}_${DATE}.log"
 
-VM_MONGODB_CMD="nohup mongod --config $HOME/group-project-master/env/vm_$ENV_env.conf &"
-GRAPHIC_MONGODB_CMD="nohup mongod --config $HOME/group-project-master/env/graphic_$ENV_env.conf &"
+cd $HOME/group-project-master
+
+VM_MONGODB_CMD="nohup mongod --config ./env/vm_$ENV_env.conf &"
+GRAPHIC_MONGODB_CMD="nohup mongod --config ./env/graphic_$ENV_env.conf &"
 
 echo $STUBS | grep httpserver
 if [ $? -eq 0 ]; then
-	HTTP_SERVER_CMD="nohup node $HOME/group-project-master/bin/stubs/httpserver_stub.js ../env/vm_$ENV_env.conf > $HTTP_SERVER_LOG 2>&1 &"
+	HTTP_SERVER_CMD="nohup node ./bin/stubs/httpserver_stub.js ./env/vm_$ENV_env.conf > $HTTP_SERVER_LOG 2>&1 &"
 else 
-	HTTP_SERVER_CMD="nohup node $HOME/group-project-master/Nodejs/AppServer/app.js ../env/vm_$ENV_env.conf > $HTTP_SERVER_LOG 2>&1 &"
+	HTTP_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/vm_$ENV_env.conf > $HTTP_SERVER_LOG 2>&1 &"
 fi
 echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
-	GRAPHIC_SERVER_CMD="nohup node $HOME/group-project-master/bin/stubs/graphicserver_stub.js ../env/graphic_$ENV_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_$ENV_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 else
-	GRAPHIC_SERVER_CMD="nohup node $HOME/group-project-master/Nodejs/AppServer/app.js ../env/graphic_$ENV_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/graphic_$ENV_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 fi
 
-GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="./$HOME/group-project-master/bin/startstop_graphic.sh -a $ACTION -e $ENV -s $STUBS"
+GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="$HOME/group-project-master/bin/startstop_graphic.sh -a $ACTION -e $ENV -s $STUBS"
 
 SSH_GRAPHIC="ssh $USER@graphic02.doc.ic.ac.uk"
 
@@ -73,7 +75,6 @@ case "$ACTION" in
 	fi
         
 	echo "Starting environment: $ENV "
-	cd $HOME/group-project-master
 	#git checkout $BRANCH
 
 	#start mongod server on VM
