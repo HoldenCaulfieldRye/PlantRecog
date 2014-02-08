@@ -28,6 +28,7 @@
 		E996A0DD189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E996A0DC189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.m */; };
 		E9B5BA3318982F5B000161F7 /* BLEFServerInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */; };
 		E9BD3A471898399E001B8570 /* BLEFSpecimenTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9BD3A461898399E001B8570 /* BLEFSpecimenTableViewController.m */; };
+		E9BEE40A18A68FFF00F3A648 /* BLEFResultsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9BEE40918A68FFF00F3A648 /* BLEFResultsViewController.m */; };
 		E9DF5BFA18A1351700B2BFDB /* BLEFServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DF5BF918A1351700B2BFDB /* BLEFServerConnection.m */; };
 		E9DF5C0718A15E9B00B2BFDB /* BLEFCameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DF5C0618A15E9B00B2BFDB /* BLEFCameraViewController.m */; };
 		E9DF5C0D18A16A3D00B2BFDB /* BLEFCameraView.xib in Resources */ = {isa = PBXBuildFile; fileRef = E9DF5C0C18A16A3D00B2BFDB /* BLEFCameraView.xib */; };
@@ -75,6 +76,8 @@
 		E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFServerInterface.m; sourceTree = "<group>"; };
 		E9BD3A451898399E001B8570 /* BLEFSpecimenTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSpecimenTableViewController.h; sourceTree = "<group>"; };
 		E9BD3A461898399E001B8570 /* BLEFSpecimenTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSpecimenTableViewController.m; sourceTree = "<group>"; };
+		E9BEE40818A68FFF00F3A648 /* BLEFResultsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFResultsViewController.h; sourceTree = "<group>"; };
+		E9BEE40918A68FFF00F3A648 /* BLEFResultsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFResultsViewController.m; sourceTree = "<group>"; };
 		E9DF5BF818A1351700B2BFDB /* BLEFServerConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFServerConnection.h; sourceTree = "<group>"; };
 		E9DF5BF918A1351700B2BFDB /* BLEFServerConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFServerConnection.m; sourceTree = "<group>"; };
 		E9DF5C0518A15E9B00B2BFDB /* BLEFCameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFCameraViewController.h; sourceTree = "<group>"; };
@@ -175,6 +178,8 @@
 				E9DF5C0518A15E9B00B2BFDB /* BLEFCameraViewController.h */,
 				E9DF5C0618A15E9B00B2BFDB /* BLEFCameraViewController.m */,
 				E9DF5C0C18A16A3D00B2BFDB /* BLEFCameraView.xib */,
+				E9BEE40818A68FFF00F3A648 /* BLEFResultsViewController.h */,
+				E9BEE40918A68FFF00F3A648 /* BLEFResultsViewController.m */,
 			);
 			path = beLeaf;
 			sourceTree = "<group>";
@@ -311,6 +316,7 @@
 			files = (
 				E9E3962B1897F8830067A991 /* BLEFGroup.m in Sources */,
 				E9829C6D189D7662004DD07F /* BLEFObservation.m in Sources */,
+				E9BEE40A18A68FFF00F3A648 /* BLEFResultsViewController.m in Sources */,
 				E9DF5C0718A15E9B00B2BFDB /* BLEFCameraViewController.m in Sources */,
 				E9BD3A471898399E001B8570 /* BLEFSpecimenTableViewController.m in Sources */,
 				5E2AD57C1863B6DA00595828 /* main.m in Sources */,

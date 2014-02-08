@@ -10,7 +10,7 @@
 #import "BLEFSpecimen.h"
 #import "BLEFCameraViewController.h"
 
-@interface BLEFSpeicmenOberservationsViewController : UICollectionViewController <UINavigationControllerDelegate, UIImagePickerControllerDelegate, BLEFCameraViewControllerDelegate>
+@interface BLEFSpeicmenOberservationsViewController : UICollectionViewController <BLEFCameraViewControllerDelegate>
 
 @property (strong, nonatomic) BLEFSpecimen* specimen;
 @property (strong, nonatomic) NSArray *observations;

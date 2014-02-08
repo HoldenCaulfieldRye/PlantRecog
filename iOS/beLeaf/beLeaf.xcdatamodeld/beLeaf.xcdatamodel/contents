@@ -8,7 +8,8 @@
     <entity name="Observation" representedClassName="BLEFObservation" syncable="YES">
         <attribute name="date" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="filename" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="job" optional="YES" attributeType="Integer 16" syncable="YES"/>
+        <attribute name="job" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="segment" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="thumbnail" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="uploaded" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <relationship name="specimen" maxCount="1" deletionRule="Nullify" destinationEntity="Specimen" inverseName="observations" inverseEntity="Specimen" syncable="YES"/>

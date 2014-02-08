@@ -44,6 +44,7 @@
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         self.imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
         self.imagePickerController.showsCameraControls = NO;
+        self.imagePickerController.cameraFlashMode = UIImagePickerControllerCameraFlashModeOff;
         NSArray *cameraViews =  [[NSBundle mainBundle] loadNibNamed:@"BLEFCameraView" owner:self options:nil];
         UIView *camerView = [cameraViews objectAtIndex:0];
         self.imagePickerController.cameraOverlayView = camerView;
@@ -105,7 +106,29 @@
 {
     NSLog(@"imagePicker took photo");
     UIImage* image = info[UIImagePickerControllerOriginalImage];
-    [delegate blefCameraViewController:self tookPhoto:image withInfo:nil];
+    
+    NSString *segment;
+    NSInteger selectedSegment =  [self.componentSelection selectedSegmentIndex];
+    switch (selectedSegment) {
+        case 0:
+            segment = @"leaf";
+            break;
+        case 1:
+            segment = @"fruit";
+            break;
+        case 2:
+            segment = @"flower";
+            break;
+        case 3:
+            segment = @"plant";
+            break;
+        default:
+            break;
+    }
+    
+    NSDictionary *observationInfo = @{@"segment": segment};
+    
+    [delegate blefCameraViewController:self tookPhoto:image withInfo:observationInfo];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker

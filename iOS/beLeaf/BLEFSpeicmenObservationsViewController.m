@@ -103,12 +103,20 @@
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    BLEFObservation *observation = [self.observations objectAtIndex:indexPath.row];
+    UICollectionViewCell *cell = [collectionView cellForItemAtIndexPath:indexPath];
+    UIProgressView *progressbar = (UIProgressView *)[cell viewWithTag:50];
+    if ([progressbar progress] == 1.0){
+        
+        [self performSegueWithIdentifier:@"observationToResult" sender:NULL];
+        
+    } else if ([progressbar progress] == 0) {
+        BLEFObservation *observation = [self.observations objectAtIndex:indexPath.row];
     
-    BLEFAppDelegate* app = [[UIApplication sharedApplication] delegate];
-    BLEFServerInterface *serverInterface = [app serverinterface];
+        BLEFAppDelegate* app = [[UIApplication sharedApplication] delegate];
+        BLEFServerInterface *serverInterface = [app serverinterface];
     
-    [serverInterface uploadObservation:[observation objectID]];
+        [serverInterface uploadObservation:[observation objectID]];
+    }
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -126,41 +134,6 @@
     [self performSegueWithIdentifier:@"ObservationToCamera" sender:self];
 }
 
-- (void)displayImagePicker
-{
-    UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
-    imagePicker.delegate = self;
-    imagePicker.allowsEditing = YES;
-    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-        imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-        imagePicker.showsCameraControls = NO;
-        NSArray *cameraViews =  [[NSBundle mainBundle] loadNibNamed:@"BLEFCameraView" owner:self options:nil];
-        UIView *camerView = [cameraViews objectAtIndex:0];
-        imagePicker.cameraOverlayView = camerView;
-    } else {
-        imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    }
-    [self presentViewController:imagePicker animated:YES completion:NULL];
-}
-
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
-{
-    UIImage* image = info[UIImagePickerControllerOriginalImage];
-    BLEFObservation* observation = [BLEFDatabase addNewObservationToSpecimen:self.specimen];
-    [observation generateThumbnailFromImage:image];
-    [BLEFDatabase saveChanges];
-    [self loadCollectionData];
-    [observation saveImage:image];
-    [self.collectionView reloadData];
-    [picker dismissViewControllerAnimated:YES completion:NULL];
-    NSLog(@"Image Picker Complete");
-}
-
--(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
-{
-    [picker dismissViewControllerAnimated:YES completion:^{NSLog(@"Image Picker Canceled");}];
-}
-
 -(void)blefCameraViewControllerDidDismiss:(BLEFCameraViewController *)cameraViewController
 {
    [cameraViewController dismissViewControllerAnimated:YES completion:^{NSLog(@"blef image picker canceled");}];
@@ -171,6 +144,7 @@
     NSLog(@"Photo Taken delegate method");
     BLEFObservation* observation = [BLEFDatabase addNewObservationToSpecimen:self.specimen];
     [observation generateThumbnailFromImage:photo];
+    [observation setSegment:info[@"segment"]];
     [BLEFDatabase saveChanges];
     [observation saveImage:photo];
 }

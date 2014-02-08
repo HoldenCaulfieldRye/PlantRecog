@@ -16,6 +16,7 @@
 @dynamic date;
 @dynamic filename;
 @dynamic job;
+@dynamic segment;
 @dynamic thumbnail;
 @dynamic uploaded;
 @dynamic specimen;

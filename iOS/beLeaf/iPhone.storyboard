@@ -72,7 +72,34 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9bU-58-lj1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1305" y="-73"/>
+            <point key="canvasLocation" x="1349" y="253"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="sBo-C0-0ud">
+            <objects>
+                <viewController id="w9r-h4-lCJ" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="bYe-OL-ygN"/>
+                        <viewControllerLayoutGuide type="bottom" id="qw8-zL-R9T"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="dfW-eH-1Zw">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Results" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fgW-cB-rc7">
+                                <rect key="frame" x="112" y="98" width="96" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="HLo-ZW-cD1"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="jGM-Ym-FsV" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1349" y="-432"/>
         </scene>
         <!--Speicmen Oberservations View Controller - Specimen Observations-->
         <scene sceneID="Nw7-M9-Vct">
@@ -122,6 +149,7 @@
                     </navigationItem>
                     <connections>
                         <segue destination="Ouh-a9-olT" kind="modal" identifier="ObservationToCamera" modalTransitionStyle="crossDissolve" id="8EW-dc-C1M"/>
+                        <segue destination="w9r-h4-lCJ" kind="push" identifier="observationToResult" id="rhS-k2-rzE"/>
                     </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Fe0-ww-Fsm" userLabel="First Responder" sceneMemberID="firstResponder"/>

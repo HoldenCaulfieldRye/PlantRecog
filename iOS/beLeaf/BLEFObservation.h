@@ -15,7 +15,8 @@
 
 @property (nonatomic) NSTimeInterval date;
 @property (nonatomic, retain) NSString * filename;
-@property (nonatomic) int16_t job;
+@property (nonatomic, retain) NSString * job;
+@property (nonatomic, retain) NSString * segment;
 @property (nonatomic, retain) id thumbnail;
 @property (nonatomic) BOOL uploaded;
 @property (nonatomic, retain) BLEFSpecimen *specimen;

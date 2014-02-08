@@ -31,8 +31,10 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
         BLEFObservation* observation = (BLEFObservation *)fetchedObject;
         NSData *imageData = [observation getImageData];
         //NSString *urlString = @"http://sheltered-ridge-6203.herokuapp.com/upload";
-        NSString *urlString = @"http://192.168.1.78:5000/upload";
-        NSDictionary *params = @{@"ID": @"1234", @"auth" : @"password"};
+        //NSString *urlString = @"http://192.168.1.78:5000/upload";
+        NSString *urlString = @"http://plantrecogniser.no-ip.biz:55580/upload";
+        //NSString *urlString = @"http://www.posttestserver.com/post.php";
+        NSDictionary *params = @{@"segment": [observation segment]};
         BLEFServerConnection *serverConnection = [self uploadFields:params andFileData:imageData toUrl:urlString];
         [serverConnection setObjID:observationID];
         [serverConnection start];
@@ -75,12 +77,6 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
     return serverConnection;
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
-{
-    NSString *dataAsString = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-    NSLog(@"didReceiveData:%@", dataAsString);
-}
-
 - (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
 {
     BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
@@ -99,9 +95,34 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
     }
 }
 
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
+{
+    BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
+    
+    NSString *dataAsString = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+    NSLog(@"didReceiveData:%@", dataAsString);
+    
+    NSError* error;
+    NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+    NSString *jobID = json[@"id"];
+    
+    BLEFObservation *observation = (BLEFObservation *)[self fetchObjectWithID:[serverConnection objID]];
+    if (observation != NULL){
+        [observation setJob:jobID];
+        [observation setUploaded:true];
+        [self saveDatabaseChanges];
+    }
+}
+
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     NSLog(@"Connection Failed");
+    BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
+    NSDictionary *uploadInfo = @{
+                                 @"percentage" : @0.0,
+                                 @"objectID"   : [serverConnection objID]
+                                 };
+    [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
@@ -126,6 +147,20 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
     return _managedObjectContext;
 }
 
+- (void)saveDatabaseChanges
+{
+    NSError *error = nil;
+    NSManagedObjectContext *managedObjectContext = [self getContext];
+    if (managedObjectContext != nil) {
+        if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
+            // Replace this implementation with code to handle the error appropriately.
+            // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+            NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+            abort();
+        }
+    }
+}
+
 - (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID
 {
     NSManagedObjectContext *context = [self getContext];
@@ -133,6 +168,8 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
     NSManagedObject* object = [context existingObjectWithID:objectID error:&error];
     return object;
 }
+
+
 
 //TODO: Subscribe to changes in other context
 
