@@ -18,12 +18,12 @@ GRAPHIC_SERVER_LOG="/tmp/graphicserver_${ENV}_${DATE}.log"
 
 cd $HOME/group-project-master
 
-GRAPHIC_MONGODB_CMD="nohup mongod --config ./env/graphic_$ENV_env.conf &"
+GRAPHIC_MONGODB_CMD="nohup mongod --config ./env/graphic_${ENV}_env.conf &"
 echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
-	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_$ENV_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 else
-	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/graphic_$ENV_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 fi
 
 if [ "$ENV" == "prod" ] ; then BRANCH=master ; else BRANCH=$ENV ; fi
@@ -38,20 +38,20 @@ case "$ACTION" in
 	echo "Starting environment: $ENV "
 	#git checkout $BRANCH
 
-	ps -fC node | grep graphic_$ENV_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_graphic_$ENV.pid
+	ps -fC node | grep graphic_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_graphic_$ENV.pid
         if [ -s /tmp/node_graphic_$ENV.pid ] ; then 
-		echo "graphic server is already running...PID=`cat /tmp/node_graphic_$ENV.pid`"
+		echo "graphic server is already running...PID=`cat /tmp/node_graphic_${ENV}.pid`"
 	else
-		$GRAPHIC_SERVER_CMD
-		ps -fC node | grep graphic_$ENV_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_graphic_$ENV.pid
+		eval $GRAPHIC_SERVER_CMD
+		ps -fC node | grep graphic_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_graphic_$ENV.pid
         fi
 	 #start graphic02 instance of MongoDB locally
-	ps -fC mongod | grep graphic_$ENV_env.conf | grep -v grep |  awk '{print $2}' > /tmp/mongodb_graphic_$ENV.pid
+	ps -fC mongod | grep graphic_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/mongodb_graphic_$ENV.pid
         if [ -s /tmp/mongodb_graphic_$ENV.pid ] ; then 
-		echo "graphic02 instance of MongoDB is already running...PID=`cat /tmp/mongodb_graphic_$ENV.pid`"
+		echo "graphic02 instance of MongoDB is already running...PID=`cat /tmp/mongodb_graphic_${ENV}.pid`"
 	else	
-		$GRAPHIC_MONGODB_CMD
-		ps -fC mongod | grep graphic_$ENV_env.conf | grep -v grep | awk '{print $2}' > /tmp/mongodb_graphic_$ENV.pid
+		eval $GRAPHIC_MONGODB_CMD
+		ps -fC mongod | grep graphic_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/mongodb_graphic_$ENV.pid
        	fi
 	;;
   stop)
@@ -61,13 +61,15 @@ case "$ACTION" in
                	echo "graphic server is not running...therefore it can't be stopped"
        	else
                	echo "Stopping node server.." 
-               	kill -9 `cat /tmp/node_graphic02_$ENV.pid`
+               	kill -9 `cat /tmp/node_graphic_${ENV}.pid`
+		rm -f /tmp/node_graphic_$ENV.pid
        	fi
 	if [ ! -s /tmp/mongodb_graphic_$ENV.pid ] ; then
                	echo "graphic02 instance of MongoDB is not running...therefore it can't be stopped"
        	else
                	echo "Stopping 'graphic02' MongoDB.." 
-               	kill `cat /tmp/mongodb_graphic_$ENV.pid`
+               	kill `cat /tmp/mongodb_graphic_${ENV}.pid`
+		rm -f /tmp/mongodb_graphic_$ENV.pid
        	fi
 	;;
   *)
