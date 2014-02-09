@@ -6,7 +6,7 @@
 #			   $2 = 'dev', 'qa', or 'prod'...the environment you wish to run
 #
 
-USAGE="Usage: $0 -a {start|stop} -e {dev|qa|prod} [-s {'httpserver graphicserver classifier'}]"
+USAGE="Usage: $0 -a {start|stop} -e {dev|qa|prod} [-s {'iPhone httpserver graphicserver classifier'}]"
 
 while getopts "a:e:s:" OPTION
 do
@@ -48,12 +48,18 @@ cd $HOME/group-project-master
 VM_MONGODB_CMD="sudo su -c \"mongod --config ./env/vm_${ENV}_env.conf &\" -s /bin/sh mongodb"
 GRAPHIC_MONGODB_CMD="sudo su -c \"mongod --config ./env/graphic_${ENV}_env.conf &\" -s /bin/sh mongodb"
 
+echo $STUBS | grep iPhone
+if [ $? -eq 0 ]; then IPHONE_STUB=true ; else IPHONE_STUB=false ; fi
+echo $STUBS | grep classifier
+if [ $? -eq 0 ]; then CLASS_STUB=true ; else CLASS_STUB=false ; fi
+
 echo $STUBS | grep httpserver
 if [ $? -eq 0 ]; then
 	HTTP_SERVER_CMD="nohup node ./bin/stubs/httpserver_stub.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
 else 
 	HTTP_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
 fi
+#add logic which deals with telling the graphic server to exec the classifier stub if CLASS_STUB=true
 echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
 	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
@@ -61,7 +67,8 @@ else
 	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 fi
 
-GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="$HOME/group-project-master/bin/startstop_graphic.sh -a $ACTION -e $ENV -s $STUBS"
+#home directories need to be changed on vm to match doc
+GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="/homes/gh413/group-project-master/bin/startstop_graphic.sh -a ${ACTION} -e ${ENV}"
 
 SSH_GRAPHIC="ssh $USER@graphic02.doc.ic.ac.uk"
 
@@ -76,7 +83,7 @@ case "$ACTION" in
         
 	echo "Starting environment: ${ENV}"
 	#git checkout $BRANCH
-
+	
 	#start mongod server on VM
 	ps -fC mongod | grep vm_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/mongodb_vm_${ENV}.pid
         if [ -s /tmp/mongodb_vm_${ENV}.pid ] ; then
@@ -88,16 +95,26 @@ case "$ACTION" in
 
 	#start http server on VM
 	ps -fC node | grep vm_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_vm_${ENV}.pid
-        if [ -s /tmp/node_vm_${ENV}.pid ] ;
-        then
+        if [ -s /tmp/node_vm_${ENV}.pid ] ; then
                 echo "app server is already running...PID=`cat /tmp/node_vm_${ENV}.pid`"
         else
 		eval $HTTP_SERVER_CMD
 		ps -fC node | grep vm_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_vm_${ENV}.pid
         fi
 
+	#if an iPhone stub is required, start it up
+	if $IPHONE_STUB ; then
+		ps -ef | grep iPhone_stub.js | grep -v grep |  awk '{print $2}' > /tmp/iPhone_vm_${ENV}.pid
+        	if [ -s /tmp/iPhone_vm_${ENV}.pid ] ; then
+			echo "iPhone stub already running...PID=`cat /tmp/iPhone_vm_${ENV}.pid`"
+		else
+			nohup node ./bin/stubs/iPhone_stub.js > /tmp/iPhoneStub_${ENV}.${DATE}.log 2>&1 &
+			ps -ef | grep iPhone_stub.js | grep -v grep |  awk '{print $2}' > /tmp/iPhone_vm_${ENV}.pid
+		fi
+	fi
+
 	if $DISTRIBUTED ; then 
-		eval `${SSH_GRAPHIC} ${GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD}`
+		eval ${SSH_GRAPHIC} ${GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD}
 	else 	#start node graphic server locally
 		ps -fC node | grep graphic_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_graphic_${ENV}.pid
         	if [ -s /tmp/node_graphic_${ENV}.pid ] ; then echo "graphic server is already running...PID=`cat /tmp/node_graphic_${ENV}.pid`" ; else
@@ -120,6 +137,7 @@ case "$ACTION" in
         else
                 echo "Stopping MongoDB.."
                 sudo kill `cat /tmp/mongodb_vm_${ENV}.pid`
+		sudo rm -f /tmp/mongodb_vm_${ENV}.pid
         fi
         
 	if [ ! -s /tmp/node_vm_${ENV}.pid ] ; then
@@ -127,22 +145,33 @@ case "$ACTION" in
         else
                 echo "Stopping http server.." 
                 kill -9 `cat /tmp/node_vm_${ENV}.pid`
+		sudo rm -f /tmp/node_vm_${ENV}.pid
         fi
 
+	if [ ! -s /tmp/iPhone_vm_${ENV}.pid ] ; then
+                echo "iPhone stub is not running...therefore it can't be stopped"
+        else
+                echo "Stopping iPhonse stub.." 
+                kill -9 `cat /tmp/iPhone_vm_${ENV}.pid`
+		sudo rm -f /tmp/iPhone_vm_${ENV}.pid
+        fi
+	
 	if $DISTRIBUTED ; then 
-		`$SSH_GRAPHIC $GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD`
+		$SSH_GRAPHIC $GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD
 	else
 		if [ ! -s /tmp/node_graphic_${ENV}.pid ] ; then
                 	echo "graphic server is not running...therefore it can't be stopped"
         	else
                 	echo "Stopping node server.." 
                 	kill -9 `cat /tmp/node_graphic_${ENV}.pid`
+			sudo rm -f cat /tmp/node_graphic_${ENV}.pid
         	fi
 		if [ ! -s /tmp/mongodb_graphic_${ENV}.pid ] ; then
                 	echo "graphic02 instance of MongoDB is not running...therefore it can't be stopped"
         	else
                 	echo "Stopping 'graphic02' MongoDB.." 
                 	sudo kill `cat /tmp/mongodb_graphic_${ENV}.pid`
+			sudo rm -f cat /tmp/mongodb_graphic_${ENV}.pid
         	fi
 	fi
 	;;
