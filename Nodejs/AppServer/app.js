@@ -10,16 +10,29 @@ var express = require('express');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
-
-/* Code to allow connection to mongo */
 var mongo = require('mongodb');
-var monk = require('monk');
+var app = express();
+
+/* Code to allow connection to mongo, gets new instance of MongoClient */
+var mongoClient = mongo.MongoClient;
+var db = -1;
+
+/* Things to seek our environment variables with*/
+var dbSeekString = '# NODE_INI: db_database = ';
+var dbHostSeekString = '# NODE_INI: db_host = ';
+var dbPortSeekString = 'port = ';
+var classifierHostSeekString = '# NODE_INI: graphic_http_host = ';
+var classifierHttpPortSeekString = '# NODE_INI: graphic_http_port = ';
+var appServerHttpPortSeekString = '# NODE_INI: vm_http_port = ';
 
 
 /* Initialise our variables to store the various database ports and locations */
 var db_host = -1;
 var db_port = -1;
 var db_database = -1;
+var classifier_host = -1;
+var classifier_port = -1;
+var appServer_port = -1;
 
 /* 
 * Store our command line arguments in args.
@@ -52,29 +65,41 @@ catch (err) {
 /* Extract our configuration variables */
 for(var i in confArray){
   
-  var dbSeekString = '# NODE_INI: db_database = ';
-  var hostSeekString = '# NODE_INI: db_host = ';
-  var portSeekString = 'port = ';
-  
   if(confArray[i].substring(0, dbSeekString.length) === dbSeekString){
     db_database = confArray[i].substring(dbSeekString.length);
     console.log('Database to use is: ' + db_database);
   }
 
-  if(confArray[i].substring(0, hostSeekString.length) === hostSeekString){
-    db_host = confArray[i].substring(hostSeekString.length);
-    console.log('Host to connect to is: ' + db_host);
+  if(confArray[i].substring(0, dbHostSeekString.length) === dbHostSeekString){
+    db_host = confArray[i].substring(dbHostSeekString.length);
+    console.log('Database Host is: ' + db_host);
   }
   
-  if(confArray[i].substring(0, portSeekString.length) === portSeekString){
-    db_port = confArray[i].substring(portSeekString.length);
-    console.log('Port to use is: ' + db_port);
+  if(confArray[i].substring(0, dbPortSeekString.length) === dbPortSeekString){
+    db_port = confArray[i].substring(dbPortSeekString.length);
+    console.log('Database Port is: ' + db_port);
+  }
+  
+  if(confArray[i].substring(0, classifierHostSeekString.length) === classifierHostSeekString){
+    classifier_host = confArray[i].substring(classifierHostSeekString.length);
+    console.log('Classifier Host is: ' + classifier_host);
+  }
+  
+  if(confArray[i].substring(0, classifierHttpPortSeekString.length) === classifierHttpPortSeekString){
+    classifier_port = confArray[i].substring(classifierHttpPortSeekString.length);
+    console.log('Classifier HTTP Port is: ' + classifier_port);
+  }
+  
+  if(confArray[i].substring(0, appServerHttpPortSeekString.length) === appServerHttpPortSeekString){
+    appServer_port = confArray[i].substring(appServerHttpPortSeekString.length);
+    console.log('Port to use is: ' + appServer_port);
   }
   
 }
 
 /* Exit if we could not configure */
-if(db_port === -1 || db_host === -1 || db_database === -1){
+if(db_port === -1 || db_host === -1 || db_database === -1 ||
+    classifier_host === -1 || classifier_port === -1 || appServer_port === -1){
   console.log('Invalid conf file provided, I cannot initialise!');
   process.exit(1);
 }
@@ -85,13 +110,21 @@ if(db_port === -1 || db_host === -1 || db_database === -1){
 console.log('Starting up database connection now!');
 
 // Actually connect to the database.
-var db = monk(db_host + ':' + db_port + '/' + db_database);
+try{
+  mongoClient = new mongo.MongoClient(new mongo.Server(db_host, db_port), {native_parser: true});
+  mongoClient.open(function(err, mongoClient){if (err) throw err;});
+  db = mongoClient.db(db_database)
+}
+catch(err){
+  console.log('Error connecting to Database: ' + err);
+  process.exit(1);
+}
+  
 
 
-var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || appServer_port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(express.favicon()); 

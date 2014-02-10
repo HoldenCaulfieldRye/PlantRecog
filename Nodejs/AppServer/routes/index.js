@@ -25,7 +25,7 @@ exports.upload = function(db) {
 			    console.log("req.files is: " + req.files.datafile.path);
 			    
 		        // Set our collection
-		        var collection = db.get('usercollection');
+		        var collection = db.collection('usercollection');
 
 		        // Submit to the DB
 		        collection.insert({
@@ -34,7 +34,9 @@ exports.upload = function(db) {
 		            "submission_time" : Math.round(new Date().getTime() / 1000)
 		        }, 
 		        
-		        function (err, doc) {
+		        {safe: true}, 
+		        
+		        function (err, docs) {
 		            if (err) {
 		                // If it failed, return error
 		                res.send("There was a problem adding the information to the database.");
@@ -42,10 +44,9 @@ exports.upload = function(db) {
 		            else {
 		                // If it worked, return JSON object from collection to App//
 		                //res.json(doc);
-		            	res.json( { "id" : doc._id });
+		            	res.json( { "id" : docs[0]._id });
 		            }
 		        });
 			}
-		//},5000);
 	}
-}
+};

@@ -30,7 +30,7 @@ var restler = require('restler');
 
 
 fs.stat("sample.jpg", function(err, stats) {
-    restler.post("http://localhost:3000/upload", {
+    restler.post("http://localhost:55580/upload", {
         multipart: true,
         data: {
             "folder_id": "0",
