@@ -1,1 +1,4 @@
 node_modules/
+uploads/dev/*.jpg
+uploads/qa/*.jpg
+uploads/prod/*.jpg
