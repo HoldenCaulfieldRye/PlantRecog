@@ -11,28 +11,17 @@ var routes = require('./routes');
 var http = require('http');
 var path = require('path');
 var mongo = require('mongodb');
+var parse = require('./config_parser');
+var async = require('async');
 var app = express();
 
 /* Code to allow connection to mongo, gets new instance of MongoClient */
 var mongoClient = mongo.MongoClient;
 var db = -1;
 
-/* Things to seek our environment variables with*/
-var dbSeekString = '# NODE_INI: db_database = ';
-var dbHostSeekString = '# NODE_INI: db_host = ';
-var dbPortSeekString = 'port = ';
-var classifierHostSeekString = '# NODE_INI: graphic_http_host = ';
-var classifierHttpPortSeekString = '# NODE_INI: graphic_http_port = ';
-var appServerHttpPortSeekString = '# NODE_INI: vm_http_port = ';
-
 
 /* Initialise our variables to store the various database ports and locations */
-var db_host = -1;
-var db_port = -1;
-var db_database = -1;
-var classifier_host = -1;
-var classifier_port = -1;
-var appServer_port = -1;
+var config = -1;
 
 /* 
 * Store our command line arguments in args.
@@ -60,95 +49,50 @@ try {
 catch (err) {
   console.log('Error parsing confFile: ' + err);
   process.exit(1);
+}   
+
+/* Wait for the parsing to complete, then continue */
+  
+console.log("Parsing Config");
+
+try{
+  configArgs = parse.parseConfig(confArray);
 }
-
-/* Extract our configuration variables */
-for(var i in confArray){
-  
-  if(confArray[i].substring(0, dbSeekString.length) === dbSeekString){
-    db_database = confArray[i].substring(dbSeekString.length);
-    console.log('Database to use is: ' + db_database);
-  }
-
-  if(confArray[i].substring(0, dbHostSeekString.length) === dbHostSeekString){
-    db_host = confArray[i].substring(dbHostSeekString.length);
-    console.log('Database Host is: ' + db_host);
-  }
-  
-  if(confArray[i].substring(0, dbPortSeekString.length) === dbPortSeekString){
-    db_port = confArray[i].substring(dbPortSeekString.length);
-    console.log('Database Port is: ' + db_port);
-  }
-  
-  if(confArray[i].substring(0, classifierHostSeekString.length) === classifierHostSeekString){
-    classifier_host = confArray[i].substring(classifierHostSeekString.length);
-    console.log('Classifier Host is: ' + classifier_host);
-  }
-  
-  if(confArray[i].substring(0, classifierHttpPortSeekString.length) === classifierHttpPortSeekString){
-    classifier_port = confArray[i].substring(classifierHttpPortSeekString.length);
-    console.log('Classifier HTTP Port is: ' + classifier_port);
-  }
-  
-  if(confArray[i].substring(0, appServerHttpPortSeekString.length) === appServerHttpPortSeekString){
-    appServer_port = confArray[i].substring(appServerHttpPortSeekString.length);
-    console.log('Port to use is: ' + appServer_port);
-  }
-  
-}
-
-/* Exit if we could not configure */
-if(db_port === -1 || db_host === -1 || db_database === -1 ||
-    classifier_host === -1 || classifier_port === -1 || appServer_port === -1){
-  console.log('Invalid conf file provided, I cannot initialise!');
+catch (err) {
+  console.log('Error during parse: ' + err);
   process.exit(1);
 }
 
 
-// Tell the user how we started up.
-
-console.log('Starting up database connection now!');
-
-// Actually connect to the database.
-try{
-  mongoClient = new mongo.MongoClient(new mongo.Server(db_host, db_port), {native_parser: true});
+//Actually connect to the database.
+try{    
+  mongoClient = new mongo.MongoClient(new mongo.Server(configArgs.db_host, configArgs.db_port), {native_parser: true});
   mongoClient.open(function(err, mongoClient){if (err) throw err;});
-  db = mongoClient.db(db_database)
+  db = mongoClient.db(configArgs.db_database);
 }
 catch(err){
   console.log('Error connecting to Database: ' + err);
   process.exit(1);
 }
-  
 
 
-
-// all environments
-app.set('port', process.env.PORT || appServer_port);
+// ALL OF THESE ARE REQUIRED FOR EXPRESS TO WORK!
+app.set('port', process.env.PORT || configArgs.appServer_port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(express.favicon()); 
-
-// Set up our options related to uploads. We want to put images to each Env
-// in a different folder.
 app.use(express.bodyParser({ 
 	keepExtensions: true,
-	uploadDir:path.join('./Nodejs/AppServer/uploads', db_database)
+	uploadDir:path.join('./Nodejs/AppServer/uploads', configArgs.db_database)
 	})
 );
-
 app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(express.cookieParser('your secret here'));
 app.use(express.session());
-
-
-
 app.use(app.router);
-
-
 
 
 /* makes public subdirectory appear as if it were the tld, so it can be 
@@ -172,3 +116,4 @@ app.post('/upload', routes.upload(db));
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+

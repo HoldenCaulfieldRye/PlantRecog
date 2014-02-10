@@ -1,5 +1,5 @@
 {
-  "name": "application-name",
+  "name": "BeLeaf_AppServer",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -9,9 +9,9 @@
     "express": "*",
     "jade": "*",
     "mongodb": "*",
-    "monk": "*",
     "restler": "*",
     "request": "*",
-    "form-data": "*"
+    "form-data": "*",
+    "async": "*"
   }
 }
