@@ -84,7 +84,9 @@ if ('development' == app.get('env')) {
 }
 
 /* Routes to follow on URL */
-app.get('/', routes.index);
+
+/* Retrieve JSON for jobID */
+app.get('/job', routes.getJob(db));
 
 
 /* Enable upload function via post at /upload url */
