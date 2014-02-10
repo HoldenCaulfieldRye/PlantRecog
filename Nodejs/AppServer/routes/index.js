@@ -25,7 +25,7 @@ exports.upload = function(db) {
 			    console.log("req.files is: " + req.files.datafile.path);
 			    
 		        // Set our collection
-		        var collection = db.get('usercollection');
+		        var collection = db.collection('usercollection');
 
 		        // Submit to the DB
 		        collection.insert({
