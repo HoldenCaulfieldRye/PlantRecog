@@ -100,7 +100,7 @@ app.use(express.favicon());
 // in a different folder.
 app.use(express.bodyParser({ 
 	keepExtensions: true,
-	uploadDir:path.join('./uploads', db_database)
+	uploadDir:path.join('./Nodejs/AppServer/uploads', db_database)
 	})
 );
 
