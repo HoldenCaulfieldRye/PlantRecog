@@ -30,39 +30,17 @@ var config = -1;
 *           argv[1] is the path to the *.js
 */
 var args = process.argv.splice(2); 
-
-/* Store the Environment required */
 var confFile = args[0];
-var confArray = [];
-
-/* Check what argument we were passed and parse the config file. */
-
-if (!confFile){
-  console.log('No arguments given, I cannot initialise without a .conf');
-  process.exit(1);
-} 
-
-/* try and parse the file (use Sync readFile), catch any error */
-try {
-  confArray = fs.readFileSync(confFile).toString().split('\n');  
-}
-catch (err) {
-  console.log('Error parsing confFile: ' + err);
-  process.exit(1);
-}   
-
-/* Wait for the parsing to complete, then continue */
   
 console.log("Parsing Config");
 
 try{
-  configArgs = parse.parseConfig(confArray);
+  configArgs = parse.parseConfig(confFile);
 }
 catch (err) {
   console.log('Error during parse: ' + err);
   process.exit(1);
 }
-
 
 //Actually connect to the database.
 try{    
@@ -96,7 +74,7 @@ app.use(app.router);
 
 
 /* makes public subdirectory appear as if it were the tld, so it can be 
- * accessed like http://localhost:3000/images  
+ * accessed like http://localhost:3000/  
  */
 app.use(express.static(path.join('./public')));
 

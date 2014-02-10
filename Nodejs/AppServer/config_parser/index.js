@@ -6,7 +6,7 @@
 var fs = require('fs');
 
 
-exports.parseConfig = function(confArray){
+exports.parseConfig = function(confFile){
   
   /* Things to seek our environment variables with*/
   var dbSeekString = '# NODE_INI: db_database = ';
@@ -25,6 +25,23 @@ exports.parseConfig = function(confArray){
   
   var configArgs = {};
   
+  var confArray = [];
+
+  /* Check what argument we were passed and parse the config file. */
+
+  if (!confFile){
+    console.log('No arguments given, I cannot initialise without a .conf');
+    process.exit(1);
+  } 
+
+  /* try and parse the file (use Sync readFile), catch any error */
+  try {
+    confArray = fs.readFileSync(confFile).toString().split('\n');  
+  }
+  catch (err) {
+    console.log('Error parsing confFile: ' + err);
+    process.exit(1);
+  }   
 
   /* Extract our configuration variables */
   for(var i in confArray){
