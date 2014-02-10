@@ -110,14 +110,21 @@ if(db_port === -1 || db_host === -1 || db_database === -1 ||
 console.log('Starting up database connection now!');
 
 // Actually connect to the database.
-  mongoClient.connect('mongodb://' + db_host + ':' + db_port + '/' + db_database, function(err, db){
-    if (err) throw err;
-  });
+try{
+  mongoClient = new mongo.MongoClient(new mongo.Server(db_host, db_port), {native_parser: true});
+  mongoClient.open(function(err, mongoClient){if (err) throw err;});
+  db = mongoClient.db(db_database)
+}
+catch(err){
+  console.log('Error connecting to Database: ' + err);
+  process.exit(1);
+}
+  
 
 
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || appServer_port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(express.favicon()); 
