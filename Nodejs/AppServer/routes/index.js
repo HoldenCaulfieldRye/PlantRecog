@@ -15,14 +15,22 @@ exports.getJob = function(db) {
       
       var job_id = req.params.job_id;
       
+      console.log(req.params);
+      
       if(job_id){
         console.log('Retrieving job: ' + job_id);
-        collection.findOne({'_id':new BSON.ObjectID(job_id)}, function(err, item) {
-          res.send(item);
-        });
+        try{
+          collection.findOne({'_id':new BSON.ObjectID(job_id)}, function(err, item) {
+              res.send(item);
+          });
+        }
+        catch(err){
+          console.log(err);
+          res.send("You did not submit a valid JobID!");
+        }
       }
       else{
-        res.send("You did not submit a valid JobID");
+        res.send("You did not submit a JobID");
       }
     };
 };
