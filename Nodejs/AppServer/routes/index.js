@@ -22,7 +22,7 @@ exports.getJob = function(db) {
         });
       }
       else{
-        res.send("You did not submit a valid JobID")
+        res.send("You did not submit a valid JobID");
       }
     };
 };
