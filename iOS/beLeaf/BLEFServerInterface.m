@@ -35,6 +35,11 @@
     return self;
 }
 
+- (void) grabTasksFromSpecimen:(NSManagedObjectID *)specimenID
+{
+    // Fetch all observations in specimen that need uploading
+}
+
 - (void) addObservationToUploadQueue:(NSManagedObjectID *)observationID
 {
     if (observationID){
@@ -121,12 +126,21 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
 
 - (void)updateJobForObservation:(NSManagedObjectID *)observationID
 {
-    NSString *urlString = @"http://192.168.1.78:5000/job";
-    NSDictionary *params = @{@"jobID": @"123456", @"other": @"abcde"};
-    BLEFServerConnection *serverConnection = [self sendGETwithFields:params toUrl:urlString];
-    [serverConnection setObjID:observationID];
-    [serverConnection setJobUpdate:true];
-    [serverConnection start];
+    NSLog(@"Job GET called");
+    NSManagedObject* fetchedObject = [self fetchObjectWithID:observationID];
+    if (fetchedObject != nil){
+        BLEFObservation *observation = (BLEFObservation *)fetchedObject;
+        NSString *jobID = [observation job];
+        if (jobID){
+            //NSString *urlString = @"http://192.168.1.78:5000/job";
+            NSString *urlString = @"http://plantrecogniser.no-ip.biz:55580/job";
+            NSDictionary *params = @{@"jobID": jobID};
+            BLEFServerConnection *serverConnection = [self sendGETwithFields:params toUrl:urlString];
+            [serverConnection setObjID:observationID];
+            [serverConnection setJobUpdate:true];
+            [serverConnection start];
+        } else NSLog(@"No jobID");
+    } else NSLog(@"Error fetching observation for job GET");
 }
 
 - (BLEFServerConnection *)uploadFields:(NSDictionary *)parameters andFileData:(NSData *)fileData toUrl:(NSString *)urlString
@@ -163,10 +177,10 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
 
 - (BLEFServerConnection *)sendGETwithFields:(NSDictionary *)parameters toUrl:(NSString *)urlString
 {
-    __block NSString *urlFields = @"?";
+    __block NSString *urlFields = @"";
     if (parameters){
         [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-            urlFields = [urlFields stringByAppendingFormat:@"&%@=%@", key, value];
+            urlFields = [urlFields stringByAppendingFormat:@"/%@", value];
         }];
     }
     NSURL *url = [NSURL URLWithString:[urlString stringByAppendingString:urlFields]];
@@ -193,6 +207,11 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
                                         };
             [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
             [serverConnection setProgress:[progress floatValue]];
+            NSManagedObject *obj = [BLEFDatabase fetchObjectWithID:[serverConnection objID]];
+            if (obj){
+                BLEFObservation *observation = (BLEFObservation *)obj;
+                [observation setUploadProgress:[progress floatValue]];
+            }
         }
     }
 }
@@ -212,9 +231,11 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
         if (jobID){
             BLEFObservation *observation = (BLEFObservation *)[self fetchObjectWithID:[serverConnection objID]];
             if (observation != NULL){
-                [observation setJob:jobID];
-                [observation setUploaded:true];
-                [self saveDatabaseChanges];
+                if (jobID) {
+                    [observation setJob:jobID];
+                    [observation setUploaded:true];
+                    [self saveDatabaseChanges];
+                }
             }
         }
     }

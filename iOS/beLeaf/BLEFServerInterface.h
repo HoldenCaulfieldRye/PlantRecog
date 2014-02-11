@@ -13,6 +13,7 @@
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 extern NSString * const BLEFUploadDidSendDataNotification;
 
+- (void) grabTasksFromSpecimen:(NSManagedObjectID *)specimenID;
 - (void) addObservationToUploadQueue:(NSManagedObjectID *)observationID;
 - (void) processQueue;
 - (void) stopProcessingQueue;

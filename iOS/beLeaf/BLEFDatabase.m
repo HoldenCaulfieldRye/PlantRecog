@@ -93,7 +93,8 @@
     NSManagedObjectContext *context = [self getContext];
     BLEFObservation *observation = [NSEntityDescription insertNewObjectForEntityForName:@"Observation" inManagedObjectContext:context];
     
-    //date
+    NSDate* now = [NSDate date];
+    observation.date = [now timeIntervalSince1970];
     
     [observation setSpecimen:specimen];
     [specimen addObservationsObject:observation];

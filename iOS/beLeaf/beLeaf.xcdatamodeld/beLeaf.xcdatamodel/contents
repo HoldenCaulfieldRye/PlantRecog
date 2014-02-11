@@ -11,9 +11,11 @@
         <attribute name="job" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="latitude" attributeType="Double" minValueString="-90" maxValueString="90" defaultValueString="0.0" syncable="YES"/>
         <attribute name="longitude" attributeType="Double" minValueString="-180" maxValueString="180" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="result" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="segment" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="thumbnail" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="uploaded" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="uploadProgress" optional="YES" transient="YES" attributeType="Float" syncable="YES"/>
         <relationship name="specimen" maxCount="1" deletionRule="Nullify" destinationEntity="Specimen" inverseName="observations" inverseEntity="Specimen" syncable="YES"/>
     </entity>
     <entity name="Specimen" representedClassName="BLEFSpecimen" syncable="YES">
