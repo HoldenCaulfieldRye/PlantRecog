@@ -7,7 +7,7 @@ echo "INFO: RUNNING UNIT TESTS ON BRANCH: dev"
 
 echo "******Unit Testing <node.js> code base*******************"
 cd ../Nodejs
-mocha -R json > mocha_test_results.json; 
+mocha -R json-cov > mocha_test_results.json; 
 node utils/parse_mocha_test_results.js 
 
 

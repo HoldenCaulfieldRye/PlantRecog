@@ -10,7 +10,7 @@ echo "INFO: Running integration tests on branch: 'qa'"
 
 echo "......Unit Testing <node.js> code base...(qa)"
 cd ../Nodejs
-mocha -R json > mocha_test_results.json; 
+mocha -R json-cov > mocha_test_results.json; 
 node utils/parse_mocha_test_results.js 
 
 echo "......Integration Testing <node.js> code base...(qa)"

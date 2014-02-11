@@ -13,7 +13,7 @@ echo "INFO: Running tests on branch: 'master' "
 #decide which tests are appropriate, if any??
 echo "......Unit Testing <node.js> code base...(master) "
 cd ../Nodejs
-mocha -R json > mocha_test_results.json; 
+mocha -R json-cov > mocha_test_results.json; 
 node utils/parse_mocha_test_results.js 
 
 

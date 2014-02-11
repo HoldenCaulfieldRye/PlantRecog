@@ -4,6 +4,10 @@ var content = JSON.parse(data);
 var stats = content.stats;
 var failures = content.failures;
 
+
+console.log('\tCode Coverage Summary:');
+console.log('\t\tcoverage: ' + content.coverage + '%\thits: ' + content.hits + '\tmisses: ' + content.misses + '\t sloc: ' + content.sloc);
+console.log('\n');
 console.log('\tSTATISTICS:');
 console.log('\n');
 console.log('\tStart Time:    ' + stats.start);

@@ -18,7 +18,8 @@ if [ 1 -eq $? ]; then
 	exit 0
 fi
 
-EMAIL_ADDR="gerardhaughian@gmail.com"
+#EMAIL_ADDR="gerardhaughian@gmail.com"
+EMAIL_ADDR="gh413@imperial.ac.uk"
 #EMAIL_ADDR="doc-g1353012-group@imperial.ac.uk"
 EMAIL_SUBJ_PREFIX="Test Suite Results - "
 EMAIL_SUBJ=${EMAIL_SUBJ_PREFIX}${PROJ_NAME}:${BRANCH}
