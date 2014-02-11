@@ -1,0 +1,26 @@
+Build settings from command line:
+    ONLY_ACTIVE_ARCH = YES
+    SDKROOT = iphonesimulator7.0
+
+=== BUILD TARGET beLeaf OF PROJECT beLeaf WITH CONFIGURATION Debug ===
+
+Check dependencies
+
+=== BUILD TARGET beLeafTests OF PROJECT beLeaf WITH CONFIGURATION Debug ===
+
+Check dependencies
+
+2014-02-11 17:40:16.072 beLeaf[22394:70b] didFinishLaunching
+Test Suite 'All tests' started at 2014-02-11 17:40:16 +0000
+Test Suite 'beLeafTests.xctest' started at 2014-02-11 17:40:16 +0000
+Test Suite 'beLeafTests' started at 2014-02-11 17:40:16 +0000
+Test Case '-[beLeafTests testTestPassing]' started.
+Test Case '-[beLeafTests testTestPassing]' passed (0.000 seconds).
+Test Suite 'beLeafTests' finished at 2014-02-11 17:40:16 +0000.
+Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'beLeafTests.xctest' finished at 2014-02-11 17:40:16 +0000.
+Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'All tests' finished at 2014-02-11 17:40:16 +0000.
+Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+** TEST SUCCEEDED **
+
