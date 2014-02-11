@@ -14,6 +14,9 @@ http.createServer(function(request,response){
 	        request.on('end', function () {
 			run_test_script(body);
 		});
+	        request.on('error', function (e) {
+			console.log('Malformed request: ' + e.message);
+		});
 	}
 	response.writeHead(200, {"Content-Type": "text/plain"}); 
 	response.write("\n\n\tWelcome to the Plant Recogniser Continuous Integration server;\n\t\t\t Where Testing Is King!!"); 
