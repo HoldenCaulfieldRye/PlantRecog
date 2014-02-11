@@ -14,14 +14,89 @@
 
 @interface BLEFServerInterface ()
 
-@property (strong, nonatomic) NSArray *queue;
+@property (strong, nonatomic) NSMutableArray *uploadQueue;
+@property (strong, nonatomic) NSMutableArray *jobQueue;
+@property (nonatomic) BOOL uploadQueueProcessingActive;
+@property (nonatomic) BOOL jobQueueProcessingActive;
 
 @end
 
 @implementation BLEFServerInterface
 
+- (id)init
+{
+    self = [super init];
+    if (self){
+        _uploadQueue = [[NSMutableArray alloc] init];
+        _jobQueue = [[NSMutableArray alloc] init];
+        _uploadQueueProcessingActive = false;
+        _jobQueueProcessingActive = false;
+    }
+    return self;
+}
+
+- (void) addObservationToUploadQueue:(NSManagedObjectID *)observationID
+{
+    if (observationID){
+        NSLog(@"image added to Upload Queue");
+        [_uploadQueue addObject:observationID];
+        [self processQueue];
+    }
+}
+
+- (void) processQueue
+{
+    if (!_uploadQueueProcessingActive){
+        [self processNextInUploadQueue];
+    }
+    if (!_jobQueueProcessingActive){
+        [self processNextInJobQueue];
+    }
+}
+
+- (void) stopProcessingQueue
+{
+    _uploadQueueProcessingActive = false;
+    _jobQueueProcessingActive = false;
+}
+
 
 NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNotification";
+
+#pragma mark Private Methods
+
+- (void) addObservationToJobQueue:(NSManagedObjectID *)observationID
+{
+    if (observationID){
+        NSLog(@"image added to Job Queue");
+        [_jobQueue addObject:observationID];
+        [self processQueue];
+    }
+}
+
+- (void)processNextInUploadQueue
+{
+    if ([_uploadQueue count] > 0){
+        _uploadQueueProcessingActive = true;
+        NSManagedObjectID *id = [_uploadQueue firstObject];
+        [_uploadQueue removeObject:id];
+        [self uploadObservation:id];
+    } else {
+        _uploadQueueProcessingActive = false;
+    }
+}
+
+- (void)processNextInJobQueue
+{
+    if ([_jobQueue count] > 0){
+        _jobQueueProcessingActive = true;
+        NSManagedObjectID *id = [_jobQueue firstObject];
+        [_jobQueue removeObject:id];
+        [self updateJobForObservation:id];
+    } else {
+        _jobQueueProcessingActive = false;
+    }
+}
 
 - (void)uploadObservation:(NSManagedObjectID *)observationID
 {
@@ -31,19 +106,28 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
         BLEFObservation* observation = (BLEFObservation *)fetchedObject;
         NSData *imageData = [observation getImageData];
         //NSString *urlString = @"http://sheltered-ridge-6203.herokuapp.com/upload";
-        //NSString *urlString = @"http://192.168.1.78:5000/upload";
-        NSString *urlString = @"http://plantrecogniser.no-ip.biz:55580/upload";
+        NSString *urlString = @"http://192.168.1.78:5000/upload";
+        //NSString *urlString = @"http://plantrecogniser.no-ip.biz:55580/upload";
         //NSString *urlString = @"http://www.posttestserver.com/post.php";
         NSDictionary *params = @{@"segment": [observation segment]};
         BLEFServerConnection *serverConnection = [self uploadFields:params andFileData:imageData toUrl:urlString];
         [serverConnection setObjID:observationID];
+        [serverConnection setUpload:true];
         [serverConnection start];
     } else {
         NSLog(@"Error fetching observation for upload");
     }
 }
 
-#pragma mark Private Methods
+- (void)updateJobForObservation:(NSManagedObjectID *)observationID
+{
+    NSString *urlString = @"http://192.168.1.78:5000/job";
+    NSDictionary *params = @{@"jobID": @"123456", @"other": @"abcde"};
+    BLEFServerConnection *serverConnection = [self sendGETwithFields:params toUrl:urlString];
+    [serverConnection setObjID:observationID];
+    [serverConnection setJobUpdate:true];
+    [serverConnection start];
+}
 
 - (BLEFServerConnection *)uploadFields:(NSDictionary *)parameters andFileData:(NSData *)fileData toUrl:(NSString *)urlString
 {
@@ -77,21 +161,39 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
     return serverConnection;
 }
 
+- (BLEFServerConnection *)sendGETwithFields:(NSDictionary *)parameters toUrl:(NSString *)urlString
+{
+    __block NSString *urlFields = @"?";
+    if (parameters){
+        [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
+            urlFields = [urlFields stringByAppendingFormat:@"&%@=%@", key, value];
+        }];
+    }
+    NSURL *url = [NSURL URLWithString:[urlString stringByAppendingString:urlFields]];
+    NSLog(@"GET URL = %@", url);
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"GET"];
+    BLEFServerConnection *serverConnection = [[BLEFServerConnection alloc] initWithRequest:request delegate:self startImmediately:false];
+    return serverConnection;
+}
+
 - (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
 {
     BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
-    
-    CGFloat dataSent = totalBytesWritten;
-    CGFloat dataTotal = totalBytesExpectedToWrite;
-    NSNumber *progress = [NSNumber numberWithFloat: round((dataSent/dataTotal) * 10)/10];
-    
-    if ([progress floatValue] > [serverConnection progress]) {
-        NSDictionary *uploadInfo = @{
-                                     @"percentage" : progress,
-                                     @"objectID"   : [serverConnection objID]
-                                     };
-        [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
-        [serverConnection setProgress:[progress floatValue]];
+    if (serverConnection.upload){
+        CGFloat dataSent = totalBytesWritten;
+        CGFloat dataTotal = totalBytesExpectedToWrite;
+        NSNumber *progress = [NSNumber numberWithFloat: round((dataSent/dataTotal) * 10)/10];
+        
+        if ([progress floatValue] > [serverConnection progress]) {
+            NSLog(@"Upload Progress: %@", progress);
+            NSDictionary *uploadInfo = @{
+                                         @"percentage" : progress,
+                                        @"objectID"   : [serverConnection objID]
+                                        };
+            [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
+            [serverConnection setProgress:[progress floatValue]];
+        }
     }
 }
 
@@ -102,15 +204,23 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
     NSString *dataAsString = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
     NSLog(@"didReceiveData:%@", dataAsString);
     
-    NSError* error;
-    NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
-    NSString *jobID = json[@"id"];
+    if (serverConnection.upload) {
+        NSError* error;
+        NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+        NSString *jobID = json[@"id"];
+        
+        if (jobID){
+            BLEFObservation *observation = (BLEFObservation *)[self fetchObjectWithID:[serverConnection objID]];
+            if (observation != NULL){
+                [observation setJob:jobID];
+                [observation setUploaded:true];
+                [self saveDatabaseChanges];
+            }
+        }
+    }
     
-    BLEFObservation *observation = (BLEFObservation *)[self fetchObjectWithID:[serverConnection objID]];
-    if (observation != NULL){
-        [observation setJob:jobID];
-        [observation setUploaded:true];
-        [self saveDatabaseChanges];
+    if (serverConnection.jobUpdate){
+        // Process result
     }
 }
 
@@ -118,17 +228,30 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
 {
     NSLog(@"Connection Failed");
     BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
-    NSDictionary *uploadInfo = @{
-                                 @"percentage" : @0.0,
-                                 @"objectID"   : [serverConnection objID]
-                                 };
-    [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
+    if (serverConnection.upload){
+        _uploadQueueProcessingActive = false;
+        NSDictionary *uploadInfo = @{
+                                     @"percentage" : @0.0,
+                                     @"objectID"   : [serverConnection objID]
+                                     };
+        [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
+    }
+    if (serverConnection.jobUpdate){
+        _jobQueueProcessingActive = false;
+    }
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    
     NSLog(@"didFinishLoading");
+    BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
+    if (serverConnection.upload){
+        [self addObservationToJobQueue:[serverConnection objID]];
+        [self processNextInUploadQueue];
+    }
+    if (serverConnection.jobUpdate){
+        [self processNextInJobQueue];
+    }
 }
 
 #pragma mark - Core Data Methods

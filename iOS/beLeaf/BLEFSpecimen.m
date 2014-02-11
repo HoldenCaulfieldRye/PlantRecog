@@ -14,8 +14,6 @@
 @implementation BLEFSpecimen
 
 @dynamic created;
-@dynamic latitude;
-@dynamic longitude;
 @dynamic name;
 @dynamic finished;
 @dynamic order;

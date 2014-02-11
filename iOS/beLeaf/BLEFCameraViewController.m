@@ -16,6 +16,9 @@
 @property (weak, nonatomic) IBOutlet UIButton *takePhotoButton;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *componentSelection;
 
+@property (strong, nonatomic) CLLocationManager *locationManager;
+@property (strong, nonatomic) CLLocation *location;
+
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 @property (strong, nonatomic) UIImagePickerController *imagePickerController;
@@ -38,6 +41,12 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    _locationManager = [[CLLocationManager alloc] init];
+    _locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+    _locationManager.delegate = self;
+    _location = nil;
+    [_locationManager startUpdatingLocation];
+    
     self.imagePickerController = [[UIImagePickerController alloc] init];
     self.imagePickerController.delegate = self;
     self.imagePickerController.allowsEditing = NO;
@@ -107,26 +116,39 @@
     NSLog(@"imagePicker took photo");
     UIImage* image = info[UIImagePickerControllerOriginalImage];
     
+    __block NSNumber *longitude = [NSNumber numberWithDouble:0.0];
+    __block NSNumber *latitude = [NSNumber numberWithDouble:0.0];
+    if (_location != nil){
+        longitude = [NSNumber numberWithDouble:_location.coordinate.longitude];
+        latitude = [NSNumber numberWithDouble:_location.coordinate.latitude];
+    }
+    
     NSString *segment;
     NSInteger selectedSegment =  [self.componentSelection selectedSegmentIndex];
     switch (selectedSegment) {
         case 0:
-            segment = @"leaf";
+            segment = @"entire";
             break;
         case 1:
-            segment = @"fruit";
+            segment = @"branch";
             break;
         case 2:
-            segment = @"flower";
+            segment = @"stem";
             break;
         case 3:
-            segment = @"plant";
+            segment = @"fruit";
+            break;
+        case 4:
+            segment = @"flower";
+            break;
+        case 5:
+            segment = @"leaf";
             break;
         default:
             break;
     }
     
-    NSDictionary *observationInfo = @{@"segment": segment};
+    NSDictionary *observationInfo = @{@"segment": segment, @"lat": latitude, @"long": longitude};
     
     [delegate blefCameraViewController:self tookPhoto:image withInfo:observationInfo];
 }
@@ -136,6 +158,12 @@
     NSLog(@"Did cancel");
     [picker dismissViewControllerAnimated:NO completion:NULL];
     [delegate blefCameraViewControllerDidDismiss:self];
+}
+
+#pragma mark - Location Services
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
+{
+    _location = [locations lastObject];
 }
 
 @end

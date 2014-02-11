@@ -26,14 +26,10 @@
     [super tearDown];
 }
 
-- (void)testExample
-{
-    //XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
-}
-
-- (void)testPass
+- (void)testTestPassing
 {
     //will pass
+    //XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
 }
 
 @end

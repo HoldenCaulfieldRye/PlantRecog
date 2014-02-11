@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreLocation/CoreLocation.h>
 
 @class BLEFCameraViewController;
 
@@ -18,7 +19,7 @@
 
 @end
 
-@interface BLEFCameraViewController : UIViewController <UINavigationControllerDelegate, UIImagePickerControllerDelegate>
+@interface BLEFCameraViewController : UIViewController <UINavigationControllerDelegate, UIImagePickerControllerDelegate, CLLocationManagerDelegate>
 
 @property (nonatomic, assign) id  delegate;
 

@@ -24,6 +24,7 @@
 		5E2AD5991863B6DA00595828 /* beLeafTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5981863B6DA00595828 /* beLeafTests.m */; };
 		5E2AD5A31863BB5A00595828 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
 		E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
+		E961B85F18AA898100AF8EA4 /* BLEFUIObservationCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E961B85E18AA898100AF8EA4 /* BLEFUIObservationCell.m */; };
 		E9829C6D189D7662004DD07F /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
 		E996A0DD189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E996A0DC189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.m */; };
 		E9B5BA3318982F5B000161F7 /* BLEFServerInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */; };
@@ -68,6 +69,8 @@
 		5E2AD5981863B6DA00595828 /* beLeafTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = beLeafTests.m; sourceTree = "<group>"; };
 		5E2AD5A21863BB5A00595828 /* iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = iPhone.storyboard; sourceTree = "<group>"; };
 		E95C85391864564000CFEC40 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		E961B85D18AA898100AF8EA4 /* BLEFUIObservationCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFUIObservationCell.h; sourceTree = "<group>"; };
+		E961B85E18AA898100AF8EA4 /* BLEFUIObservationCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFUIObservationCell.m; sourceTree = "<group>"; };
 		E9829C6B189D7662004DD07F /* BLEFObservation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFObservation.h; sourceTree = "<group>"; };
 		E9829C6C189D7662004DD07F /* BLEFObservation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFObservation.m; sourceTree = "<group>"; };
 		E996A0DB189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSpeicmenObservationsViewController.h; sourceTree = "<group>"; };
@@ -175,6 +178,8 @@
 				E9BD3A461898399E001B8570 /* BLEFSpecimenTableViewController.m */,
 				E996A0DB189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.h */,
 				E996A0DC189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.m */,
+				E961B85D18AA898100AF8EA4 /* BLEFUIObservationCell.h */,
+				E961B85E18AA898100AF8EA4 /* BLEFUIObservationCell.m */,
 				E9DF5C0518A15E9B00B2BFDB /* BLEFCameraViewController.h */,
 				E9DF5C0618A15E9B00B2BFDB /* BLEFCameraViewController.m */,
 				E9DF5C0C18A16A3D00B2BFDB /* BLEFCameraView.xib */,
@@ -325,6 +330,7 @@
 				E9E396281897F8830067A991 /* BLEFSpecimen.m in Sources */,
 				E9E3962E1897F94F0067A991 /* BLEFDatabase.m in Sources */,
 				E9DF5BFA18A1351700B2BFDB /* BLEFServerConnection.m in Sources */,
+				E961B85F18AA898100AF8EA4 /* BLEFUIObservationCell.m in Sources */,
 				E9B5BA3318982F5B000161F7 /* BLEFServerInterface.m in Sources */,
 				E996A0DD189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.m in Sources */,
 			);

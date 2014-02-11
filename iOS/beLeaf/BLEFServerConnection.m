@@ -15,6 +15,8 @@
     self = [super init];
     if (self) {
         self.progress = 0;
+        self.jobUpdate = false;
+        self.upload = false;
     }
     return self;
 }

@@ -16,6 +16,8 @@
 @dynamic date;
 @dynamic filename;
 @dynamic job;
+@dynamic latitude;
+@dynamic longitude;
 @dynamic segment;
 @dynamic thumbnail;
 @dynamic uploaded;

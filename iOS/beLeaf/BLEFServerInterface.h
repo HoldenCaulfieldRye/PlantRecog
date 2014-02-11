@@ -13,7 +13,8 @@
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 extern NSString * const BLEFUploadDidSendDataNotification;
 
-
-- (void) uploadObservation:(NSManagedObjectID *)observationID;
+- (void) addObservationToUploadQueue:(NSManagedObjectID *)observationID;
+- (void) processQueue;
+- (void) stopProcessingQueue;
 
 @end

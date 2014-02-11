@@ -11,6 +11,8 @@
 @interface BLEFServerConnection : NSURLConnection
 
 @property (strong, nonatomic) NSManagedObjectID *objID;
+@property (nonatomic) BOOL upload;
+@property (nonatomic) BOOL jobUpdate;
 @property (nonatomic) CGFloat progress;
 
 @end

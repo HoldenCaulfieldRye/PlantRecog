@@ -14,8 +14,6 @@
 @interface BLEFSpecimen : NSManagedObject
 
 @property (nonatomic) NSTimeInterval created;
-@property (nonatomic) float latitude;
-@property (nonatomic) float longitude;
 @property (nonatomic, retain) NSString * name;
 @property (nonatomic) BOOL finished;
 @property (nonatomic) int16_t order;

@@ -10,6 +10,7 @@
 #import "BLEFDatabase.h"
 #import "BLEFAppDelegate.h"
 #import "BLEFServerInterface.h"
+#import "BLEFUIObservationCell.h"
 
 @implementation BLEFSpeicmenOberservationsViewController
 
@@ -32,6 +33,15 @@
 {
     [self loadCollectionData];
     [self.collectionView reloadData];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    for (int i = 0; i < [[self collectionView] numberOfItemsInSection:0]; i++){
+        BLEFUIObservationCell *cell = (BLEFUIObservationCell *)[[self collectionView] cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection:0]];
+        [center removeObserver:cell];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -60,34 +70,18 @@
     
     // Get Cell
     static NSString *identifier = @"Cell";
-    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
+    BLEFUIObservationCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
+    [cell setObjIB:objID];
     
     // Set Thumbnail
-    UIImageView *cellImageView = (UIImageView *)[cell viewWithTag:100];
-    cellImageView.image = [observation getThumbnail];
+    [[cell imageView] setImage:[observation getThumbnail]];
     
     // Set Progress Bar
-    UIProgressView* progressbar = (UIProgressView *)[cell viewWithTag:50];
-    [progressbar setProgress:0];
-    
+    [[cell progressBar] setProgress:0];
+
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    [center addObserverForName:BLEFUploadDidSendDataNotification
-                        object:nil
-                         queue:nil
-                    usingBlock:^(NSNotification *notification)
-     {
-         NSDictionary* uploadInfo = notification.userInfo;
-         NSManagedObjectID *uploadID = [uploadInfo objectForKey:@"objectID"];
-         
-         if ([uploadID isEqual:objID]){
-         NSNumber* progress = [uploadInfo objectForKey:@"percentage"];
-         float progressF = [progress floatValue];
-         dispatch_async(dispatch_get_main_queue(), ^{
-             NSLog(@"Progress:%f", progressF);
-             [progressbar setProgress:progressF animated:true];
-         });
-         }
-     }];
+    
+    [center addObserver:cell selector:@selector(updateProgress:) name:BLEFUploadDidSendDataNotification object:nil];
     
     return cell;
 }
@@ -115,7 +109,7 @@
         BLEFAppDelegate* app = [[UIApplication sharedApplication] delegate];
         BLEFServerInterface *serverInterface = [app serverinterface];
     
-        [serverInterface uploadObservation:[observation objectID]];
+        [serverInterface addObservationToUploadQueue:[observation objectID]];
     }
 }
 
@@ -145,6 +139,8 @@
     BLEFObservation* observation = [BLEFDatabase addNewObservationToSpecimen:self.specimen];
     [observation generateThumbnailFromImage:photo];
     [observation setSegment:info[@"segment"]];
+    [observation setLatitude:[info[@"lat"] doubleValue]];
+    [observation setLongitude:[info[@"long"] doubleValue]];
     [BLEFDatabase saveChanges];
     [observation saveImage:photo];
 }
