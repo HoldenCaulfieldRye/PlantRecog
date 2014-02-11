@@ -30,13 +30,13 @@ exports.classify = function(db) {
 		        var collection = db.collection('usercollection');
 
 		        // Submit to the DB
-		        collection.update({	        	
+		        collection.update(	        	
 		           { "filepath" : filePath },
 		           { 
-		           		$set: { "submission_state" : "File Submitted from App" },
+		                $set: { "submission_state" : "Image classified" },
 		            	$set: { "submission_time" : Math.round(new Date().getTime() / 1000) }
 		           } 
-		        }, 
+		        , 
 		        
 		        {safe: true}, 
 		        
