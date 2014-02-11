@@ -41,7 +41,7 @@ fi
 
 DATE=`date +"%Y.%m.%d"`
 HTTP_SERVER_LOG="/tmp/AppServer_${ENV}_${DATE}.log"
-GRAPHIC_SERVER_LOG="/tmp/graphicserver_${ENV}_${DATE}.log"
+GRAPHIC_SERVER_LOG="/tmp/GraphicServer_${ENV}_${DATE}.log"
 
 cd $HOME/group-project-master
 
@@ -64,13 +64,12 @@ echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
 	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 else
-	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/GraphicServer/graphic.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 fi
 
-#home directories need to be changed on vm to match doc
-GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="/homes/gh413/group-project-master/bin/startstop_graphic.sh -a ${ACTION} -e ${ENV}"
+GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="~/group-project-master/bin/startstop_graphic.sh -a ${ACTION} -e ${ENV}"
 
-SSH_GRAPHIC="ssh $USER@graphic02.doc.ic.ac.uk"
+SSH_GRAPHIC="ssh ${USER}@graphic02.doc.ic.ac.uk"
 
 if [ "$ENV" == "prod" ] ; then BRANCH=master ; else BRANCH=$ENV ; fi
 #Handle the requested action i.e start and stop
