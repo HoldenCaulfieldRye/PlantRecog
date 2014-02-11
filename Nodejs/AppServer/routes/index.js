@@ -1,13 +1,43 @@
+var mongo = require('mongodb');
+
+var BSON = mongo.BSONPure;
 
 /*
- * GET home page.
+ * GET Job
  */
 
-exports.index = function(req, res){
-  res.render('index', { title: 'Express' });
+exports.getJob = function(db) {
+  
+    return function(req, res){
+
+      // Set our collection
+      var collection = db.collection('usercollection');
+      
+      var job_id = req.params.job_id;
+      
+      console.log(req.params);
+      
+      if(job_id){
+        console.log('Retrieving job: ' + job_id);
+        try{
+          collection.findOne({'_id':new BSON.ObjectID(job_id)}, function(err, item) {
+              res.send(item);
+          });
+        }
+        catch(err){
+          console.log(err);
+          res.send("You did not submit a valid JobID!");
+        }
+      }
+      else{
+        res.send("You did not submit a JobID");
+      }
+    };
 };
 
-
+/*
+ * POST Image
+ */
 exports.upload = function(db) {
 	
 	return function(req, res) {
@@ -48,5 +78,5 @@ exports.upload = function(db) {
 		            }
 		        });
 			}
-	}
+	};
 };
