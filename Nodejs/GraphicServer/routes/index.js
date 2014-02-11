@@ -38,7 +38,7 @@ exports.classify = function(db) {
 		           } 
 		        , 
 		        
-		        {safe: true}, 
+		        //{safe: true}, 
 		        
 		        function (err, docs) {
 		            if (err) {
