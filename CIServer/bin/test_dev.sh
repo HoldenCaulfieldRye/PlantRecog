@@ -3,17 +3,23 @@
 #	Script that runs unit tests for each code base
 #	Author: ghaughian Feb 2014
 #
-echo "INFO: RUNNING UNIT TESTS ON BRANCH: dev"
+echo "////////// INFO: RUNNING UNIT TESTS ON BRANCH: dev /////////"
+echo ""
+echo "**************Unit Testing <node.js> Code Base**************"
+echo ""
 
-echo "******Unit Testing <node.js> code base*******************"
 cd ../Nodejs
 mocha -R json-cov > mocha_test_results.json; 
 node utils/parse_mocha_test_results.js 
 
+echo ""
+echo "******Unit Testing Machine Learning <python> Code Base******"
+echo ""
 
-echo "******Unit testing machine learning <python> code base***"
 cd ../ML
 #add commands to run python unit tests
 
-echo "******Unit testing machine learning <C++> code base******"
+echo ""
+echo "*******Unit Testing Machine Learning <C++> Code Base********"
+echo ""
 #add commands to run C++ unit tests
