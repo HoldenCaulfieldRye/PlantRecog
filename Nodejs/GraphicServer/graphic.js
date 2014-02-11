@@ -44,8 +44,6 @@ catch (err) {
 }
 
 //Actually connect to the database.
-// Ignore for now
-/*
 try{    
   mongoClient = new mongo.MongoClient(new mongo.Server(configArgs.db_host, configArgs.db_port), {native_parser: true});
   mongoClient.open(function(err, mongoClient){if (err) throw err;});
@@ -55,12 +53,11 @@ catch(err){
   console.log('Error connecting to Database: ' + err);
   process.exit(1);
 }
-*/
 
 
 
 // ALL OF THESE ARE REQUIRED FOR EXPRESS TO WORK!
-app.set('port', configArgs.classifier_port || process.env.PORT );
+app.set('port', process.env.PORT || configArgs.classifier_port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(express.favicon()); 
