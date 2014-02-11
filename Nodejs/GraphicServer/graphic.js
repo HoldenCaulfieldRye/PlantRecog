@@ -57,8 +57,10 @@ catch(err){
 }
 */
 
+
+
 // ALL OF THESE ARE REQUIRED FOR EXPRESS TO WORK!
-app.set('port', process.env.PORT || configArgs.classifier_port);
+app.set('port', configArgs.classifier_port || process.env.PORT );
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(express.favicon()); 
@@ -91,11 +93,9 @@ app.get('/', routes.index);
 
 
 /* Enable upload function via post at /upload url */
-// Ignore for now
-//app.post('/upload', routes.upload(db));
+app.post('/classify', routes.classify(db));
 
 /* Create HTTP Server */
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
-

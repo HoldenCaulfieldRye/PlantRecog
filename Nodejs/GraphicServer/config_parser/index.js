@@ -91,9 +91,9 @@ exports.parseConfig = function(confFile){
   configArgs.db_host = db_host;
   configArgs.db_database = db_database;
   configArgs.classifier_host = classifier_host;
-  configArgs.classifer_port = classifier_port;
+  configArgs.classifier_port = classifier_port;
   configArgs.appServer_port = appServer_port;
   
   return configArgs;
   
-};
+}
