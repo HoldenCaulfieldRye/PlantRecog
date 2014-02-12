@@ -6,21 +6,22 @@
 #			   $2 = 'dev', 'qa', or 'prod'...the environment you wish to run
 #
 
-ENV=$2
-if [ "$ENV" == "prod" ] ; then BRANCH=master ; else BRANCH=$ENV ; fi
-USER=`whoami`
-DATE=`date +"%Y.%m.%d"`
+USAGE="Usage: $0 -a {start|stop} -e {dev|qa|prod} [-s {'iPhone httpserver graphicserver classifier'}]"
 
-HTTP_SERVER_LOG="httpserver_"${ENV}_${DATE}
-GRAPHIC_SERVER_LOG="graphicserver_"${ENV}_${DATE}
+while getopts "a:e:s:" OPTION
+do
+    case $OPTION in
+        a)	ACTION="$OPTARG";;
+	e)	ENV="$OPTARG";;
+	s)	STUBS="$OPTARG";;
+	*)	echo $USAGE; exit 2;;
+    esac
+done
 
-USAGE=$"Usage: $0 {start|stop} {dev|qa|prod}"
-
-#Check user is on a doc host before continuing.
-HOSTNAME=`hostname -A | awk 'BEGIN {FS="."}{print $2}'`
-if [ ! "$HOSTNAME" == "doc" ] ; then
-	echo "WARN:script must be run from a doc server"
-	exit
+# Enfore that this script is run from the VM machine
+if [ ! "`hostname -i`" == "146.169.44.217" ] ; then 
+	echo "This script must be run from the VM machine"
+	exit 2
 fi
 
 #Do we need to set up a distributd system or a local one? (dev is always local)
@@ -28,109 +29,153 @@ if [ "$ENV" == "qa" -o "$ENV" == "prod" ]
   then DISTRIBUTED=true
   else DISTRIBUTED=false
 fi
-echo $DISTRIBUTED
 
-#Handle the 2 options for running the script i.e start and stop
-case "$1" in
+echo -n "Have you cloned the latest version of the repo to your home directory [yes|no]: "
+read cloned
+
+if [ "$cloned" == "no" ] ; then 
+	echo "ERROR: Please clone the latest revision of the repo to your home directory on"
+	if $DISTRIBUTED ; then echo "       both the VM and graphic02 machines" ; else echo "       the VM machine" ; fi
+	exit 2
+fi
+
+DATE=`date +"%Y.%m.%d"`
+HTTP_SERVER_LOG="/tmp/AppServer_${ENV}_${DATE}.log"
+GRAPHIC_SERVER_LOG="/tmp/GraphicServer_${ENV}_${DATE}.log"
+
+cd $HOME/group-project-master
+
+VM_MONGODB_CMD="sudo su -c \"mongod --config ./env/vm_${ENV}_env.conf &\" -s /bin/sh mongodb"
+GRAPHIC_MONGODB_CMD="sudo su -c \"mongod --config ./env/graphic_${ENV}_env.conf &\" -s /bin/sh mongodb"
+
+echo $STUBS | grep iPhone
+if [ $? -eq 0 ]; then IPHONE_STUB=true ; else IPHONE_STUB=false ; fi
+echo $STUBS | grep classifier
+if [ $? -eq 0 ]; then CLASS_STUB=true ; else CLASS_STUB=false ; fi
+
+echo $STUBS | grep httpserver
+if [ $? -eq 0 ]; then
+	HTTP_SERVER_CMD="nohup node ./bin/stubs/httpserver_stub.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
+else 
+	HTTP_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
+fi
+#add logic which deals with telling the graphic server to exec the classifier stub if CLASS_STUB=true
+echo $STUBS | grep graphicserver
+if [ $? -eq 0 ]; then
+	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+else
+	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/GraphicServer/graphic.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+fi
+
+GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="~/group-project-master/bin/startstop_graphic.sh -a ${ACTION} -e ${ENV}"
+
+SSH_GRAPHIC="ssh ${USER}@graphic02.doc.ic.ac.uk"
+
+if [ "$ENV" == "prod" ] ; then BRANCH=master ; else BRANCH=$ENV ; fi
+#Handle the requested action i.e start and stop
+case "$ACTION" in
   start)
-        echo "Starting environment: $ENV "
-	
-	if $DISTRIBUTED ; then  
-		if [ ! "`hostname -i`" == "146.169.44.217" ] ; then 
-			ssh -p 55022 $USER@146.169.44.217
-			if [ ! -d $HOME/group-project-master ] ; then 
-				echo "Please ensure the group-project-master repo has been cloned to your home directory: $HOME/group-project-master"
-				exit
-			else 
-				cd $HOME/group-project-master/bin
-			fi
-		fi
+	if [ ! -d $HOME/group-project-master ] ; then
+		echo "Please ensure the group-project-master repo has been cloned to your home directory: $HOME/group-project-master"
+		exit 2
 	fi
-	git checkout $BRANCH
+        
+	echo "Starting environment: ${ENV}"
+	#git checkout $BRANCH
 	
 	#start mongod server on VM
-	ps -ef | grep mongodb_$ENV.conf | grep -v grep |  awk '{print $2}' > /tmp/mongod_vm_$ENV.pid
-        if [ -s /tmp/mongod_vm_$ENV.pid ] ;
-        then
-                echo "MongoDB is already running...PID=`cat /tmp/mongod_vm_$ENV.pid`"
+	ps -fC mongod | grep vm_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/mongodb_vm_${ENV}.pid
+        if [ -s /tmp/mongodb_vm_${ENV}.pid ] ; then
+                echo "MongoDB is already running...PID=`cat /tmp/mongodb_vm_${ENV}.pid`"
         else
-		sudo nohup /usr/bin/mongod --config ../env/mongodb_$ENV.conf &
-		ps -ef | grep mongodb_$ENV.conf | grep -v grep | awk '{print $2}' > /tmp/mongod_vm_$ENV.pid
+		eval $VM_MONGODB_CMD
+		ps -fC mongod | grep vm_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/mongodb_vm_${ENV}.pid
         fi
 
 	#start http server on VM
-	ps -ef | grep node | grep -v grep |  awk '{print $2}' > /tmp/node_vm_$ENV.pid
-        if [ -s /tmp/node_vm_$ENV.pid ] ;
-        then
-                echo "http server is already running...PID=`cat /tmp/node_vm_$ENV.pid`"
+	ps -fC node | grep vm_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_vm_${ENV}.pid
+        if [ -s /tmp/node_vm_${ENV}.pid ] ; then
+                echo "app server is already running...PID=`cat /tmp/node_vm_${ENV}.pid`"
         else
-		nohup ../Nodejs/httpserver.js > /tmp/$HTTP_SERVER_LOG 2>&1 &
-		ps -ef | grep node | grep -v grep | awk '{print $2}' > /tmp/node_vm_$ENV.pid
+		eval $HTTP_SERVER_CMD
+		ps -fC node | grep vm_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_vm_${ENV}.pid
         fi
 
-	if $DISTRIBUTED ; then 
-		CMD="ssh $USER@graphic02.doc.ic.ac.uk"
-: '		if [ ! -d $HOME/group-project-master ] ; then 
-			echo "Please ensure the group-project-master repo has been cloned to your home directory: $HOME/group-project-master"
-			exit
-		else 
-			cd $HOME/group-project-master/bin
-		fi
-'	fi
-	#git checkout $BRANCH
-
-	#start mongod server on VM
-	#TO-DO: ADD
-
-	#start node graphic server on graphic02
-	$CMD ps -ef | grep node | grep -v grep |  awk '{print $2}' > /tmp/node_graphic02_$ENV.pid
-        $CMD if [ -s /tmp/node_graphic02_$ENV.pid ] ; then echo "graphic server is already running...PID=`cat /tmp/node_graphic02_$ENV.pid`" ; else
-		nohup ../Nodejs/graphicserver.js > /tmp/$GRAPHIC_SERVER_LOG 2>&1 &
-		ps -ef | grep node | grep -v grep | awk '{print $2}' > /tmp/node_graphic02_$ENV.pid
-        fi
-
-        ;;
-
-  stop)
-	echo "Stopping environment: $ENV"	
-	
-	if $DISTRIBUTED ; then  
-		if [ ! "`hostname -i`" == "146.169.44.217" ] ; then 
-			ssh -p 55022 $USER@146.169.44.217
+	#if an iPhone stub is required, start it up
+	if $IPHONE_STUB ; then
+		ps -ef | grep iPhone_stub.js | grep -v grep |  awk '{print $2}' > /tmp/iPhone_vm_${ENV}.pid
+        	if [ -s /tmp/iPhone_vm_${ENV}.pid ] ; then
+			echo "iPhone stub already running...PID=`cat /tmp/iPhone_vm_${ENV}.pid`"
+		else
+			nohup node ./bin/stubs/iPhone_stub.js > /tmp/iPhoneStub_${ENV}.${DATE}.log 2>&1 &
+			ps -ef | grep iPhone_stub.js | grep -v grep |  awk '{print $2}' > /tmp/iPhone_vm_${ENV}.pid
 		fi
 	fi
 
-	if [ ! -s /tmp/mongod_vm_$ENV.pid ]
-        then
+	if $DISTRIBUTED ; then 
+		eval ${SSH_GRAPHIC} ${GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD}
+	else 	#start node graphic server locally
+		ps -fC node | grep graphic_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_graphic_${ENV}.pid
+        	if [ -s /tmp/node_graphic_${ENV}.pid ] ; then echo "graphic server is already running...PID=`cat /tmp/node_graphic_${ENV}.pid`" ; else
+			eval $GRAPHIC_SERVER_CMD
+			ps -fC node | grep graphic_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_graphic_${ENV}.pid
+        	fi
+	 	#start graphic02 instance of MongoDB locally
+		ps -fC mongod | grep graphic_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/mongodb_graphic_$ENV.pid
+        	if [ -s /tmp/mongodb_graphic_$PENV}.pid ] ; then echo "graphic02 instance of MongoDB is already running...PID=`cat /tmp/mongodb_graphic_${ENV}.pid`" ; else
+			eval $GRAPHIC_MONGODB_CMD
+			ps -fC mongod | grep graphic_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/mongodb_graphic_${ENV}.pid
+        	fi
+	fi
+        ;;
+  stop)
+	echo "Stopping environment: $ENV"	
+	
+	if [ ! -s /tmp/mongodb_vm_${ENV}.pid ] ; then
                 echo "MongoDB is not running...therefore it can't be stopped"
         else
                 echo "Stopping MongoDB.."
-                sudo kill -9 `cat /tmp/mongod_vm_$ENV.pid`
+                sudo kill `cat /tmp/mongodb_vm_${ENV}.pid`
+		sudo rm -f /tmp/mongodb_vm_${ENV}.pid
         fi
         
-	if [ ! -s /tmp/node_vm_$ENV.pid ]
-        then
+	if [ ! -s /tmp/node_vm_${ENV}.pid ] ; then
                 echo "http server is not running...therefore it can't be stopped"
         else
                 echo "Stopping http server.." 
-                kill -9 `cat /tmp/node_vm_$ENV.pid`
+                kill -9 `cat /tmp/node_vm_${ENV}.pid`
+		sudo rm -f /tmp/node_vm_${ENV}.pid
         fi
 
-	if $DISTRIBUTED ; then ssh $USER@graphic02.doc.ic.ac.uk ; fi
-
-	if [ ! -s /tmp/node_graphic02_$ENV.pid ]
-        then
-                echo "graphic server is not running...therefore it can't be stopped"
+	if [ ! -s /tmp/iPhone_vm_${ENV}.pid ] ; then
+                echo "iPhone stub is not running...therefore it can't be stopped"
         else
-                echo "Stopping node server.." 
-                kill -9 `cat /tmp/node_graphic02_$ENV.pid`
+                echo "Stopping iPhonse stub.." 
+                kill -9 `cat /tmp/iPhone_vm_${ENV}.pid`
+		sudo rm -f /tmp/iPhone_vm_${ENV}.pid
         fi
 	
+	if $DISTRIBUTED ; then 
+		$SSH_GRAPHIC $GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD
+	else
+		if [ ! -s /tmp/node_graphic_${ENV}.pid ] ; then
+                	echo "graphic server is not running...therefore it can't be stopped"
+        	else
+                	echo "Stopping node server.." 
+                	kill -9 `cat /tmp/node_graphic_${ENV}.pid`
+			sudo rm -f cat /tmp/node_graphic_${ENV}.pid
+        	fi
+		if [ ! -s /tmp/mongodb_graphic_${ENV}.pid ] ; then
+                	echo "graphic02 instance of MongoDB is not running...therefore it can't be stopped"
+        	else
+                	echo "Stopping 'graphic02' MongoDB.." 
+                	sudo kill `cat /tmp/mongodb_graphic_${ENV}.pid`
+			sudo rm -f cat /tmp/mongodb_graphic_${ENV}.pid
+        	fi
+	fi
 	;;
   *)
         echo $USAGE
         exit 2
 esac
-
-
 
