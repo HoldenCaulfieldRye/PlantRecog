@@ -48,7 +48,7 @@ class Tree:
         self.children = {}   # same with children
         self.nodes = {}      # dict of nodes: keys are nodes, values are bool
         self.images = {}     # dict of number of images: keys are nodes, values are number of images in synset corresponding to that node
-        self.bucket = {}     # dict of buckets
+        self.bucket = {}     # dict of buckets 
         self.status = {}
 
     def addNode(self,nodeName,numImages=0):
