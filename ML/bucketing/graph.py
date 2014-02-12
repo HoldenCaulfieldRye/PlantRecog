@@ -135,15 +135,20 @@ class Graph:
         
     def bucketAlgo(self, threshold=1000):
         # step 1: set buckets
-        for node in self.nodes:
-            bucketNode = node
-            while self.images[bucketNode] < threshold:
-                bucketNode = self.parent[bucketNode]
+        for node in self.nodes.keys():
+            bucketNode = node    
+            try:
+                while self.images[bucketNode] < threshold:
+                        bucketNode = self.parent[bucketNode]
+            except: # should reach here iif bucketNode == []
                 if bucketNode == []:
                     print 'Error: %s has no bucketable ancestor'
                     print '       either tree is incorrect, or you have less than 1000 images in total'
-                    return
-            self.bucket[node] = bucketNode
+
+                else:
+                    print 'Fucked it up jonny'
+                    print 'node: %s, bucketNode: %s' % (node, bucketNode)
+                return
 
         # step 2: set node statuses
         # ie figure out which nodes are classifiable, unclassifiable, unnecessary
@@ -152,22 +157,23 @@ class Graph:
                 self.status[node] = 'unclassifiable'
             else: self.status[node] = 'unnecessary'
             
-        for node in unnecessary:
-            if self.children[node] == []:
+        for node in self.nodes.keys():
+            if self.status[node]=='unnecessary' and self.children[node] == []:
                 self.status[node] = 'classifiable'
                 continue
 
             for child in self.children[node]:
                 if self.status[child] == 'unclassifiable':
-                    self.status[node] = classifiable
+                    self.status[node] = 'classifiable'
                     break
 
 
     def printGraphStatus(self):
         print '#total\d: %i \d(check %i)' % (len(self.nodes.keys()), len(self.status.keys()))
         result = {}
-        for stat in [classifiable, unnecessary, unclassifiable]:
-            print = '#%s\d: %i' % (stat, len([node for node in self.nodes.keys() if self.status[node]==stat]))
+        for stat in ['classifiable', 'unnecessary', 'unclassifiable']:
+            result[stat] = [node for node in self.status.keys() if self.status[node]==stat]
+            # print = '#%s\d: %i' % (stat, len([node for node in self.status.keys() if self.status[node]==stat]))
         print ''
 
 
@@ -333,10 +339,8 @@ else: print 'addEdge() SUCCESS :)'
 ######################################################################
 
 print 'bucketing with threshold at 1000 images'
-print 'images for each node:'
-print g1.getImages()
 g1.bucketAlgo()
-printGraphStatus()
+g1.printGraphStatus()
 print ''
 
 g2.bucketAlgo()
