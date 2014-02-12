@@ -8,9 +8,6 @@
 #                                                                                    #
 # Bucketing threshold can be specified as arg, default is 1000                       #
 #                                                                                    #
-# WARNING: If not a tree, image propagation goes wrong (need to improve algo)        #
-#          ie if there exists multiple paths from a node to another, image prop goes #
-#          wrong                                                                     #
 #                                                                                    #
 # WARNING: Still need to write another addEdge() for case where ImageNet provides    #
 #          propagated images                                                         #
@@ -31,6 +28,8 @@
 # NOTE   : Maybe should be able to generate graph from an xml file? wait and see     #
 #          ImageNet provide                                                          #
 #                                                                                    #
+# NOTE   : If you try adding an edge that adds a 2nd parent to a node, it will fail  #
+#          this is to ensure the graph remains a tree                                #
 ######################################################################################
 
 import sys
@@ -38,47 +37,51 @@ import sys
 class Graph:
     def __init__(self,name=""):
         self.name = name      # name of graph
-        self.parents = {}     # dict of neighbours: keys are nodeNames, values are lists of nodeNames
+        self.parent = {}     # dict of neighbours: keys are nodes, values are lists of nodes
         self.children = {}    # same with children
-        self.nodeNames = {}   # dict of nodeNames: keys are nodeNames, values are bool
+        self.nodes = {}   # dict of nodes: keys are nodes, values are bool
         self.images = {}
+        self.bucket = {}
         self.unclassifiable = []
         self.classifiable = []
         self.unnecessary = []
-        
 
     def addNode(self,nodeName,numImages=0):
-        self.nodeNames[nodeName] = True
+        self.nodes[nodeName] = True
         self.images[nodeName] = numImages
         self.children[nodeName] = []
-        self.parents[nodeName] = []
+        self.parent[nodeName] = []
         
 
-    def propagateImages(self, nodeName, numImages, parents):
+    def propagateImages(self, nodeName, numImages, parent):
 
-        # print "propagate called with %s, %i, %s" % (nodeName, numImages, parents)
+        # print "propagate called with %s, %i, %s" % (nodeName, numImages, parent)
         
-        if parents == []: return
+        if parent == []: return
         
-        for parent in parents:
+        for parent in parent:
             try:
                 self.images[parent] += numImages
             except:
                 self.images[parent] = numImages
 
-            # print "len(%s.parents[%s]) == %i" % (self, parent, len(self.parents[parent]))
+            # print "len(%s.parent[%s]) == %i" % (self, parent, len(self.parent[parent]))
 
-            if len(self.parents[parent]) > 0:
-                self.propagateImages(parent, numImages, self.parents[parent]) #self.propagateImages? self as arg?
+            if len(self.parent[parent]) > 0:
+                self.propagateImages(parent, numImages, self.parent[parent]) #self.propagateImages? self as arg?
     
         
     def addEdge(self,parentNode,childNode):
         if childNode in self.children[parentNode]:
             print 'edge already exists'
             return
+
+        if not len(self.parent[childNode])==0:
+            print 'Error: %s already has %s as a parent' % (childNode, self.parent[childNode])
+            print 'if you add %s, the graph will no longer be a tree and bucketing will malfunction' % (parentNode)
         
         self.children[parentNode].append(childNode)
-        self.parents[childNode].append(parentNode)
+        self.parent[childNode].append(parentNode)
 
         # propagate child's images to new parent only, not to all!
         # print '(addEdge): about to propagate', childNode, '\'s', self.images[childNode], 'images to all its ancestors'
@@ -92,10 +95,10 @@ class Graph:
         # except: return []
 
 
-    def getParents(self, nodeName=''):
+    def getParent(self, nodeName=''):
         # try: 
-        if nodeName == '': return self.parents
-        else: return self.parents[nodeName]
+        if nodeName == '': return self.parent
+        else: return self.parent[nodeName]
         # except: return []
 
 
@@ -107,37 +110,43 @@ class Graph:
 
 
     def getNodes(self):
-        return self.nodeNames.keys()
+        return self.nodes.keys()
     
-    def deleteEdge(self,parentNodeName,childNodeName):
+    def deleteEdge(self,parentNode,childNode):
         # try :
-        self.children[parentNodeName].remove(childNodeName)
-        self.parents[childNodeName].remove(parentNodeName)
+        self.children[parentNode].remove(childNode)
+        self.parent[childNode].remove(parentNode)
         # except :
         #     return "error"
 
-    def deleteNode(self,nodeName):
-        del self.nodeNames[nodeName]
+    def deleteNode(self,node):
+        del self.nodes[node]
         # try :
-        for otherNodeName in self.children[nodeName] :
-            self.children[otherNodeName].remove(nodeName)
-        del self.children[nodeName]
+        for otherNode in self.children[node] :
+            self.children[otherNode].remove(node)
+        del self.children[node]
         
-        for otherNodeName in self.parents[nodeName] :
-            self.parents[otherNodeName].remove(nodeName)
-        del self.parents[nodeName]
+        for otherNode in self.parent[node] :
+            self.parent[otherNode].remove(node)
+        del self.parent[node]
         # except :
         #     return "error"
         
         
     def bucketAlgo(self, threshold=1000):
-        for node in self.nodeNames:
+        for node in self.nodes:
             if self.images[node] < threshold:
                 self.unclassifiable.append(node)
+                parent = self.parent[node]
+                # while self.images[parent] < threshold:
+                    
             else: self.unnecessary.append(node)
 
+        # for node in self.nodes:
+            
+
+            
         for node in self.unnecessary:
-            # try:
             if self.children[node] == []:
                 self.unnecessary.remove(node) 
                 self.classifiable.append(node)
@@ -153,7 +162,7 @@ class Graph:
             #     self.unnecessary.remove(node) 
             #     self.classifiable.append(node)
                 
-        print 'total #classes:', len(self.unclassifiable)+len(self.classifiable)+len(self.unnecessary), '(check:', len(self.nodeNames.keys()), ')'
+        print 'total #classes:', len(self.unclassifiable)+len(self.classifiable)+len(self.unnecessary), '(check:', len(self.nodes.keys()), ')'
         print '#classifiable:', len(self.classifiable)
         print '#unnecessary:', len(self.unnecessary)
         print '#unclassifiable:', len(self.unclassifiable)
@@ -224,7 +233,7 @@ createNodes(g5)
 
 print 'adding edges'
 
-## CASE 1: add all leaves first, then parents
+## CASE 1: add all leaves first, then parent
 
 # add edge involving a leaf
 g1.addEdge('european tree', 'evergreen european tree')
@@ -236,7 +245,7 @@ g1.addEdge('asian tree', 'square asian tree')
 g1.addEdge('african tree', 'sexy african tree')
 g1.addEdge('african tree', 'minger african tree')
 
-# add edge involving parents only
+# add edge involving parent only
 g1.addEdge('tree', 'european tree')
 g1.addEdge('tree', 'american tree')
 g1.addEdge('tree', 'asian tree')
@@ -244,9 +253,9 @@ g1.addEdge('tree', 'african tree')
 
 
 
-# CASE 2: add all parents first, then leaves
+# CASE 2: add all parent first, then leaves
 
-# add edge involving parents only
+# add edge involving parent only
 g2.addEdge('tree', 'european tree')
 g2.addEdge('tree', 'american tree')
 g2.addEdge('tree', 'asian tree')
