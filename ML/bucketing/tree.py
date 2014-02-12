@@ -38,7 +38,7 @@
 
 import sys
 
-class Graph:
+class Tree:
     def __init__(self,name=""):
         self.name = name     # name of graph
         self.parent = {}     # dict of neighbours: keys are nodes, values are lists of nodes
@@ -52,7 +52,6 @@ class Graph:
         self.nodes[nodeName] = True
         self.images[nodeName] = numImages
         self.children[nodeName] = []
-        self.parent[nodeName] = []
         
 
     def propagateImages(self, nodeName, numImages, parent):
@@ -78,12 +77,12 @@ class Graph:
             print 'edge already exists'
             return
 
-        if not len(self.parent[childNode])==0:
+        if childNode in self.parent.keys():
             print 'Error: %s already has %s as a parent' % (childNode, self.parent[childNode])
             print '       if you add %s, the graph will no longer be a tree and bucketing will malfunction' % (parentNode)
         
         self.children[parentNode].append(childNode)
-        self.parent[childNode].append(parentNode)
+        self.parent[childNode] = parentNode
 
         # propagate child's images to new parent only, not to all!
         # print '(addEdge): about to propagate', childNode, '\'s', self.images[childNode], 'images to all its ancestors'
@@ -117,7 +116,7 @@ class Graph:
     def deleteEdge(self,parentNode,childNode):
         # try :
         self.children[parentNode].remove(childNode)
-        self.parent[childNode].remove(parentNode)
+        del self.parent[childNode]
         # except :
         #     return "error"
 
@@ -168,7 +167,7 @@ class Graph:
                     break
 
 
-    def printGraphStatus(self):
+    def printTreeStatus(self):
         print '#total\d: %i \d(check %i)' % (len(self.nodes.keys()), len(self.status.keys()))
         result = {}
         for stat in ['classifiable', 'unnecessary', 'unclassifiable']:
@@ -213,11 +212,11 @@ print 'shh testing, attention please'
 #  PART 1: initialise graphs                                         #
 ######################################################################
 
-g1 = Graph()
-g2 = Graph()
-g3 = Graph()
-g4 = Graph()
-g5 = Graph()
+g1 = Tree()
+g2 = Tree()
+g3 = Tree()
+g4 = Tree()
+g5 = Tree()
 
 
 ######################################################################
@@ -340,7 +339,7 @@ else: print 'addEdge() SUCCESS :)'
 
 print 'bucketing with threshold at 1000 images'
 g1.bucketAlgo()
-g1.printGraphStatus()
+g1.printTreeStatus()
 print ''
 
 g2.bucketAlgo()
