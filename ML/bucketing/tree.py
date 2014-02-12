@@ -135,19 +135,18 @@ class Tree:
     def bucketAlgo(self, threshold=1000):
         # step 1: set buckets
         for node in self.nodes.keys():
-            bucketNode = node    
-            try:
-                while self.images[bucketNode] < threshold:
-                        bucketNode = self.parent[bucketNode]
-            except: # should reach here iif bucketNode == []
-                if bucketNode == []:
-                    print 'Error: %s has no bucketable ancestor'
-                    print '       either tree is incorrect, or you have less than 1000 images in total'
-
-                else:
-                    print 'Fucked it up jonny'
-                    print 'node: %s, bucketNode: %s' % (node, bucketNode)
+            bucketNode = node
+            while self.images[bucketNode] < threshold:
+                # below is computationally inefficient, but python doesn't allow me to use a value as a key,
+                # so I can't do bucketNode = self.parent[bucketNode]
+                for parent in self.children.keys():
+                    if bucketNode in self.children[parent]:
+                        bucketNode = parent
+                        continue
+                print 'Error: %s has no bucketable ancestor'
+                print '       either tree is incorrect, or you have less than 1000 images in total'
                 return
+            self.bucket[node] = bucketNode
 
         # step 2: set node statuses
         # ie figure out which nodes are classifiable, unclassifiable, unnecessary
