@@ -15,6 +15,9 @@
 # WARNING: Still need to split 'images' field into 'personalImages' and              #
 #          'bucketedImages'; can currently only perform one bucketing per graph      #
 #                                                                                    #
+# WARNING: bucketAlgo code is dirty. passes the tests, but bad programming. would be #
+#          good to improve it.                                                       #
+#                                                                                    #
 # NOTE   : A species/node is either classifiable, unclassifiable, or unnecessary     #
 #          (unnecessary when all children are classifiable)                          #
 #          so with current implementation, if 1000 labrador images and 50 chiuahuah  #
@@ -68,7 +71,7 @@ class Tree:
 
             # print "len(%s.parent[%s]) == %i" % (self, parent, len(self.parent[parent]))
 
-            if len(self.parent[parent]) > 0:
+            if parent in self.parent.keys():
                 self.propagateImages(parent, numImages, self.parent[parent]) #self.propagateImages? self as arg?
     
         
@@ -134,18 +137,20 @@ class Tree:
         
     def bucketAlgo(self, threshold=1000):
         # step 1: set buckets
+        # these continues and breaks are dirty, not robust! would be good to improve
         for node in self.nodes.keys():
             bucketNode = node
             while self.images[bucketNode] < threshold:
                 # below is computationally inefficient, but python doesn't allow me to use a value as a key,
                 # so I can't do bucketNode = self.parent[bucketNode]
                 for parent in self.children.keys():
-                    if bucketNode in self.children[parent]:
+                    if bucketNode in self.children[parent]: # ie if bucketNode's parent has been found
+                        print 'move from %s to %s' % (bucketNode, parent)
                         bucketNode = parent
                         continue
-                print 'Error: %s has no bucketable ancestor'
-                print '       either tree is incorrect, or you have less than 1000 images in total'
-                return
+                # reach here iif root has been met and doesn't meet threshold
+                self.bucket[node] = bucketNode
+                break
             self.bucket[node] = bucketNode
 
         # step 2: set node statuses
