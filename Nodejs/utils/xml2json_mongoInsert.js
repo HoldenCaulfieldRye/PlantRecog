@@ -25,8 +25,9 @@ MongoClient.connect(conn, function(err, db) {
 			  var document = result.Image;
 			  document.FileName = [ IMAGE_DB_PATH + document.FileName ]; 					
 			  console.log(document);
-			  // add taxon tree at this stage ???
-			  // document.TaxonTree = ['Plant', 'Flowering Plant'];
+			  // add bucket information at this stage
+			  bucket = db.collection('buckets').find({ species : document.Species } , { bucket : 1, _id : 0 });
+			  document.Bucket = [ bucket ];
 			  // insert doc into mongo collection 
 			  db.collection(table).insert(
 			    document, 
