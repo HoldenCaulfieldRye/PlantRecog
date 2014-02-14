@@ -19,7 +19,7 @@ species = bucket.keys()
 
 for i in keys 
 	doc = { "species" : species[i], 
-			"bucket"  : bucket[species[i]] }
+		"bucket"  : bucket[species[i]] }
 	post_id = bucketCollection.insert(doc)
 	if post_id is None:
 		print "error posting species bucket: %s" % (bucket[species[i]]) 

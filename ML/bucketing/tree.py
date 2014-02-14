@@ -15,6 +15,9 @@
 # WARNING: Still need to split 'images' field into 'personalImages' and              #
 #          'bucketedImages'; can currently only perform one bucketing per graph      #
 #                                                                                    #
+# WARNING: bucketAlgo code is dirty. passes the tests, but bad programming. would be #
+#          good to improve it.                                                       #
+#                                                                                    #
 # NOTE   : A species/node is either classifiable, unclassifiable, or unnecessary     #
 #          (unnecessary when all children are classifiable)                          #
 #          so with current implementation, if 1000 labrador images and 50 chiuahuah  #
@@ -28,29 +31,30 @@
 # NOTE   : Maybe should be able to generate graph from an xml file? wait and see     #
 #          ImageNet provide                                                          #
 #                                                                                    #
-# NOTE   : If you try adding an edge that adds a 2nd parent to a node, it will fail  #
+# NOTE   : If you try adding an edge that adds a 2nd parent to a node, it will fail; #
 #          this is to ensure the graph remains a tree                                #
+#                                                                                    #
+# NOTE   : Every node belongs to a bucket. each bucket is a node. a node can         #
+#          therefore be the bucket of multiple nodes.                                #
+#                                                                                    #
 ######################################################################################
 
 import sys
 
-class Graph:
+class Tree:
     def __init__(self,name=""):
-        self.name = name      # name of graph
+        self.name = name     # name of graph
         self.parent = {}     # dict of neighbours: keys are nodes, values are lists of nodes
-        self.children = {}    # same with children
-        self.nodes = {}   # dict of nodes: keys are nodes, values are bool
-        self.images = {}
-        self.bucket = {}
-        self.unclassifiable = []
-        self.classifiable = []
-        self.unnecessary = []
+        self.children = {}   # same with children
+        self.nodes = {}      # dict of nodes: keys are nodes, values are bool
+        self.images = {}     # dict of number of images: keys are nodes, values are number of images in synset corresponding to that node
+        self.bucket = {}     # dict of buckets 
+        self.status = {}
 
     def addNode(self,nodeName,numImages=0):
         self.nodes[nodeName] = True
         self.images[nodeName] = numImages
         self.children[nodeName] = []
-        self.parent[nodeName] = []
         
 
     def propagateImages(self, nodeName, numImages, parent):
@@ -67,7 +71,7 @@ class Graph:
 
             # print "len(%s.parent[%s]) == %i" % (self, parent, len(self.parent[parent]))
 
-            if len(self.parent[parent]) > 0:
+            if parent in self.parent.keys():
                 self.propagateImages(parent, numImages, self.parent[parent]) #self.propagateImages? self as arg?
     
         
@@ -76,12 +80,12 @@ class Graph:
             print 'edge already exists'
             return
 
-        if not len(self.parent[childNode])==0:
+        if childNode in self.parent.keys():
             print 'Error: %s already has %s as a parent' % (childNode, self.parent[childNode])
-            print 'if you add %s, the graph will no longer be a tree and bucketing will malfunction' % (parentNode)
+            print '       if you add %s, the graph will no longer be a tree and bucketing will malfunction' % (parentNode)
         
         self.children[parentNode].append(childNode)
-        self.parent[childNode].append(parentNode)
+        self.parent[childNode] = parentNode
 
         # propagate child's images to new parent only, not to all!
         # print '(addEdge): about to propagate', childNode, '\'s', self.images[childNode], 'images to all its ancestors'
@@ -115,7 +119,7 @@ class Graph:
     def deleteEdge(self,parentNode,childNode):
         # try :
         self.children[parentNode].remove(childNode)
-        self.parent[childNode].remove(parentNode)
+        del self.parent[childNode]
         # except :
         #     return "error"
 
@@ -129,48 +133,51 @@ class Graph:
         for otherNode in self.parent[node] :
             self.parent[otherNode].remove(node)
         del self.parent[node]
-        # except :
-        #     return "error"
         
         
     def bucketAlgo(self, threshold=1000):
+        # step 1: set buckets
+        # these continues and breaks are dirty, not robust! would be good to improve
+        for node in self.nodes.keys():
+            bucketNode = node
+            while self.images[bucketNode] < threshold:
+                # below is computationally inefficient, but python doesn't allow me to use a value as a key,
+                # so I can't do bucketNode = self.parent[bucketNode]
+                for parent in self.children.keys():
+                    if bucketNode in self.children[parent]: # ie if bucketNode's parent has been found
+                        print 'move from %s to %s' % (bucketNode, parent)
+                        bucketNode = parent
+                        continue
+                # reach here iif root has been met and doesn't meet threshold
+                self.bucket[node] = bucketNode
+                break
+            self.bucket[node] = bucketNode
+
+        # step 2: set node statuses
+        # ie figure out which nodes are classifiable, unclassifiable, unnecessary
         for node in self.nodes:
             if self.images[node] < threshold:
-                self.unclassifiable.append(node)
-                parent = self.parent[node]
-                # while self.images[parent] < threshold:
-                    
-            else: self.unnecessary.append(node)
-
-        # for node in self.nodes:
+                self.status[node] = 'unclassifiable'
+            else: self.status[node] = 'unnecessary'
             
-
-            
-        for node in self.unnecessary:
-            if self.children[node] == []:
-                self.unnecessary.remove(node) 
-                self.classifiable.append(node)
+        for node in self.nodes.keys():
+            if self.status[node]=='unnecessary' and self.children[node] == []:
+                self.status[node] = 'classifiable'
                 continue
 
             for child in self.children[node]:
-                if child in self.unclassifiable:
-                    self.unnecessary.remove(node)
-                    self.classifiable.append(node)
+                if self.status[child] == 'unclassifiable':
+                    self.status[node] = 'classifiable'
                     break
 
-            # except: # reach here if node has no children and images >= threshold
-            #     self.unnecessary.remove(node) 
-            #     self.classifiable.append(node)
-                
-        print 'total #classes:', len(self.unclassifiable)+len(self.classifiable)+len(self.unnecessary), '(check:', len(self.nodes.keys()), ')'
-        print '#classifiable:', len(self.classifiable)
-        print '#unnecessary:', len(self.unnecessary)
-        print '#unclassifiable:', len(self.unclassifiable)
 
-        
-    def getBucketResults(self):
-        return self.classifiable, self.unnecessary, self.unclassifiable
-        
+    def printTreeStatus(self):
+        print '#total\d: %i \d(check %i)' % (len(self.nodes.keys()), len(self.status.keys()))
+        result = {}
+        for stat in ['classifiable', 'unnecessary', 'unclassifiable']:
+            result[stat] = [node for node in self.status.keys() if self.status[node]==stat]
+            # print = '#%s\d: %i' % (stat, len([node for node in self.status.keys() if self.status[node]==stat]))
+        print ''
 
 
 def createNodes(g):
@@ -209,11 +216,11 @@ print 'shh testing, attention please'
 #  PART 1: initialise graphs                                         #
 ######################################################################
 
-g1 = Graph()
-g2 = Graph()
-g3 = Graph()
-g4 = Graph()
-g5 = Graph()
+g1 = Tree()
+g2 = Tree()
+g3 = Tree()
+g4 = Tree()
+g5 = Tree()
 
 
 ######################################################################
@@ -329,23 +336,22 @@ if not g1.images['tree'] == g2.images['tree'] == g3.images['tree'] == g4.images[
 
 else: print 'addEdge() SUCCESS :)'
 
+
 ######################################################################
 #  PART 4: bucketing                                                 #
 ######################################################################
 
 print 'bucketing with threshold at 1000 images'
-print 'images for each node:'
-print g1.getImages()
 g1.bucketAlgo()
+g1.printTreeStatus()
 print ''
-print 'classifiable: %s, \nunnecessary: %s, \nunclassifiable: %s\n' % (g1.getBucketResults()[0], g1.getBucketResults()[1], g1.getBucketResults()[2])
 
 g2.bucketAlgo()
 g3.bucketAlgo()
 g4.bucketAlgo()
 g5.bucketAlgo()
 
-if not g1.getBucketResults() == g2.getBucketResults() == g3.getBucketResults() == g4.getBucketResults() == g5.getBucketResults():
+if not g1.status == g2.status == g3.status == g4.status == g5.status:
     print 'PROBLEM!'
 
 else: print 'bucketing success :)'
