@@ -131,7 +131,7 @@ class PlantConvNet(convnet.ConvNet):
 
 
 def console():
-    cfg = get_options('run.cfg', 'run')
+    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
     cfg_options_file = cfg.get(sys.argv[1],'Type classification not found')
     cfg_data_options = get_options(cfg_options_file, 'dataset')
     creator = resolve(cfg.get('creator', 'run.ImageRecogniser'))

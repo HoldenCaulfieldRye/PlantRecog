@@ -43,7 +43,7 @@ def console():
             print '[' + arg + '] ',
         print ''
         return
-    cfg = get_options('run.cfg', 'run')
+    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
     num_results=int(cfg.get('number-of-results',5))
     random_labels = ['Oak','Beech','Lemon tree','Ash','Maple','Pine','Rose','Tulip','Tomato plant','Lavender','Bonsai']
     for images in chunks(sys.argv[2:],128):
