@@ -355,3 +355,4 @@ if not g1.status == g2.status == g3.status == g4.status == g5.status:
     print 'PROBLEM!'
 
 else: print 'bucketing success :)'
+
