@@ -77,6 +77,7 @@ class Tagger(object):
         self.count_correct = 0
         self.count_incorrect = 0
         start_time = time.clock()
+        all_names_and_labels = ['/data2/leafbd/train/5941.xml']
         for names_and_labels,n_l_next in get_next(list(chunks(all_names_and_labels,self.batch_size))):
             loop_time = time.clock()
             if batch_num == 1:
@@ -110,6 +111,9 @@ class Tagger(object):
 
     def write_to_xml(self,data):
         for tag,(name, label) in data:
+            print tag
+            print name
+            '''
             tree = ET.parse(label)
             root = tree.getroot()
             actual = root.find('Content').text
@@ -122,6 +126,7 @@ class Tagger(object):
                     self.count_correct += 1
                 else:
                     self.count_incorrect +=1
+            '''
 
 
 class TagConvNet(convnet.ConvNet):
@@ -148,6 +153,7 @@ class TagConvNet(convnet.ConvNet):
         # Process the batch
         threshold_array = np.empty((self.b_preds.shape[0],1))
         threshold_array.fill(self.b_threshold)
+        print self.b_preds
         self.b_preds = np.hstack((self.b_preds,threshold_array))
         return [self.tag_names[i] for i in np.nditer(self.b_preds.argmax(axis=1))]
 
