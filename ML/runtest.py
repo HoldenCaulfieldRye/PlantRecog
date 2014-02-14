@@ -50,9 +50,10 @@ def console():
 	time.sleep(1.8)
         for image in images:
        	    random_result = random_pick(random_labels)
+            print image + ' {',
 	    for index in range(0,num_results):
                 print '%s:%.03f;'%(random_result[index][0],random_result[index][1]),
-            print ''
+            print '}'
 
 
 if __name__ == "__main__":
