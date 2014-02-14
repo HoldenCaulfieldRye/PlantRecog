@@ -4,10 +4,13 @@ import sys
 import pymongo
 from   pymongo import MongoClient
 
-# Need a way of passing and desierable db host port and db name...from a config file
+# Need a way of passing a desirable db host, port and db name...from a config file
 database = sys.argv[1]
 db_host  = sys.argv[2]
 db_port  = sys.argv[3]
+
+#test bucket dict
+bucket = {"a":"l", "b":"m", "c":"n", "d":"o", "e":"p"}
 
 client = MongoClient(db_host, db_port)
 
@@ -15,9 +18,11 @@ db = client.database
 bucketCollection = db.buckets
 
 #bucket is the resulting dict generated in graph.py
+#WARN: this does not sort this list of keys...ordering is messed up..
 species = bucket.keys()
 
-for i in keys 
+#def()insertBuckets 
+for i in species 
 	doc = { "species" : species[i], 
 		"bucket"  : bucket[species[i]] }
 	post_id = bucketCollection.insert(doc)
