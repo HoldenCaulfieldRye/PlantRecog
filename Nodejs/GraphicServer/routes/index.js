@@ -20,7 +20,9 @@ exports.classify = function(db) {
 			if (req.files.datafile){
 
 				/* TODO synchronously exec the classification script on the command line */
-
+			    exec("python ../../../ML/runtest.py entire ../sample1.jpg", function(err,stdout,stderr){
+				console.log("Image classified");
+			    });
 
 				
 				/* output where we saved the file */
