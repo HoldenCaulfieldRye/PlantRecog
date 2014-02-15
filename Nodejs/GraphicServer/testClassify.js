@@ -30,9 +30,10 @@ var restler = require('restler');
 
 
 fs.stat("sample.jpg", function(err, stats) {
-    restler.post("http://146.169.49.11:55581/classify", {
+    restler.post("http://146.169.44.217:55581/classify", {
         multipart: true,
         data: {
+        	"_id": "52f916df5e5081df42255538",
             "folder_id": "0",
             "datafile": restler.file("sample.jpg", null, stats.size, null, "application/octet-stream")
         }

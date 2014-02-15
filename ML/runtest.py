@@ -52,8 +52,11 @@ def console():
        	    random_result = random_pick(random_labels)
             print image + ' {',
 	    for index in range(0,num_results):
-                print '%s:%.03f;'%(random_result[index][0],random_result[index][1]),
-            print '}'
+                if index < num_results-1:
+                    print '%s:%.03f,'%(random_result[index][0],random_result[index][1]),
+                else:
+                    print '%s:%0.03f }'%(random_result[index][0],random_result[index][1])
+            
 
 
 if __name__ == "__main__":
