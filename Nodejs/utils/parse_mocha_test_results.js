@@ -4,10 +4,14 @@ var content = JSON.parse(data);
 var stats = content.stats;
 var failures = content.failures;
 
-console.log('\tSTATISTICS:');
+
 console.log('\n');
-console.log('\tStart Time:    ' + stats.start);
-console.log('\tEnd Time:      ' + stats.end);
+console.log('\tCode Coverage Summary:');
+console.log('\t\tcoverage: ' + content.coverage + '%\thits: ' + content.hits + '\tmisses: ' + content.misses + '\t sloc: ' + content.sloc);
+console.log('\n');
+console.log('\tSTATISTICS:');
+console.log('\t\tStart Time:    ' + stats.start);
+console.log('\t\tEnd Time:      ' + stats.end);
 console.log('\n');
 console.log('\tTotal number of tests: ' + stats.tests );
 console.log('\t\tPassed: '+stats.passes+'  Failed: '+stats.failures+'  Pending: '+stats.pending);

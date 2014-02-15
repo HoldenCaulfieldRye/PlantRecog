@@ -9,7 +9,7 @@ var content, git_url, git_ref;
 var exec_testScript = function(data){
 	/* parse contents of json message and extract the git_url and git_ref */
 	content = JSON.parse(data);
-	console.log(content);
+	//console.log(content);
 	git_url = content.repository.url;
 	git_ref = content.ref;
 	

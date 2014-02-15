@@ -13,8 +13,8 @@ do
 done
 
 DATE=`date +"%Y.%m.%d"`
-HTTP_SERVER_LOG="/tmp/httpserver_${ENV}_${DATE}.log"
-GRAPHIC_SERVER_LOG="/tmp/graphicserver_${ENV}_${DATE}.log"
+HTTP_SERVER_LOG="/tmp/AppServer_${ENV}_${DATE}.log"
+GRAPHIC_SERVER_LOG="/tmp/GraphicServer_${ENV}_${DATE}.log"
 
 cd $HOME/group-project-master
 
@@ -23,7 +23,7 @@ echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
 	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 else
-	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/GraphicServer/graphic.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 fi
 
 if [ "$ENV" == "prod" ] ; then BRANCH=master ; else BRANCH=$ENV ; fi

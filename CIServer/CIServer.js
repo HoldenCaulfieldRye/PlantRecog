@@ -12,6 +12,7 @@ http.createServer(function(request,response){
 	            body += data;
 	        });
 	        request.on('end', function () {
+			console.log(body);
 			run_test_script(body);
 		});
 	        request.on('error', function (e) {
