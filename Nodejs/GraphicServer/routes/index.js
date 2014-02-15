@@ -14,9 +14,11 @@ exports.index = function(req, res){
 exports.classify = function(db) {
 	
 	return function(req, res) {
+
+//	    function update_db(stdout){
 				
 			/* log the body of this upload */
-			console.log(req.body);
+			console.log('red.body._id: ' + req.body._id);
 			
 			filePath = req.files.datafile.path;
 	                collection = db.collection('usercollection');
@@ -29,8 +31,10 @@ exports.classify = function(db) {
 			    }
 			    
 			    var output = stdout.toString();
-			    var json_obj = JSON.stringify(output.substring(output.search('{'),output.search('}')));
-			    console.log(json_obj);
+			    var to_json = output.substring(output.search('{'),output.search('}')+1);
+			    var json_obj = JSON.stringify(output.substring(output.search('{'),output.search('}')+1));
+			    console.log('to_json: ' + to_json);
+			    console.log('json_obj: ' + json_obj);
 			    console.log(req.body._id);
 			    collection.findAndModify(	        	
 		              { '_id': new BSON.ObjectID(req.body._id)}, /* '52ff886b27d625b55344093f' */
@@ -40,7 +44,7 @@ exports.classify = function(db) {
           	                  "graphic_filepath": filePath,
                                   "classification": json_obj}
 		              },
-		              {}, 
+			      {'new': true}, 
 		              function (err,doc) {
 		                if (err) {
 		                  //If it failed, return error
@@ -55,8 +59,6 @@ exports.classify = function(db) {
 		                  res.json(doc);
 		                }
 		              });
-
-
 			});
 	                
                  	/* output where we saved the file */
