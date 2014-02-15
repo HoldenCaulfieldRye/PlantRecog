@@ -1,32 +1,24 @@
-#!/usr/bin/python
+'''
+	This function will split up the contents of a 'bucket' dictionary and 
+	insert its contents into the 'mongoCollection'. 
+	'bucket' must be a dict of the form species -> bucket
+	'mongoCollection' should be a connection to a mongo collection
 
-import sys
-import pymongo
-from   pymongo import MongoClient
+	author: ghaughian (Feb 2014)
+'''
 
-# Need a way of passing and desierable db host port and db name...from a config file
-database = sys.argv[1]
-db_host  = sys.argv[2]
-db_port  = sys.argv[3]
-
-client = MongoClient(db_host, db_port)
-
-db = client.database
-bucketCollection = db.buckets
-
-#bucket is the resulting dict generated in graph.py
-species = bucket.keys()
-
-for i in keys 
-	doc = { "species" : species[i], 
-		"bucket"  : bucket[species[i]] }
-	post_id = bucketCollection.insert(doc)
-	if post_id is None:
-		print "error posting species bucket: %s" % (bucket[species[i]]) 
-		if not client.alive():
-			print "connection to mongodb has gone down"
-			sys.exit(2)
-
-print "Finished inserting bucket data into MongoDB"
+def insertBucketsIntoMongo(bucket, mongoCollection):
+	species = bucket.keys()
+	for plant in species:
+		doc = { "species" : plant, 
+			"bucket"  : bucket[plant] }
+		post_id = mongoCollection.insert(doc)
+		if post_id is None:
+			print "Error posting species bucket: %s" % (plant) 
+			if not client.alive():
+				print "Connection to mongodb has gone down!! Please retry"
+				sys.exit(2)
+	print "Finished inserting bucket data into MongoDB"
+	return 
 
 
