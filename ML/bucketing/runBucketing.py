@@ -17,7 +17,7 @@ import sys
 import pymongo
 from   pymongo import MongoClient
 
-# load dependant python files
+# load dependent python files
 import tree
 import mongoInsertBuckets
 
@@ -40,9 +40,9 @@ database = sys.argv[3]
 # run tree function(s) in order to generate 'bucket' dictionary
 # TO-DO: Change tree.py so that a single function call (which we call from this script)
 #	 triggers the generation of the taxon tree and bucketing info
-#	 It needs to return a referance to a Tree object so that we can extract the 
+#	 It needs to return a reference to a Tree object so that we can extract the 
 #	 'bucket' dictionary from it.
-
+from taxonTree import t
 
 
 # now insert buckets into mongo
