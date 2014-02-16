@@ -9,8 +9,8 @@
 #import "BLEFSpeicmenObservationsViewController.h"
 #import "BLEFDatabase.h"
 #import "BLEFAppDelegate.h"
-#import "BLEFServerInterface.h"
 #import "BLEFUIObservationCell.h"
+#import "BLEFResultsViewController.h"
 
 @implementation BLEFSpeicmenOberservationsViewController
 
@@ -39,7 +39,6 @@
 {
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     for (int i = 0; i < ([[self collectionView] numberOfItemsInSection:0] - 1); i++){
-        NSLog(@"Removing observer");
         BLEFUIObservationCell *cell = (BLEFUIObservationCell *)[[self collectionView] cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection:0]];
         [center removeObserver:cell];
     }
@@ -86,10 +85,16 @@
         } else {
             [[cell progressBar] setProgress:0];
         }
+        
+        if ([observation result])
+            [cell updateJobStatusUI:true];
+        else
+            [cell updateJobStatusUI:false];
     
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     
         [center addObserver:cell selector:@selector(updateProgress:) name:BLEFUploadDidSendDataNotification object:nil];
+        [center addObserver:cell selector:@selector(updateJobStatus:) name:BLEFJobDidSendDataNotification object:nil];
     
         return cell;
     }
@@ -103,7 +108,8 @@
 - (IBAction)updateButtonClicked:(id)sender
 {
     NSLog(@"Update button clicked");
-    // Server get tasks from self.specimen
+     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    [center postNotificationName:BLEFNetworkRetryNotification object:nil];
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
@@ -111,7 +117,7 @@
     if (indexPath.row < [self.observations count]){
         BLEFUIObservationCell *cell = (BLEFUIObservationCell *)[collectionView cellForItemAtIndexPath:indexPath];
         if ([[cell progressBar] progress] == 1.0){
-            [self performSegueWithIdentifier:@"observationToResult" sender:NULL];
+            [self performSegueWithIdentifier:@"observationToResult" sender:[cell objIB]];
         }
     } else {
         [self showCamerView];
@@ -123,6 +129,9 @@
     if ([[segue identifier] isEqualToString:@"ObservationToCamera"]) {
         BLEFCameraViewController *destination = [segue destinationViewController];
         [destination setDelegate:sender];
+    } else if ([[segue identifier] isEqualToString:@"observationToResult"]){
+        BLEFResultsViewController *destination = [segue destinationViewController];
+        [destination setResultID:sender];
     }
 }
 

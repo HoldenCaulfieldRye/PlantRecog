@@ -18,6 +18,8 @@
 @property (strong, nonatomic) NSMutableArray *jobQueue;
 @property (nonatomic) BOOL uploadQueueProcessingActive;
 @property (nonatomic) BOOL jobQueueProcessingActive;
+@property (nonatomic) BOOL uploadQueueHalted;
+@property (nonatomic) BOOL jobQueueHalted;
 
 @end
 
@@ -31,6 +33,10 @@
         _jobQueue = [[NSMutableArray alloc] init];
         _uploadQueueProcessingActive = false;
         _jobQueueProcessingActive = false;
+        _uploadQueueHalted = false;
+        _jobQueueHalted = false;
+        NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+        [center addObserver:self selector:@selector(enableQueueProcessing) name:BLEFNetworkRetryNotification object:nil];
     }
     return self;
 }
@@ -51,10 +57,10 @@
 
 - (void) processQueue
 {
-    if (!_uploadQueueProcessingActive){
+    if (!_uploadQueueProcessingActive && !_uploadQueueHalted){
         [self processNextInUploadQueue];
     }
-    if (!_jobQueueProcessingActive){
+    if (!_jobQueueProcessingActive && !_jobQueueHalted){
         [self processNextInJobQueue];
     }
 }
@@ -63,10 +69,22 @@
 {
     _uploadQueueProcessingActive = false;
     _jobQueueProcessingActive = false;
+    _jobQueueHalted = true;
+    _uploadQueueHalted = true;
+}
+
+- (void) enableQueueProcessing
+{
+    NSLog(@"Enabling queue processing");
+    _jobQueueHalted = false;
+    _uploadQueueHalted = false;
+    [self processQueue];
 }
 
 
 NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNotification";
+NSString * const BLEFJobDidSendDataNotification = @"BLEFJobDidSendDataNotification";
+NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 
 #pragma mark Private Methods
 
@@ -97,7 +115,7 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
         _jobQueueProcessingActive = true;
         NSManagedObjectID *id = [_jobQueue firstObject];
         [_jobQueue removeObject:id];
-        [self updateJobForObservation:id];
+        [self updateJobAfterDelay:id];
     } else {
         _jobQueueProcessingActive = false;
     }
@@ -109,19 +127,30 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
     NSManagedObject* fetchedObject = [self fetchObjectWithID:observationID];
     if (fetchedObject != nil){
         BLEFObservation* observation = (BLEFObservation *)fetchedObject;
-        NSData *imageData = [observation getImageData];
-        //NSString *urlString = @"http://sheltered-ridge-6203.herokuapp.com/upload";
-        NSString *urlString = @"http://192.168.1.78:5000/upload";
-        //NSString *urlString = @"http://plantrecogniser.no-ip.biz:55580/upload";
-        //NSString *urlString = @"http://www.posttestserver.com/post.php";
-        NSDictionary *params = @{@"segment": [observation segment]};
-        BLEFServerConnection *serverConnection = [self uploadFields:params andFileData:imageData toUrl:urlString];
-        [serverConnection setObjID:observationID];
-        [serverConnection setUpload:true];
-        [serverConnection start];
+        if (![observation uploaded]){
+            NSData *imageData = [observation getImageData];
+            //NSString *urlString = @"http://sheltered-ridge-6203.herokuapp.com/upload";
+            //NSString *urlString = @"http://192.168.1.78:5000/upload";
+            NSString *urlString = @"http://plantrecogniser.no-ip.biz:55580/upload";
+            //NSString *urlString = @"http://www.posttestserver.com/post.php";
+            NSDictionary *params = @{@"segment": [observation segment]};
+            BLEFServerConnection *serverConnection = [self uploadFields:params andFileData:imageData toUrl:urlString];
+            [serverConnection setObjID:observationID];
+            [serverConnection setUpload:true];
+            [serverConnection start];
+        } else {
+            NSLog(@"Already uploaded");
+            [self processNextInUploadQueue];
+        }
     } else {
         NSLog(@"Error fetching observation for upload");
+        [self processNextInUploadQueue];
     }
+}
+
+- (void)updateJobAfterDelay:(NSManagedObjectID*)observationID
+{
+    [self performSelector:@selector(updateJobForObservation:) withObject:observationID afterDelay:1.0f];
 }
 
 - (void)updateJobForObservation:(NSManagedObjectID *)observationID
@@ -131,16 +160,24 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
     if (fetchedObject != nil){
         BLEFObservation *observation = (BLEFObservation *)fetchedObject;
         NSString *jobID = [observation job];
-        if (jobID){
+        if (jobID && ([jobID length] > 2)){
             //NSString *urlString = @"http://192.168.1.78:5000/job";
             NSString *urlString = @"http://plantrecogniser.no-ip.biz:55580/job";
             NSDictionary *params = @{@"jobID": jobID};
+            //NSString *testjobID = @"52ff886a27d625b55344093e";
+            //NSDictionary *params = @{@"jobID": testjobID};
             BLEFServerConnection *serverConnection = [self sendGETwithFields:params toUrl:urlString];
             [serverConnection setObjID:observationID];
             [serverConnection setJobUpdate:true];
             [serverConnection start];
-        } else NSLog(@"No jobID");
-    } else NSLog(@"Error fetching observation for job GET");
+        } else {
+            NSLog(@"No jobID to GET");
+            [self processNextInJobQueue];
+        }
+    } else {
+        NSLog(@"Error fetching observation for job GET");
+        [self processNextInJobQueue];
+    }
 }
 
 - (BLEFServerConnection *)uploadFields:(NSDictionary *)parameters andFileData:(NSData *)fileData toUrl:(NSString *)urlString
@@ -241,7 +278,27 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
     }
     
     if (serverConnection.jobUpdate){
-        // Process result
+        NSError* error;
+        NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+        NSString *classification = json[@"classification"];
+        bool jobComplete = false;
+        if (classification){
+            BLEFObservation *observation = (BLEFObservation *)[self fetchObjectWithID:[serverConnection objID]];
+            if (observation != NULL){
+                [observation setResult:classification];
+                [self saveDatabaseChanges];
+                jobComplete = true;
+                NSDictionary *jobInfo = @{
+                                             @"status" : @true,
+                                             @"objectID"   : [serverConnection objID]
+                                             };
+                [[NSNotificationCenter defaultCenter] postNotificationName:BLEFJobDidSendDataNotification object:nil userInfo:jobInfo];
+                [self processNextInJobQueue];
+            }
+        }
+        if (!jobComplete){
+            [self updateJobAfterDelay:[serverConnection objID]];
+        }
     }
 }
 
@@ -256,21 +313,26 @@ NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNoti
                                      @"objectID"   : [serverConnection objID]
                                      };
         [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
+        [self stopProcessingQueue];
+        [self addObservationToUploadQueue:[serverConnection objID]];
     }
     if (serverConnection.jobUpdate){
-        _jobQueueProcessingActive = false;
+        [self stopProcessingQueue];
+        [self addObservationToJobQueue:[serverConnection objID]];
     }
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    NSLog(@"didFinishLoading");
+    NSLog(@"didFinishLoading...");
     BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
     if (serverConnection.upload){
+        NSLog(@"an Upload");
         [self addObservationToJobQueue:[serverConnection objID]];
         [self processNextInUploadQueue];
     }
     if (serverConnection.jobUpdate){
+        NSLog(@"a Job");
         [self processNextInJobQueue];
     }
 }

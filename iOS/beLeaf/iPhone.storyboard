@@ -74,10 +74,10 @@
             </objects>
             <point key="canvasLocation" x="1349" y="253"/>
         </scene>
-        <!--View Controller-->
+        <!--Results View Controller-->
         <scene sceneID="sBo-C0-0ud">
             <objects>
-                <viewController id="w9r-h4-lCJ" sceneMemberID="viewController">
+                <viewController id="w9r-h4-lCJ" customClass="BLEFResultsViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="bYe-OL-ygN"/>
                         <viewControllerLayoutGuide type="bottom" id="qw8-zL-R9T"/>
@@ -92,10 +92,20 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="..." lineBreakMode="wordWrap" numberOfLines="12" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="250" translatesAutoresizingMaskIntoConstraints="NO" id="fmT-8s-vEf">
+                                <rect key="frame" x="42" y="153" width="250" height="246"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
                     <navigationItem key="navigationItem" id="HLo-ZW-cD1"/>
+                    <connections>
+                        <outlet property="resultLabel" destination="fmT-8s-vEf" id="7ed-sR-3Rh"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jGM-Ym-FsV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

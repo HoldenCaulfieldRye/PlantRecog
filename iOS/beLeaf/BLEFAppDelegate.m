@@ -80,8 +80,21 @@
     if (coordinator != nil) {
         _managedObjectContext = [[NSManagedObjectContext alloc] init];
         [_managedObjectContext setPersistentStoreCoordinator:coordinator];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_mocDidSaveNotification:) name:NSManagedObjectContextDidSaveNotification object:nil];
     }
     return _managedObjectContext;
+}
+
+- (void)_mocDidSaveNotification:(NSNotification *)notification
+{
+    NSManagedObjectContext *savedContext = [notification object];
+    if (_managedObjectContext == savedContext)
+    {
+        return;
+    } else {
+        NSLog(@"Merging changes from server into main DB");
+        [[self managedObjectContext] mergeChangesFromContextDidSaveNotification:notification];
+    }
 }
 
 // Returns the managed object model for the application.

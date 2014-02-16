@@ -15,5 +15,7 @@
 @property (strong, nonatomic) NSManagedObjectID *objIB;
 
 -(void)updateProgress:(NSNotification *)notification;
+-(void)updateJobStatus:(NSNotification *)notification;
+-(void)updateJobStatusUI:(BOOL)status;
 
 @end

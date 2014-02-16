@@ -95,7 +95,6 @@
 
 
 - (IBAction)userSwipeRight:(id)sender {
-    NSLog(@"User swiped ->");
     NSInteger numberofSegments = [self.componentSelection numberOfSegments];
     NSInteger selectedSegment =  [self.componentSelection selectedSegmentIndex];
     if (selectedSegment < numberofSegments)
@@ -103,7 +102,6 @@
 }
 
 - (IBAction)userSwipeLeft:(id)sender {
-    NSLog(@"User swiped <-");
     NSInteger selectedSegment =  [self.componentSelection selectedSegmentIndex];
     if (selectedSegment > 0)
         [self.componentSelection setSelectedSegmentIndex:(selectedSegment -1)];

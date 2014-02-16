@@ -15,5 +15,7 @@
 @property (strong, nonatomic) BLEFSpecimen* specimen;
 @property (strong, nonatomic) NSArray *observations;
 extern NSString * const BLEFUploadDidSendDataNotification;
+extern NSString * const BLEFJobDidSendDataNotification;
+extern NSString * const BLEFNetworkRetryNotification;
 
 @end

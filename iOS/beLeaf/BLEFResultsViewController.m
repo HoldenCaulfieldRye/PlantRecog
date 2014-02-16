@@ -7,8 +7,11 @@
 //
 
 #import "BLEFResultsViewController.h"
+#import "BLEFDatabase.h"
 
 @interface BLEFResultsViewController ()
+
+@property (weak, nonatomic) IBOutlet UILabel *resultLabel;
 
 @end
 
@@ -27,6 +30,15 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    NSManagedObject *fetchedObj = [BLEFDatabase fetchObjectWithID:[self resultID]];
+    if (fetchedObj){
+        BLEFObservation *observation = (BLEFObservation*)fetchedObj;
+        NSString *result = [observation result];
+        if (result)
+            [[self resultLabel] setText:result];
+        else
+            [[self resultLabel] setText:@"No classification..yet"];
+    }
 }
 
 - (void)didReceiveMemoryWarning
