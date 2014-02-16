@@ -14,16 +14,14 @@ exports.index = function(req, res){
 exports.classify = function(db) {
 	
 	return function(req, res) {
-
-//	    function update_db(stdout){
 				
 			/* log the body of this upload */
-			console.log('red.body._id: ' + req.body._id);
+			console.log('req.body._id: ' + req.body._id);
 			
 			filePath = req.files.datafile.path;
 	                collection = db.collection('usercollection');
 			
-			exec('python ML/runtest.py entire ../sample1.jpg', function(err,stdout,stderr){
+			exec('python ML/runtest.py entire ../../../' + filePath, function(err,stdout,stderr){
 			    console.log('stdout: ' + stdout);
 			    console.log('stderr: ' + stderr);
 			    if(err !== null){
@@ -31,16 +29,15 @@ exports.classify = function(db) {
 			    }
 			    
 			    var output = stdout.toString();
-			    var to_json = output.substring(output.search('{'),output.search('}')+1);
-			    var json_obj = JSON.stringify(output.substring(output.search('{'),output.search('}')+1));
-			    console.log('to_json: ' + to_json);
+			    var json_obj = output.substring(output.search('{'),output.search('}')+1);
+			    
 			    console.log('json_obj: ' + json_obj);
-			    console.log(req.body._id);
+			    
 			    collection.findAndModify(	        	
-		              { '_id': new BSON.ObjectID(req.body._id)}, /* '52ff886b27d625b55344093f' */
+		              { '_id': new BSON.ObjectID(req.body._id)}, /* new BSON.  '52ff886b27d625b55344093f' */
 		              [],
 		              { $set : { 
-		                "submission_state" : "Image classified",
+		                  "submission_state" : "Image classified",
           	                  "graphic_filepath": filePath,
                                   "classification": json_obj}
 		              },
@@ -59,12 +56,6 @@ exports.classify = function(db) {
 		                  res.json(doc);
 		                }
 		              });
-			});
-	                
-                 	/* output where we saved the file */
-			console.log("req.body._id is: " + req.body._id);
-			    
-		        // Find our document
-		          
+			});  
 	};
 };
