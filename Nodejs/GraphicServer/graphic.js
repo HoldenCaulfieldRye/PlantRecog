@@ -89,7 +89,7 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 
 
-/* Enable upload function via post at /upload url */
+/* Enable classify function via post at /classify url */
 app.post('/classify', routes.classify(db));
 
 /* Create HTTP Server */

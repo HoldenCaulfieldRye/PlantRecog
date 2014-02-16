@@ -90,7 +90,7 @@ app.get('/job/:job_id', routes.getJob(db));
 
 
 /* Enable upload function via post at /upload url */
-app.post('/upload', routes.upload(db));
+app.post('/upload', routes.upload(db, "http://" + configArgs.classifier_host + ":" + configArgs.classifier_port));
 
 /* Create HTTP Server */
 http.createServer(app).listen(app.get('port'), function(){

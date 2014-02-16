@@ -1,6 +1,7 @@
 var mongo = require('mongodb');
-
 var BSON = mongo.BSONPure;
+var fs = require('fs');
+var restler = require('restler');
 
 /*
  * GET Job
@@ -38,7 +39,7 @@ exports.getJob = function(db) {
 /*
  * POST Image
  */
-exports.upload = function(db) {
+exports.upload = function(db, graphicServer) {
 	
 	return function(req, res) {
 		
@@ -59,7 +60,7 @@ exports.upload = function(db) {
 
 		        // Submit to the DB
 		        collection.insert({
-		            "filepath" : filePath,
+		            "vm_filepath" : filePath,
 		            "submission_state" : "File Submitted from App",
 		            "submission_time" : Math.round(new Date().getTime() / 1000)
 		        }, 
@@ -75,8 +76,22 @@ exports.upload = function(db) {
 		                // If it worked, return JSON object from collection to App//
 		                //res.json(doc);
 		            	res.json( { "id" : docs[0]._id });
+		            	
+		                // Send the image over to the classifier
+		                restler.post(graphicServer + "/classify", {
+		                  multipart: true,
+		                  data: {
+		                    "_id": docs[0]._id,
+		                    "datafile": restler.file(req.files.datafile.path, null, req.files.datafile.size, null, "application/octet-stream")
+		                  }
+		                }).on("complete", function(data) {
+		                  console.log(data);
+		                });
+		              
 		            }
 		        });
+		        
+
 			}
 	};
 };

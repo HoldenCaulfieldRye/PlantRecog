@@ -13,7 +13,7 @@ exports.parseConfig = function(confFile){
   var dbHostSeekString = '# NODE_INI: db_host = ';
   var dbPortSeekString = 'port = ';
   var classifierHostSeekString = '# NODE_INI: graphic_http_host = ';
-  var classifierHttpPortSeekString = '# NODE_INI: graphic_http_port = ';
+  var classifierHttpPortSeekString = '# NODE_INI: graphic_http_port = '; 
   var appServerHttpPortSeekString = '# NODE_INI: vm_http_port = ';
   
   var db_host = -1;
@@ -90,7 +90,7 @@ exports.parseConfig = function(confFile){
   configArgs.db_host = db_host;
   configArgs.db_database = db_database;
   configArgs.classifier_host = classifier_host;
-  configArgs.classifer_port = classifier_port;
+  configArgs.classifier_port = classifier_port;
   configArgs.appServer_port = appServer_port;
   
   return configArgs;

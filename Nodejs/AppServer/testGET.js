@@ -29,14 +29,11 @@ var restler = require('restler');
 
 
 
-fs.stat("sample.jpg", function(err, stats) {
-    restler.post("http://localhost:55581/classify", {
-        multipart: true,
-        data: {
-            "_id": "52f916b400d9bbcf42b87b01",
-            "datafile": restler.file("sample.jpg", null, stats.size, null, "application/octet-stream")
-        }
-    }).on("complete", function(data) {
-        console.log(data);
-    });
+restler.get("http://localhost:55580/job/52ff86ddb844830a533f2b40", {
+  multipart: true,
+  data: {
+    bla: "bla"
+  }
+}).on("complete", function(data) {
+  console.log(data);
 });
