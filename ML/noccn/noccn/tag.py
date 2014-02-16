@@ -113,10 +113,10 @@ class Tagger(object):
         for tag,(name, label) in data:
             print tag
             print name
-            '''
             tree = ET.parse(label)
             root = tree.getroot()
             actual = root.find('Content').text
+            '''
             if self.tagas != None:
 		title = ET.SubElement(root, self.tagas)
 	 	title.text = tag
