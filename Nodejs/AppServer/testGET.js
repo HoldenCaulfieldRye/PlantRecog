@@ -28,8 +28,11 @@ var restler = require('restler');
 //}
 
 
+var arg = process.argv.splice(2);
 
-restler.get("http://localhost:55580/job/52ff86ddb844830a533f2b40", {
+console.log("Getting job information for: " + "http://plantrecogniser.no-ip.biz:55580/job/" + arg);
+
+restler.get("http://plantrecogniser.no-ip.biz:55580/job/" + arg, {
   multipart: true,
   data: {
     bla: "bla"
