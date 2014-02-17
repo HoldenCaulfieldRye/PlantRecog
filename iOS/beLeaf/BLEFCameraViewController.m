@@ -90,12 +90,20 @@
 - (IBAction)takePhoto:(id)sender
 {
     NSLog(@"User Take Photo");
+    [self flash];
     [self.imagePickerController takePicture];
+}
+
+-(void)flash
+{
+    self.imagePickerController.cameraOverlayView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:1.0f];
+    [UIView animateWithDuration:0.5f animations:^{
+        self.imagePickerController.cameraOverlayView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.0f];
+    }];
 }
 
 
 - (IBAction)userSwipeRight:(id)sender {
-    NSLog(@"User swiped ->");
     NSInteger numberofSegments = [self.componentSelection numberOfSegments];
     NSInteger selectedSegment =  [self.componentSelection selectedSegmentIndex];
     if (selectedSegment < numberofSegments)
@@ -103,7 +111,6 @@
 }
 
 - (IBAction)userSwipeLeft:(id)sender {
-    NSLog(@"User swiped <-");
     NSInteger selectedSegment =  [self.componentSelection selectedSegmentIndex];
     if (selectedSegment > 0)
         [self.componentSelection setSelectedSegmentIndex:(selectedSegment -1)];

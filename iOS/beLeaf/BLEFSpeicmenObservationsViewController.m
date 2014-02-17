@@ -9,8 +9,8 @@
 #import "BLEFSpeicmenObservationsViewController.h"
 #import "BLEFDatabase.h"
 #import "BLEFAppDelegate.h"
-#import "BLEFServerInterface.h"
 #import "BLEFUIObservationCell.h"
+#import "BLEFResultsViewController.h"
 
 @implementation BLEFSpeicmenOberservationsViewController
 
@@ -38,7 +38,7 @@
 - (void)viewWillDisappear:(BOOL)animated
 {
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    for (int i = 0; i < [[self collectionView] numberOfItemsInSection:0]; i++){
+    for (int i = 0; i < ([[self collectionView] numberOfItemsInSection:0] - 1); i++){
         BLEFUIObservationCell *cell = (BLEFUIObservationCell *)[[self collectionView] cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection:0]];
         [center removeObserver:cell];
     }
@@ -59,57 +59,68 @@
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return [self.observations count];
+    return [self.observations count] + 1;
 }
 
 - (UICollectionViewCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    // Get Observation
-    BLEFObservation *observation = [self.observations objectAtIndex:indexPath.row];
-    NSManagedObjectID *objID = [observation objectID];
+    if (indexPath.row < [self.observations count]){
+        // Get Observation
+        BLEFObservation *observation = [self.observations objectAtIndex:indexPath.row];
+        NSManagedObjectID *objID = [observation objectID];
     
-    // Get Cell
-    static NSString *identifier = @"Cell";
-    BLEFUIObservationCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
-    [cell setObjIB:objID];
+        // Get Cell
+        static NSString *identifier = @"Cell";
+        BLEFUIObservationCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
+        [cell setObjIB:objID];
     
-    // Set Thumbnail
-    [[cell imageView] setImage:[observation getThumbnail]];
+        // Set Thumbnail
+        [[cell imageView] setImage:[observation getThumbnail]];
     
-    // Set Progress Bar
-    [[cell progressBar] setProgress:0];
-
-    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+        // Set Progress Bar
+        if ([observation uploaded]){
+            [[cell progressBar] setProgress:1.0];
+        } else if ([observation uploadProgress]){
+            [[cell progressBar] setProgress:[observation uploadProgress]];
+        } else {
+            [[cell progressBar] setProgress:0];
+        }
+        
+        if ([observation result])
+            [cell updateJobStatusUI:true];
+        else
+            [cell updateJobStatusUI:false];
     
-    [center addObserver:cell selector:@selector(updateProgress:) name:BLEFUploadDidSendDataNotification object:nil];
+        NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     
+        [center addObserver:cell selector:@selector(updateProgress:) name:BLEFUploadDidSendDataNotification object:nil];
+        [center addObserver:cell selector:@selector(updateJobStatus:) name:BLEFJobDidSendDataNotification object:nil];
+    
+        return cell;
+    }
+    NSString *identifier = @"AddCell";
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
     return cell;
 }
 
 #pragma mark - Navigation Methods
 
-- (IBAction)addPhotoButtonClicked:(id)sender
+- (IBAction)updateButtonClicked:(id)sender
 {
-    NSLog(@"Camera clicked");
-    //[self displayImagePicker];
-    [self showCamerView];
+    NSLog(@"Update button clicked");
+     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    [center postNotificationName:BLEFNetworkRetryNotification object:nil];
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    UICollectionViewCell *cell = [collectionView cellForItemAtIndexPath:indexPath];
-    UIProgressView *progressbar = (UIProgressView *)[cell viewWithTag:50];
-    if ([progressbar progress] == 1.0){
-        
-        [self performSegueWithIdentifier:@"observationToResult" sender:NULL];
-        
-    } else if ([progressbar progress] == 0) {
-        BLEFObservation *observation = [self.observations objectAtIndex:indexPath.row];
-    
-        BLEFAppDelegate* app = [[UIApplication sharedApplication] delegate];
-        BLEFServerInterface *serverInterface = [app serverinterface];
-    
-        [serverInterface addObservationToUploadQueue:[observation objectID]];
+    if (indexPath.row < [self.observations count]){
+        BLEFUIObservationCell *cell = (BLEFUIObservationCell *)[collectionView cellForItemAtIndexPath:indexPath];
+        if ([[cell progressBar] progress] == 1.0){
+            [self performSegueWithIdentifier:@"observationToResult" sender:[cell objIB]];
+        }
+    } else {
+        [self showCamerView];
     }
 }
 
@@ -118,6 +129,9 @@
     if ([[segue identifier] isEqualToString:@"ObservationToCamera"]) {
         BLEFCameraViewController *destination = [segue destinationViewController];
         [destination setDelegate:sender];
+    } else if ([[segue identifier] isEqualToString:@"observationToResult"]){
+        BLEFResultsViewController *destination = [segue destinationViewController];
+        [destination setResultID:sender];
     }
 }
 

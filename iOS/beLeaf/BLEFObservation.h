@@ -18,9 +18,11 @@
 @property (nonatomic, retain) NSString * job;
 @property (nonatomic) double latitude;
 @property (nonatomic) double longitude;
+@property (nonatomic, retain) NSString * result;
 @property (nonatomic, retain) NSString * segment;
 @property (nonatomic, retain) id thumbnail;
 @property (nonatomic) BOOL uploaded;
+@property (nonatomic) float uploadProgress;
 @property (nonatomic, retain) BLEFSpecimen *specimen;
 
 - (UIImage *)getImage;

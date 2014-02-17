@@ -44,4 +44,27 @@
     }
 }
 
+-(void)updateJobStatus:(NSNotification *)notification
+{
+    NSDictionary* uploadInfo = notification.userInfo;
+    NSManagedObjectID *uploadID = [uploadInfo objectForKey:@"objectID"];
+    NSNumber *status = [uploadInfo objectForKey:@"status"];
+    BOOL statusB = [status boolValue];
+    if ([uploadID isEqual:_objIB]){
+        [self updateJobStatusUI:statusB];
+        [_progressBar tintColorDidChange];
+        [_progressBar setNeedsDisplay];
+        [_progressBar setProgress:0.9f animated:true];
+        [_progressBar setProgress:1.0f];
+    }
+}
+
+-(void)updateJobStatusUI:(BOOL)status
+{
+    if (status)
+        [_progressBar setTintColor:[UIColor colorWithRed:0.0f green:1.0f blue:0.0f alpha:1.0f]];
+    else
+        [_progressBar setTintColor:[UIColor colorWithRed:0.0f green:139/255.0f blue:251/255.0f alpha:1.0f]];
+}
+
 @end

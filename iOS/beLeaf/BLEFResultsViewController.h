@@ -10,4 +10,6 @@
 
 @interface BLEFResultsViewController : UIViewController
 
+@property (strong, nonatomic) NSManagedObjectID *resultID;
+
 @end
