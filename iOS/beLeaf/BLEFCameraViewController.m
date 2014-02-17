@@ -90,7 +90,16 @@
 - (IBAction)takePhoto:(id)sender
 {
     NSLog(@"User Take Photo");
+    [self flash];
     [self.imagePickerController takePicture];
+}
+
+-(void)flash
+{
+    self.imagePickerController.cameraOverlayView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:1.0f];
+    [UIView animateWithDuration:0.5f animations:^{
+        self.imagePickerController.cameraOverlayView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.0f];
+    }];
 }
 
 

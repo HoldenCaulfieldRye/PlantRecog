@@ -289,7 +289,7 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
                 [self saveDatabaseChanges];
                 jobComplete = true;
                 NSDictionary *jobInfo = @{
-                                             @"status" : @true,
+                                             @"status" : [NSNumber numberWithBool:true],
                                              @"objectID"   : [serverConnection objID]
                                              };
                 [[NSNotificationCenter defaultCenter] postNotificationName:BLEFJobDidSendDataNotification object:nil userInfo:jobInfo];

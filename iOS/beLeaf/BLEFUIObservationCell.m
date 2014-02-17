@@ -49,8 +49,13 @@
     NSDictionary* uploadInfo = notification.userInfo;
     NSManagedObjectID *uploadID = [uploadInfo objectForKey:@"objectID"];
     NSNumber *status = [uploadInfo objectForKey:@"status"];
+    BOOL statusB = [status boolValue];
     if ([uploadID isEqual:_objIB]){
-        [self updateJobStatusUI:[status boolValue]];
+        [self updateJobStatusUI:statusB];
+        [_progressBar tintColorDidChange];
+        [_progressBar setNeedsDisplay];
+        [_progressBar setProgress:0.9f animated:true];
+        [_progressBar setProgress:1.0f];
     }
 }
 
