@@ -12,9 +12,9 @@ echo "**************Unit Testing <node.js> Code Base**************"
 echo ""
 cd ../Nodejs
 #mocha -R json-cov > mocha_test_results.json; 
-rm -r lib-cov
 make test-cov
 node utils/parse_mocha_test_results.js 
+
 echo ""
 echo "***********Integration Testing <node.js> Code Base**********"
 echo ""

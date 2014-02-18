@@ -19,3 +19,12 @@ describe('Array', function(){
     })
   })
 })
+
+
+describe('GraphicServer', function(){
+  describe('#graphic_config()', function(){
+    it('should not return Invalid Config File error', function(){
+      assert.not.equal({}, graphic_config('../env/graphic_dev_env.conf'));
+    })
+  })
+})
