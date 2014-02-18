@@ -8,12 +8,13 @@
 
 USAGE="Usage: $0 -a {start|stop} -e {dev|qa|prod} [-s {'iPhone httpserver graphicserver classifier'}]"
 
-while getopts "a:e:s:" OPTION
+while getopts "a:e:s:q" OPTION
 do
     case $OPTION in
         a)	ACTION="$OPTARG";;
 	e)	ENV="$OPTARG";;
 	s)	STUBS="$OPTARG";;
+	q)	QUIET_MODE=true;;
 	*)	echo $USAGE; exit 2;;
     esac
 done
@@ -30,13 +31,14 @@ if [ "$ENV" == "qa" -o "$ENV" == "prod" ]
   else DISTRIBUTED=false
 fi
 
-echo -n "Have you cloned the latest version of the repo to your home directory [yes|no]: "
-read cloned
-
-if [ "$cloned" == "no" ] ; then 
-	echo "ERROR: Please clone the latest revision of the repo to your home directory on"
-	if $DISTRIBUTED ; then echo "       both the VM and graphic02 machines" ; else echo "       the VM machine" ; fi
-	exit 2
+if [ ! $QUIET_MODE ] ; then
+	echo -n "Have you cloned the latest version of the repo to your home directory [yes|no]: "
+	read cloned
+	if [ "$cloned" == "no" ] ; then 
+		echo "ERROR: Please clone the latest revision of the repo to your home directory on"
+		if $DISTRIBUTED ; then echo "       both the VM and graphic02 machines" ; else echo "       the VM machine" ; fi
+		exit 2
+	fi
 fi
 
 DATE=`date +"%Y.%m.%d"`
@@ -57,17 +59,18 @@ echo $STUBS | grep httpserver
 if [ $? -eq 0 ]; then
 	HTTP_SERVER_CMD="nohup node ./bin/stubs/httpserver_stub.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
 else 
-	HTTP_SERVER_CMD="nohup node ./Nodejs/AppServer/app.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
+	HTTP_SERVER_CMD="nohup node ./Nodejs/lib/AppServer/app.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
 fi
 #add logic which deals with telling the graphic server to exec the classifier stub if CLASS_STUB=true
 echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
 	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 else
-	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/GraphicServer/graphic.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/lib/GraphicServer/graphic.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 fi
 
-GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="~/group-project-master/bin/startstop_graphic.sh -a ${ACTION} -e ${ENV}"
+#GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="~/group-project-master/bin/startstop_graphic.sh -a ${ACTION} -e ${ENV}"
+GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="/homes/gh413/group-project-master/bin/startstop_graphic.sh -a ${ACTION} -e ${ENV}"
 
 SSH_GRAPHIC="ssh ${USER}@graphic02.doc.ic.ac.uk"
 
@@ -97,6 +100,7 @@ case "$ACTION" in
         if [ -s /tmp/node_vm_${ENV}.pid ] ; then
                 echo "app server is already running...PID=`cat /tmp/node_vm_${ENV}.pid`"
         else
+		echo $HTTP_SERVER_CMD
 		eval $HTTP_SERVER_CMD
 		ps -fC node | grep vm_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_vm_${ENV}.pid
         fi
@@ -112,8 +116,8 @@ case "$ACTION" in
 		fi
 	fi
 
-	if $DISTRIBUTED ; then 
-		eval ${SSH_GRAPHIC} ${GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD}
+	if $DISTRIBUTED ; then
+		eval "${SSH_GRAPHIC} ${GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD}"
 	else 	#start node graphic server locally
 		ps -fC node | grep graphic_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_graphic_${ENV}.pid
         	if [ -s /tmp/node_graphic_${ENV}.pid ] ; then echo "graphic server is already running...PID=`cat /tmp/node_graphic_${ENV}.pid`" ; else

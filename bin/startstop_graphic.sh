@@ -23,7 +23,7 @@ echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
 	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 else
-	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/GraphicServer/graphic.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/lib/GraphicServer/graphic.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
 fi
 
 if [ "$ENV" == "prod" ] ; then BRANCH=master ; else BRANCH=$ENV ; fi
