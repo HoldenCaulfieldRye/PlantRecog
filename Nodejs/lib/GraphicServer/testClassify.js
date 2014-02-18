@@ -30,7 +30,7 @@ var restler = require('restler');
 
 
 fs.stat("sample.jpg", function(err, stats) {
-    restler.post("http://151.225.48.14:55581/classify", {
+    restler.post("http://146.169.44.217:55582/classify", {
         multipart: true,
         data: {
         	"_id": "52f916df5e5081df42255538",
