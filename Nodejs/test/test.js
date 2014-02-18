@@ -1,3 +1,6 @@
+var assert = require("assert")
+
+// Sample Test 1: A failing test
 describe('Array', function(){
   describe('#indexOf()', function(){
     it('should return -1 when the value is not present', function(){
@@ -6,7 +9,8 @@ describe('Array', function(){
     })
   })
 })
-var assert = require("assert")
+
+// Sample Test 2: A passing test
 describe('Array', function(){
   describe('#indexOf()', function(){
     it('should return -1 when the value is not present', function(){
