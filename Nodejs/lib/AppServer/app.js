@@ -61,7 +61,7 @@ app.set('view engine', 'jade');
 app.use(express.favicon()); 
 app.use(express.bodyParser({ 
 	keepExtensions: true,
-	uploadDir:path.join('./Nodejs/AppServer/uploads', configArgs.db_database)
+	uploadDir:path.join('./Nodejs/lib/AppServer/uploads', configArgs.db_database)
 	})
 );
 app.use(express.logger('dev'));

@@ -11,7 +11,7 @@ echo ""
 cd ../Nodejs
 #mocha -R json-cov > mocha_test_results.json; 
 make test-cov
-node utils/parse_mocha_test_results.js 
+node lib/utils/parse_mocha_test_results.js 
 
 echo ""
 echo "******Unit Testing Machine Learning <python> Code Base******"
