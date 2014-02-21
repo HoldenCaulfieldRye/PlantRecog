@@ -26,8 +26,7 @@ from .script import random_seed
 from .script import resolve
 
 # This is used to parse the xml files
-import xml.etree.ElementTree as ET # can be speeded up using lxml possibly
-import xml.dom.minidom as minidom
+from lxml import etree
 
 N_JOBS = -1
 SIZE = (64, 64)
@@ -77,7 +76,6 @@ class Tagger(object):
         self.count_correct = 0
         self.count_incorrect = 0
         start_time = time.clock()
-        all_names_and_labels = ['/data2/leafbd/train/5941.xml']
         for names_and_labels,n_l_next in get_next(list(chunks(all_names_and_labels,self.batch_size))):
             loop_time = time.clock()
             if batch_num == 1:
@@ -85,9 +83,9 @@ class Tagger(object):
 		    delayed(_process_tag_item)(self.size,self.channels,name)
 		    for name, label in names_and_labels)
 	    data = np.vstack([r for r in rows if r is not None]).T
-            mean = data.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
-            print mean
-            data = data - mean
+            if len(names_and_labels) > 20:
+                mean = data.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
+	        data = data - mean
             self.model.start_predictions(data,self.threshold)
             if n_l_next is not None:
 	        rows = Parallel(n_jobs=self.n_jobs)(
@@ -97,37 +95,20 @@ class Tagger(object):
             self.write_to_xml(zip(tags,names_and_labels))
             batch_num += 1
 	    print "Tagged %d images in %.02f seconds" % (len(names_and_labels),time.clock()-loop_time)
-            print 'Correct:' + `self.count_correct` + '\t\t\tIncorrect:',
-            print `self.count_incorrect` + '\t\t\tRatio',
-            print `float(self.count_correct)/(self.count_correct+self.count_incorrect)`
         print "Tagging complete. Tagged %d images in %.02f seconds" % (len(all_names_and_labels),time.clock()-start_time)
-        print 'Correct:' + `self.count_correct` + '\t\t\tIncorrect:' + `self.count_incorrect` + '\t\t\tRatio' + `float(self.count_correct)/(self.count_correct+self.count_incorrect)`
-        
-    def prettify(self, elem):
-	"""Return a pretty-printed XML string for the Element.
-	"""
-	rough_string = ET.tostring(elem, encoding='utf8', method='xml')
-	reparsed = minidom.parseString(rough_string)
-	return reparsed
 
+        
     def write_to_xml(self,data):
         for tag,(name, label) in data:
-            print tag
-            print name
-            tree = ET.parse(label)
-            root = tree.getroot()
-            actual = root.find('Content').text
-            '''
-            if self.tagas != None:
-		title = ET.SubElement(root, self.tagas)
-	 	title.text = tag
-		tree.write(self.output_path+'/'+os.path.basename(label))
-            if tag!='Exclude' and actual!='LeafScan':
-                if tag == actual:
-                    self.count_correct += 1
-                else:
-                    self.count_incorrect +=1
-            '''
+            root = etree.Element("root")
+            meta_data = etree.SubElement(root, "meta_data")
+            image_name = etree.SubElement(meta_data, "Image")
+            image_name.text = name
+            image_tag = etree.SubElement(meta_data, "Component_Tag")
+            image_tag.text = tag
+            xml_file = open(label,'wb')
+            xml_file.write(etree.tostring(root, pretty_print=True))
+            xml_file.close()
 
 
 class TagConvNet(convnet.ConvNet):
@@ -154,7 +135,6 @@ class TagConvNet(convnet.ConvNet):
         # Process the batch
         threshold_array = np.empty((self.b_preds.shape[0],1))
         threshold_array.fill(self.b_threshold)
-        print self.b_preds
         self.b_preds = np.hstack((self.b_preds,threshold_array))
         return [self.tag_names[i] for i in np.nditer(self.b_preds.argmax(axis=1))]
 
@@ -174,15 +154,16 @@ class TagConvNet(convnet.ConvNet):
 
 
 def find(root, pattern):
-    for path, folders, files in os.walk(root, followlinks=True):
-        for fname in files:
+    for path, folders, files in os.walk(root):
+        print path
+        for fname in os.listdir(path):
             if fnmatch(fname, pattern):
                 yield os.path.join(path, fname)
 
 
 def _collect_filenames_and_labels(cfg):
     path = cfg['input-path']
-    pattern = cfg.get('pattern', '*.jpg')
+    pattern = cfg.get('pattern', '*.JPEG')
     metadata_file_ext = cfg.get('meta_data_file_ext', '.xml')
     filenames_and_labels = []
     counter = 0

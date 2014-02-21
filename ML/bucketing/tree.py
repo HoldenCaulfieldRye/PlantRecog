@@ -44,10 +44,11 @@ import sys
 class Tree:
     def __init__(self,name=""):
         self.name = name     # name of graph
-        self.parent = {}     # dict of neighbours: keys are nodes, values are lists of nodes
+        self.parent = {}     # dict of parents: keys are nodes, values are lists of nodes
         self.children = {}   # same with children
         self.nodes = {}      # dict of nodes: keys are nodes, values are bool
         self.images = {}     # dict of number of images: keys are nodes, values are number of images in synset corresponding to that node
+        self.all_images = {} # dict of number of images of all nodes below it: keys are nodes, values are number of images in synset corresponding to that node
         self.bucket = {}     # dict of buckets 
         self.status = {}
 
@@ -55,6 +56,7 @@ class Tree:
     def addNode(self,nodeName,parentNode=None,numImages=0):
         self.nodes[nodeName] = True
         self.images[nodeName] = numImages
+        self.all_images[nodeName] = numImages
         self.children[nodeName] = []
         if parentNode is not None:
 	    self.addEdge(parentNode,nodeName)
@@ -62,18 +64,10 @@ class Tree:
 
     def propagateImages(self, nodeName, numImages, parent):
         # print "propagate called with %s, %i, %s" % (nodeName, numImages, parent)
-        if parent == []: return
-        
-        for parent in parent:
-            try:
-                self.images[parent] += numImages
-            except:
-                self.images[parent] = numImages
-
-            # print "len(%s.parent[%s]) == %i" % (self, parent, len(self.parent[parent]))
-
-            if parent in self.parent.keys():
-                self.propagateImages(parent, numImages, self.parent[parent]) #self.propagateImages? self as arg?
+        self.all_images[parent] += numImages
+        # print "len(%s.parent[%s]) == %i" % (self, parent, len(self.parent[parent]))
+        if parent in self.parent.keys():
+            self.propagateImages(parent, numImages, self.parent[parent]) #self.propagateImages? self as arg?
     
         
     def addEdge(self,parentNode,childNode):
@@ -83,14 +77,15 @@ class Tree:
 
         if childNode in self.parent.keys():
             print 'Error: %s already has %s as a parent' % (childNode, self.parent[childNode])
-            print '       if you add %s, the graph will no longer be a tree and bucketing will malfunction' % (parentNode)
+            print '       if you %s, the graph will no longer be a tree and bucketing will malfunction. It has been rejected' % (parentNode)
+            return
         
         self.children[parentNode].append(childNode)
         self.parent[childNode] = parentNode
 
         # propagate child's images to new parent only, not to all!
         # print '(addEdge): about to propagate', childNode, '\'s', self.images[childNode], 'images to all its ancestors'
-        self.propagateImages(childNode, self.images[childNode], [parentNode])
+        self.propagateImages(childNode, self.images[childNode], parentNode)
 
             
     def getChildren(self, nodeName=''):
