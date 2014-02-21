@@ -1,3 +1,4 @@
 nohup.out
 /Nodejs/lib/AppServer/uploads/*/*.jpg
-/Nodejs/lib/GraphicServer/uploads/*/*.jpg
+/Nodejs/lib/GraphicServer/uploads/*/*.jpgi
+node_modules/

@@ -6,15 +6,18 @@
 #			   $2 = 'dev', 'qa', or 'prod'...the environment you wish to run
 #
 
-USAGE="Usage: $0 -a {start|stop} -e {dev|qa|prod} [-s {'iPhone httpserver graphicserver classifier'}]"
+USAGE="Usage: $0 -a {start|stop} -e {dev|qa|prod} [-d -q] [-s {'iPhone httpserver graphicserver classifier'}]"
+PSEUDODIST=false
 
-while getopts "a:e:s:q" OPTION
+
+while getopts "a:e:s:qd" OPTION
 do
     case $OPTION in
         a)	ACTION="$OPTARG";;
 	e)	ENV="$OPTARG";;
 	s)	STUBS="$OPTARG";;
 	q)	QUIET_MODE=true;;
+	d)	PSEUDODIST=true;;
 	*)	echo $USAGE; exit 2;;
     esac
 done
@@ -26,9 +29,14 @@ if [ ! "`hostname -i`" == "146.169.44.217" ] ; then
 fi
 
 #Do we need to set up a distributd system or a local one? (dev is always local)
-if [ "$ENV" == "qa" -o "$ENV" == "prod" ]
-  then DISTRIBUTED=true
-  else DISTRIBUTED=false
+if $PSEUDODIST 
+then
+	DISTRIBUTED=false
+else
+	if [ "$ENV" == "qa" -o "$ENV" == "prod" ]
+	  then DISTRIBUTED=true
+	  else DISTRIBUTED=false
+	fi
 fi
 
 if [ ! $QUIET_MODE ] ; then
@@ -45,7 +53,16 @@ DATE=`date +"%Y.%m.%d"`
 HTTP_SERVER_LOG="/tmp/AppServer_${ENV}_${DATE}.log"
 GRAPHIC_SERVER_LOG="/tmp/GraphicServer_${ENV}_${DATE}.log"
 
+if $PSEUDODIST ; then
+	NODE_APP_ENV="./env/pseudo-dist_dev_env.conf"
+	NODE_GRAPHIC_ENV="./env/pseudo-dist_dev_env.conf"
+else
+	NODE_APP_ENV="./env/vm_${ENV}_env.conf"
+	NODE_GRAPHIC_ENV="./env/graphic_${ENV}_env.conf"
+fi
+
 cd $HOME/group-project-master
+
 
 VM_MONGODB_CMD="sudo su -c \"mongod --config ./env/vm_${ENV}_env.conf &\" -s /bin/sh mongodb"
 GRAPHIC_MONGODB_CMD="sudo su -c \"mongod --config ./env/graphic_${ENV}_env.conf &\" -s /bin/sh mongodb"
@@ -57,16 +74,16 @@ if [ $? -eq 0 ]; then CLASS_STUB=true ; else CLASS_STUB=false ; fi
 
 echo $STUBS | grep httpserver
 if [ $? -eq 0 ]; then
-	HTTP_SERVER_CMD="nohup node ./bin/stubs/httpserver_stub.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
+	HTTP_SERVER_CMD="nohup node ./bin/stubs/httpserver_stub.js $NODE_APP_ENV > $HTTP_SERVER_LOG 2>&1 &"
 else 
-	HTTP_SERVER_CMD="nohup node ./Nodejs/lib/AppServer/app.js ./env/vm_${ENV}_env.conf > $HTTP_SERVER_LOG 2>&1 &"
+	HTTP_SERVER_CMD="nohup node ./Nodejs/lib/AppServer/app.js $NODE_APP_ENV > $HTTP_SERVER_LOG 2>&1 &"
 fi
 #add logic which deals with telling the graphic server to exec the classifier stub if CLASS_STUB=true
 echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
-	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ${NODE_GRAPHIC_ENV}  > $GRAPHIC_SERVER_LOG 2>&1 &"
 else
-	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/lib/GraphicServer/graphic.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"
+	GRAPHIC_SERVER_CMD="nohup node ./Nodejs/lib/GraphicServer/graphic.js ${NODE_GRAPHIC_ENV}  > $GRAPHIC_SERVER_LOG 2>&1 &"
 fi
 
 #GRAPHIC_SERVER_STARTSTOP_SCRIPT_CMD="~/group-project-master/bin/startstop_graphic.sh -a ${ACTION} -e ${ENV}"
@@ -121,6 +138,7 @@ case "$ACTION" in
 	else 	#start node graphic server locally
 		ps -fC node | grep graphic_${ENV}_env.conf | grep -v grep |  awk '{print $2}' > /tmp/node_graphic_${ENV}.pid
         	if [ -s /tmp/node_graphic_${ENV}.pid ] ; then echo "graphic server is already running...PID=`cat /tmp/node_graphic_${ENV}.pid`" ; else
+			echo $GRAPHIC_SERVER_CMD
 			eval $GRAPHIC_SERVER_CMD
 			ps -fC node | grep graphic_${ENV}_env.conf | grep -v grep | awk '{print $2}' > /tmp/node_graphic_${ENV}.pid
         	fi
