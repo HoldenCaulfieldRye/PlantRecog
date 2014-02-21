@@ -155,7 +155,6 @@ class TagConvNet(convnet.ConvNet):
 
 def find(root, pattern):
     for path, folders, files in os.walk(root):
-        print path
         for fname in os.listdir(path):
             if fnmatch(fname, pattern):
                 yield os.path.join(path, fname)
