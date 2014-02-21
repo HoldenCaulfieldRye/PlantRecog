@@ -86,6 +86,7 @@ class Tagger(object):
 		    for name, label in names_and_labels)
 	    data = np.vstack([r for r in rows if r is not None]).T
             mean = data.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
+            print mean
             data = data - mean
             self.model.start_predictions(data,self.threshold)
             if n_l_next is not None:

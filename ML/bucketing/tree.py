@@ -51,16 +51,17 @@ class Tree:
         self.bucket = {}     # dict of buckets 
         self.status = {}
 
-    def addNode(self,nodeName,numImages=0):
+
+    def addNode(self,nodeName,parentNode=None,numImages=0):
         self.nodes[nodeName] = True
         self.images[nodeName] = numImages
         self.children[nodeName] = []
+        if parentNode is not None:
+	    self.addEdge(parentNode,nodeName)
         
 
     def propagateImages(self, nodeName, numImages, parent):
-
         # print "propagate called with %s, %i, %s" % (nodeName, numImages, parent)
-        
         if parent == []: return
         
         for parent in parent:
@@ -209,150 +210,153 @@ def createNodes(g):
     g.addNode('minger african tree', 1250)
 
 
+def main():
 # if __name__ == "__main__":
-print 'shh testing, attention please'
+    print 'shh testing, attention please'
 
 ######################################################################
 #  PART 1: initialise graphs                                         #
 ######################################################################
 
-g1 = Tree()
-g2 = Tree()
-g3 = Tree()
-g4 = Tree()
-g5 = Tree()
+    g1 = Tree()
+    g2 = Tree()
+    g3 = Tree()
+    g4 = Tree()
+    g5 = Tree()
 
 
 ######################################################################
 #  PART 2: create node-wise identical graphs                         #
 ######################################################################
 
-createNodes(g1)
-createNodes(g2)
-createNodes(g3)
-createNodes(g4)
-createNodes(g5)
+    createNodes(g1)
+    createNodes(g2)
+    createNodes(g3)
+    createNodes(g4)
+    createNodes(g5)
 
 
 ######################################################################
 #  PART 3: add same edges to each graph, but in different order      #
 ######################################################################
 
-print 'adding edges'
+    print 'adding edges'
 
 ## CASE 1: add all leaves first, then parent
 
 # add edge involving a leaf
-g1.addEdge('european tree', 'evergreen european tree')
-g1.addEdge('european tree', 'palm european tree')
-g1.addEdge('american tree', 'big american tree')
-g1.addEdge('american tree', 'small american tree')
-g1.addEdge('asian tree', 'pointy asian tree')
-g1.addEdge('asian tree', 'square asian tree')
-g1.addEdge('african tree', 'sexy african tree')
-g1.addEdge('african tree', 'minger african tree')
+    g1.addEdge('european tree', 'evergreen european tree')
+    g1.addEdge('european tree', 'palm european tree')
+    g1.addEdge('american tree', 'big american tree')
+    g1.addEdge('american tree', 'small american tree')
+    g1.addEdge('asian tree', 'pointy asian tree')
+    g1.addEdge('asian tree', 'square asian tree')
+    g1.addEdge('african tree', 'sexy african tree')
+    g1.addEdge('african tree', 'minger african tree')
 
 # add edge involving parent only
-g1.addEdge('tree', 'european tree')
-g1.addEdge('tree', 'american tree')
-g1.addEdge('tree', 'asian tree')
-g1.addEdge('tree', 'african tree')
+    g1.addEdge('tree', 'european tree')
+    g1.addEdge('tree', 'american tree')
+    g1.addEdge('tree', 'asian tree')
+    g1.addEdge('tree', 'african tree')
 
 
 
 # CASE 2: add all parent first, then leaves
 
 # add edge involving parent only
-g2.addEdge('tree', 'european tree')
-g2.addEdge('tree', 'american tree')
-g2.addEdge('tree', 'asian tree')
-g2.addEdge('tree', 'african tree')
+    g2.addEdge('tree', 'european tree')
+    g2.addEdge('tree', 'american tree')
+    g2.addEdge('tree', 'asian tree')
+    g2.addEdge('tree', 'african tree')
 
 # add edge involving a leaf
-g2.addEdge('european tree', 'evergreen european tree')
-g2.addEdge('european tree', 'palm european tree')
-g2.addEdge('american tree', 'big american tree')
-g2.addEdge('american tree', 'small american tree')
-g2.addEdge('asian tree', 'pointy asian tree')
-g2.addEdge('asian tree', 'square asian tree')
-g2.addEdge('african tree', 'sexy african tree')
-g2.addEdge('african tree', 'minger african tree')
+    g2.addEdge('european tree', 'evergreen european tree')
+    g2.addEdge('european tree', 'palm european tree')
+    g2.addEdge('american tree', 'big american tree')
+    g2.addEdge('american tree', 'small american tree')
+    g2.addEdge('asian tree', 'pointy asian tree')
+    g2.addEdge('asian tree', 'square asian tree')
+    g2.addEdge('african tree', 'sexy african tree')
+    g2.addEdge('african tree', 'minger african tree')
 
 
 
 # CASE 3: mix up leaf/parent adding order
 
-g3.addEdge('european tree', 'palm european tree')
-g3.addEdge('tree', 'american tree')
-g3.addEdge('american tree', 'big american tree')
-g3.addEdge('asian tree', 'pointy asian tree')
-g3.addEdge('tree', 'african tree')
-g3.addEdge('african tree', 'sexy african tree')
-g3.addEdge('african tree', 'minger african tree')
-g3.addEdge('asian tree', 'square asian tree')
-g3.addEdge('tree', 'european tree')
-g3.addEdge('european tree', 'evergreen european tree')
-g3.addEdge('tree', 'asian tree')
-g3.addEdge('american tree', 'small american tree')
+    g3.addEdge('european tree', 'palm european tree')
+    g3.addEdge('tree', 'american tree')
+    g3.addEdge('american tree', 'big american tree')
+    g3.addEdge('asian tree', 'pointy asian tree')
+    g3.addEdge('tree', 'african tree')
+    g3.addEdge('african tree', 'sexy african tree')
+    g3.addEdge('african tree', 'minger african tree')
+    g3.addEdge('asian tree', 'square asian tree')
+    g3.addEdge('tree', 'european tree')
+    g3.addEdge('european tree', 'evergreen european tree')
+    g3.addEdge('tree', 'asian tree')
+    g3.addEdge('american tree', 'small american tree')
 
 
 
 # CASE 4: mix up leaf/parent adding order differently
 
-g4.addEdge('asian tree', 'square asian tree')
-g4.addEdge('european tree', 'evergreen european tree')
-g4.addEdge('american tree', 'small american tree')
-g4.addEdge('tree', 'american tree')
-g4.addEdge('african tree', 'sexy african tree')
-g4.addEdge('american tree', 'big american tree')
-g4.addEdge('tree', 'asian tree')
-g4.addEdge('asian tree', 'pointy asian tree')
-g4.addEdge('tree', 'african tree')
-g4.addEdge('african tree', 'minger african tree')
-g4.addEdge('tree', 'european tree')
-g4.addEdge('european tree', 'palm european tree')
+    g4.addEdge('asian tree', 'square asian tree')
+    g4.addEdge('european tree', 'evergreen european tree')
+    g4.addEdge('american tree', 'small american tree')
+    g4.addEdge('tree', 'american tree')
+    g4.addEdge('african tree', 'sexy african tree')
+    g4.addEdge('american tree', 'big american tree')
+    g4.addEdge('tree', 'asian tree')
+    g4.addEdge('asian tree', 'pointy asian tree')
+    g4.addEdge('tree', 'african tree')
+    g4.addEdge('african tree', 'minger african tree')
+    g4.addEdge('tree', 'european tree')
+    g4.addEdge('european tree', 'palm european tree')
 
 
 
 # CASE 5: mix up leaf/parent adding order again differently
 
-g5.addEdge('asian tree', 'square asian tree')
-g5.addEdge('american tree', 'small american tree')
-g5.addEdge('tree', 'american tree')
-g5.addEdge('african tree', 'minger african tree')
-g5.addEdge('european tree', 'evergreen european tree')
-g5.addEdge('tree', 'european tree')
-g5.addEdge('american tree', 'big american tree')
-g5.addEdge('tree', 'asian tree')
-g5.addEdge('african tree', 'sexy african tree')
-g5.addEdge('asian tree', 'pointy asian tree')
-g5.addEdge('european tree', 'palm european tree')
-g5.addEdge('tree', 'african tree')
+    g5.addEdge('asian tree', 'square asian tree')
+    g5.addEdge('american tree', 'small american tree')
+    g5.addEdge('tree', 'american tree')
+    g5.addEdge('african tree', 'minger african tree')
+    g5.addEdge('european tree', 'evergreen european tree')
+    g5.addEdge('tree', 'european tree')
+    g5.addEdge('american tree', 'big american tree')
+    g5.addEdge('tree', 'asian tree')
+    g5.addEdge('african tree', 'sexy african tree')
+    g5.addEdge('asian tree', 'pointy asian tree')
+    g5.addEdge('european tree', 'palm european tree')
+    g5.addEdge('tree', 'african tree')
 
 
-if not g1.images['tree'] == g2.images['tree'] == g3.images['tree'] == g4.images['tree'] == g5.images['tree']:
-    print 'PROBLEM!!'
-    print "g1.images['tree'] == %i \ng2.images['tree'] == %i \ng3.images['tree'] == %i \ng4.images['tree'] == %i \ng5.images['tree'] == %i \n" % (g1.images['tree'], g2.images['tree'], g3.images['tree'], g4.images['tree'], g5.images['tree'])
+    if not g1.images['tree'] == g2.images['tree'] == g3.images['tree'] == g4.images['tree'] == g5.images['tree']:
+	print 'PROBLEM!!'
+	print "g1.images['tree'] == %i \ng2.images['tree'] == %i \ng3.images['tree'] == %i \ng4.images['tree'] == %i \ng5.images['tree'] == %i \n" % (g1.images['tree'], g2.images['tree'], g3.images['tree'], g4.images['tree'], g5.images['tree'])
 
-else: print 'addEdge() SUCCESS :)'
+    else: print 'addEdge() SUCCESS :)'
 
 
 ######################################################################
 #  PART 4: bucketing                                                 #
 ######################################################################
 
-print 'bucketing with threshold at 1000 images'
-g1.bucketAlgo()
-g1.printTreeStatus()
-print ''
+    print 'bucketing with threshold at 1000 images'
+    g1.bucketAlgo()
+    g1.printTreeStatus()
+    print ''
 
-g2.bucketAlgo()
-g3.bucketAlgo()
-g4.bucketAlgo()
-g5.bucketAlgo()
+    g2.bucketAlgo()
+    g3.bucketAlgo()
+    g4.bucketAlgo()
+    g5.bucketAlgo()
 
-if not g1.status == g2.status == g3.status == g4.status == g5.status:
-    print 'PROBLEM!'
+    if not g1.status == g2.status == g3.status == g4.status == g5.status:
+	print 'PROBLEM!'
 
-else: print 'bucketing success :)'
+    else: print 'bucketing success :)'
 
+if __name__ == "__main__":
+    main()
