@@ -21,7 +21,7 @@ exports.classify = function(db) {
 			filePath = req.files.datafile.path;
 	                collection = db.collection('usercollection');
 			
-			exec('python ML/runtest.py entire ../../../' + filePath, function(err,stdout,stderr){
+			exec('python ML/runtest.py entire ../../../../' + filePath, function(err,stdout,stderr){
 			    console.log('stdout: ' + stdout);
 			    console.log('stderr: ' + stderr);
 			    if(err !== null){

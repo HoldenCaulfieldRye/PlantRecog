@@ -36,6 +36,7 @@ var confFile = args[0];
 console.log("Parsing Config");
 
 try{
+  //configArgs = parse.parseConfig(confFile);
   configArgs = parse.parseConfig(confFile);
 }
 catch (err) {
@@ -86,10 +87,11 @@ if ('development' == app.get('env')) {
 }
 
 /* Routes to follow on URL */
+//app.get('/', routes.index);
 app.get('/', routes.index);
 
-
 /* Enable classify function via post at /classify url */
+//app.post('/classify', routes.classify(db));
 app.post('/classify', routes.classify(db));
 
 /* Create HTTP Server */
