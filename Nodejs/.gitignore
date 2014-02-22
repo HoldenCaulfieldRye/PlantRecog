@@ -1,2 +1,2 @@
-*.json
+mocha_test_results.json
 lib-cov

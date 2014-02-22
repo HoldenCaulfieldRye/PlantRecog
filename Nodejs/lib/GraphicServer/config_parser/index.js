@@ -12,7 +12,7 @@ exports.parseConfig = function(confFile){
   /* TODO: remove vars which are not relevant to graphic02 */
   var dbSeekString = '# NODE_INI: db_database = ';
   var dbHostSeekString = '# NODE_INI: db_host = ';
-  var dbPortSeekString = 'port = ';
+  var dbPortSeekString = '# NODE_INI: db_port = ';
   var classifierHostSeekString = '# NODE_INI: graphic_http_host = ';
   var classifierHttpPortSeekString = '# NODE_INI: graphic_http_port = ';
   var appServerHttpPortSeekString = '# NODE_INI: vm_http_port = ';
