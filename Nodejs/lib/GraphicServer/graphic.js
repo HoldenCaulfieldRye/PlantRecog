@@ -7,14 +7,13 @@ var DEBUG = true;
  */
 var fs = require('fs');
 var express = require('express');
-//var routes = require('./routes');
+var routes = require('./routes');
 var http = require('http');
 var path = require('path');
 var mongo = require('mongodb');
-//var parse = require('./config_parser');
+var parse = require('./config_parser');
 var async = require('async');
 var app = express();
-var plant = require('../plant.js');
 
 /* Code to allow connection to mongo, gets new instance of MongoClient */
 var mongoClient = mongo.MongoClient;
@@ -38,7 +37,7 @@ console.log("Parsing Config");
 
 try{
   //configArgs = parse.parseConfig(confFile);
-  configArgs = plant.graphic_config.parseConfig(confFile);
+  configArgs = parse.parseConfig(confFile);
 }
 catch (err) {
   console.log('Error during parse: ' + err);
@@ -89,11 +88,11 @@ if ('development' == app.get('env')) {
 
 /* Routes to follow on URL */
 //app.get('/', routes.index);
-app.get('/', plant.graphic_routes_index.index);
+app.get('/', routes.index);
 
 /* Enable classify function via post at /classify url */
 //app.post('/classify', routes.classify(db));
-app.post('/classify', plant.graphic_routes_index.classify(db));
+app.post('/classify', routes.classify(db));
 
 /* Create HTTP Server */
 http.createServer(app).listen(app.get('port'), function(){
