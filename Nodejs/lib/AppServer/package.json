@@ -12,6 +12,8 @@
     "restler": "*",
     "request": "*",
     "form-data": "*",
-    "async": "*"
+    "async": "*",
+    "formidable": "*",
+    "util": "*"
   }
 }

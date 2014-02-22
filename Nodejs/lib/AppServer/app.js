@@ -59,11 +59,6 @@ app.set('port', process.env.PORT || configArgs.appServer_port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(express.favicon()); 
-app.use(express.bodyParser({ 
-	keepExtensions: true,
-	uploadDir:path.join('./Nodejs/lib/AppServer/uploads', configArgs.db_database)
-	})
-);
 app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
@@ -90,7 +85,7 @@ app.get('/job/:job_id', routes.getJob(db));
 
 
 /* Enable upload function via post at /upload url */
-app.post('/upload', routes.upload(db, "http://" + configArgs.classifier_host + ":" + configArgs.classifier_port));
+app.post('/upload', routes.upload(db, "http://" + configArgs.classifier_host + ":" + configArgs.classifier_port, configArgs));
 
 /* Create HTTP Server */
 http.createServer(app).listen(app.get('port'), function(){
