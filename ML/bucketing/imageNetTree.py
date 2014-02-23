@@ -18,7 +18,8 @@ def addAllNodes(tree,wnid,directory):
             number_of_images = 0
             if (os.path.isdir(directory+'/'+sub_wnid)):
                 number_of_images = len([name for name in os.listdir(directory+'/'+sub_wnid) 
-                                        if os.path.isfile(directory+'/'+sub_wnid+'/'+name)])
+                                        if os.path.isfile(directory+'/'+sub_wnid+'/'+name) and name[-5:] == '.JPEG'])
+            print 'Images found for %s:%i' % (sub_wnid,number_of_images)
 	    tree.addNode(sub_wnid,wnid,number_of_images)
     if sub_children:
         for sub_child in sub_children:
@@ -54,8 +55,9 @@ def main(arguments):
             number_of_images = 0
             if (os.path.isdir(arguments[2]+'/'+node)):
                 number_of_images = len([name for name in os.listdir(arguments[2]+'/'+node) 
-                                        if os.path.isfile(arguments[2]+'/'+node+'/'+name)])
+                                        if os.path.isfile(arguments[2]+'/'+node+'/'+name) and name[-5:] == '.JPEG'])
             imagenet_tree.addNode(node,node_dictionary[node],number_of_images)
+            print 'Images found for %s:%i' % (node,number_of_images)
             addAllNodes(imagenet_tree,node,arguments[2])
         pickled_file = open(arguments[1],'wb')
 	pickle.dump(imagenet_tree,pickled_file)
