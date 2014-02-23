@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 *.pyc
 bin/
 obj/
@@ -16,4 +15,3 @@ lib/
 local
 
 *pyc
->>>>>>> noccn-master

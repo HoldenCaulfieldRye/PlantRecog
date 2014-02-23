@@ -39,15 +39,15 @@ if ! grep -q 'export LOCAL_BIN=${HOME}/.local/bin' ~/.bashrc ; then
     export LOCAL_BIN=${HOME}/.local/bin
 fi
 
-if ! grep -q 'export LD_LIBRARY_PATH=:${CUDA_LIB}:$LD_LIBRARY_PATH' ~/.bashrc ; then
+if ! grep -q 'export LD_LIBRARY_PATH=${CUDA_LIB}:$LD_LIBRARY_PATH' ~/.bashrc ; then
     if grep -q 'LD_LIBRARY_PATH=' ~/.bashrc ; then
 	echo ''
 	echo 'ERROR: looks like you already have LD_LIBRARY_PATH as an environment variable in ~/.bashrc, but not in a format that can be recognised. please make sure the following string appears in ~/.bashrc'
-	echo 'export LD_LIBRARY_PATH=:${CUDA_LIB}:$LD_LIBRARY_PATH'
+	echo 'export LD_LIBRARY_PATH=${CUDA_LIB}:$LD_LIBRARY_PATH'
 	echo 'and run this script again'
 	exit
     fi
-    echo 'export LD_LIBRARY_PATH=:${CUDA_LIB}:$LD_LIBRARY_PATH' >>~/.bashrc
+    echo 'export LD_LIBRARY_PATH=${CUDA_LIB}:$LD_LIBRARY_PATH' >>~/.bashrc
     export LD_LIBRARY_PATH=:${CUDA_LIB}:$LD_LIBRARY_PATH
 fi
 
@@ -120,9 +120,9 @@ export ATLAS_LIB_PATH=/usr/lib/atlas-base
 make $*
 
 # install DNouri's scripts
-cd noccn
+cd ../noccn
 ./setup.sh
-cd ..
+cd -
 
 echo ""
 echo ""
