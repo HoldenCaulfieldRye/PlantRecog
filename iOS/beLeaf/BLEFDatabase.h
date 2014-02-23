@@ -26,5 +26,6 @@
 
 + (void) ensureGroupsExist;
 + (void) createStartingPoint;
++ (void) setContext:(NSManagedObjectContext*)context;
 
 @end

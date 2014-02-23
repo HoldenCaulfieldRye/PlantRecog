@@ -34,8 +34,18 @@
     if (fetchedObj){
         BLEFObservation *observation = (BLEFObservation*)fetchedObj;
         NSString *result = [observation result];
-        if (result)
-            [[self resultLabel] setText:result];
+        
+        /* JSON PARSE */
+        if (result){
+            NSDictionary* resultDic = [NSJSONSerialization JSONObjectWithData:[result dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:nil];
+            __block NSString *formatedResult = @"";
+            if (resultDic){
+                [resultDic enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
+                    formatedResult = [formatedResult stringByAppendingString:[NSString stringWithFormat:@"%@ : %@ \n\n", key, value]];
+                }];
+            }
+            [[self resultLabel] setText:formatedResult];
+        }
         else
             [[self resultLabel] setText:@"No classification..yet"];
     }

@@ -12,15 +12,13 @@
 
 @implementation BLEFAppDelegate
 
-@synthesize managedObjectContext = _managedObjectContext;
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
 @synthesize serverinterface = _serverinterface;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    NSLog(@"didFinishLaunching");
-    [BLEFDatabase ensureGroupsExist];
+    [self databaseInit];
     return YES;
 }
 
@@ -49,52 +47,21 @@
 - (void)applicationWillTerminate:(UIApplication *)application
 {
     // Saves changes in the application's managed object context before the application terminates.
-    [self saveContext];
-}
-
-- (void)saveContext
-{
-    NSError *error = nil;
-    NSManagedObjectContext *managedObjectContext = self.managedObjectContext;
-    if (managedObjectContext != nil) {
-        if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
-             // Replace this implementation with code to handle the error appropriately.
-             // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development. 
-            NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-            abort();
-        } 
-    }
+    [BLEFDatabase saveChanges];
 }
 
 #pragma mark - Core Data stack
 
-// Returns the managed object context for the application.
-// If the context doesn't already exist, it is created and bound to the persistent store coordinator for the application.
-- (NSManagedObjectContext *)managedObjectContext
+// Creates and returns a Managed Object Context using the App's Persistent Store Coordinator
+- (NSManagedObjectContext *)generateManagedObjectContext
 {
-    if (_managedObjectContext != nil) {
-        return _managedObjectContext;
-    }
-    
     NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
     if (coordinator != nil) {
-        _managedObjectContext = [[NSManagedObjectContext alloc] init];
-        [_managedObjectContext setPersistentStoreCoordinator:coordinator];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_mocDidSaveNotification:) name:NSManagedObjectContextDidSaveNotification object:nil];
+        NSManagedObjectContext *mod = [[NSManagedObjectContext alloc] init];
+        [mod setPersistentStoreCoordinator:coordinator];
+        return mod;
     }
-    return _managedObjectContext;
-}
-
-- (void)_mocDidSaveNotification:(NSNotification *)notification
-{
-    NSManagedObjectContext *savedContext = [notification object];
-    if (_managedObjectContext == savedContext)
-    {
-        return;
-    } else {
-        NSLog(@"Merging changes from server into main DB");
-        [[self managedObjectContext] mergeChangesFromContextDidSaveNotification:notification];
-    }
+    return nil;
 }
 
 // Returns the managed object model for the application.
@@ -169,6 +136,15 @@
     }
     _serverinterface = [[BLEFServerInterface alloc] init];
     return _serverinterface;
+}
+
+#pragma mark - Database Setup
+
+- (void)databaseInit
+{
+    NSManagedObjectContext *databaseMOD = [self generateManagedObjectContext];
+    [BLEFDatabase setContext:databaseMOD];
+    [BLEFDatabase ensureGroupsExist];
 }
 
 

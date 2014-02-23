@@ -61,7 +61,6 @@
 
 - (void)saveImage:(UIImage *)image
 {
-    NSLog(@"saveImage start");
     if (image != nil) {
         NSManagedObjectID* observationID = [self objectID];
         dispatch_queue_t imageFileProcessing = dispatch_queue_create("imageFileProcessing",NULL);
@@ -127,7 +126,6 @@
 
 + (void)forObservation:(NSManagedObjectID *)observationID setFileNameTo:(NSString *)filename
 {
-    NSLog(@"Updating obsservation's filename");
     NSManagedObject* object = [BLEFDatabase fetchObjectWithID:observationID];
     if (object == nil){
         NSLog(@"Error fetching observation with id: %@", observationID);
@@ -136,7 +134,6 @@
         BLEFObservation* observation = (BLEFObservation *)object;
         [observation setFilename:filename];
         [BLEFDatabase saveChanges];
-        NSLog(@"filename update complete");
     }
 }
 

@@ -9,28 +9,59 @@
 #import "BLEFDatabase.h"
 #import "BLEFAppDelegate.h"
 
+static NSManagedObjectContext *managedObjectContext;
+
+
 @implementation BLEFDatabase
 
-+ (BLEFAppDelegate *)getAppDelegate
++ (void)initialize
 {
-    return [[UIApplication sharedApplication] delegate];
+    [[NSNotificationCenter defaultCenter]   addObserver:self
+                                            selector:@selector(_mocDidSaveNotification:)
+                                            name:NSManagedObjectContextDidSaveNotification
+                                            object:nil];
 }
 
-+ (NSManagedObjectContext *)getContext
++ (void) setContext:(NSManagedObjectContext*)context;
 {
-    BLEFAppDelegate *appDelegate = [self getAppDelegate];
-    return [appDelegate managedObjectContext];
+    managedObjectContext = context;
+}
+
++ (NSManagedObjectContext *) getContext
+{
+    return managedObjectContext;
+}
+
++ (void)_mocDidSaveNotification:(NSNotification *)notification
+{
+    NSManagedObjectContext *savedContext = [notification object];
+    if (managedObjectContext == savedContext)
+    {
+        return;
+    } else {
+        if (managedObjectContext)
+            [managedObjectContext mergeChangesFromContextDidSaveNotification:notification];
+    }
 }
 
 + (void)saveChanges
 {
-    BLEFAppDelegate *appDelegate = [self getAppDelegate];
-    [appDelegate saveContext];
+    NSError *error = nil;
+    if (managedObjectContext != nil) {
+        if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
+            // Replace this implementation with code to handle the error appropriately.
+            // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+            NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+            abort();
+        }
+    }
 }
 
 + (NSArray*)getGroups
 {
     NSManagedObjectContext *context = [self getContext];
+    if (context == nil)
+        return nil;
     // Construct request
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"Group" inManagedObjectContext:context];
@@ -69,6 +100,8 @@
 + (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID
 {
     NSManagedObjectContext *context = [self getContext];
+    if (context == nil)
+        return nil;
     NSError* error = nil;
     NSManagedObject* object = [context existingObjectWithID:objectID error:&error];
     return object;
@@ -77,6 +110,8 @@
 + (BLEFSpecimen*)addNewSpecimentToGroup:(BLEFGroup *)group
 {
     NSManagedObjectContext *context = [self getContext];
+    if (context == nil)
+        return nil;
     BLEFSpecimen *specimen = [NSEntityDescription insertNewObjectForEntityForName:@"Specimen" inManagedObjectContext:context];
     
     NSDate* now = [NSDate date];
@@ -91,6 +126,8 @@
 + (BLEFObservation*)addNewObservationToSpecimen:(BLEFSpecimen *)specimen
 {
     NSManagedObjectContext *context = [self getContext];
+    if (context == nil)
+        return nil;
     BLEFObservation *observation = [NSEntityDescription insertNewObjectForEntityForName:@"Observation" inManagedObjectContext:context];
     
     NSDate* now = [NSDate date];
@@ -112,10 +149,11 @@
 
 + (void)createStartingPoint
 {
-    NSLog(@"createStartPoint");
     NSManagedObjectContext *context = [self getContext];
-    [NSEntityDescription insertNewObjectForEntityForName:@"Group" inManagedObjectContext:context];
-    [self saveChanges];
+    if (context){
+        [NSEntityDescription insertNewObjectForEntityForName:@"Group" inManagedObjectContext:context];
+        [self saveChanges];
+    }
 }
 
 @end

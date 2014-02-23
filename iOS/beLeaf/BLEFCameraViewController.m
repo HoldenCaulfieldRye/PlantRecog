@@ -81,7 +81,6 @@
 #pragma mark - Custom Camera View Methods
 - (IBAction)userCancel:(id)sender
 {
-    NSLog(@"User Cancel");
     [self.imagePickerController dismissViewControllerAnimated:NO completion:^{
             [delegate blefCameraViewControllerDidDismiss:self];
     }];
@@ -89,7 +88,6 @@
 
 - (IBAction)takePhoto:(id)sender
 {
-    NSLog(@"User Take Photo");
     [self flash];
     [self.imagePickerController takePicture];
 }
@@ -120,7 +118,6 @@
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    NSLog(@"imagePicker took photo");
     UIImage* image = info[UIImagePickerControllerOriginalImage];
     
     __block NSNumber *longitude = [NSNumber numberWithDouble:0.0];
@@ -162,7 +159,6 @@
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
-    NSLog(@"Did cancel");
     [picker dismissViewControllerAnimated:NO completion:NULL];
     [delegate blefCameraViewControllerDidDismiss:self];
 }

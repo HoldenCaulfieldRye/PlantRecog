@@ -21,8 +21,13 @@
 		5E2AD58E1863B6DA00595828 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E2AD5711863B6D900595828 /* UIKit.framework */; };
 		5E2AD58F1863B6DA00595828 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E2AD5731863B6D900595828 /* CoreData.framework */; };
 		5E2AD5971863B6DA00595828 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5951863B6DA00595828 /* InfoPlist.strings */; };
-		5E2AD5991863B6DA00595828 /* beLeafTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5981863B6DA00595828 /* beLeafTests.m */; };
 		5E2AD5A31863BB5A00595828 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
+		E9100F6B18BA437800006AF0 /* beLeaf.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5811863B6DA00595828 /* beLeaf.xcdatamodeld */; };
+		E9100F6C18BA439800006AF0 /* BLEFGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962A1897F8830067A991 /* BLEFGroup.m */; };
+		E9100F6D18BA439800006AF0 /* BLEFSpecimen.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396271897F8830067A991 /* BLEFSpecimen.m */; };
+		E9100F6E18BA439800006AF0 /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
+		E94400C118B91B1500D2C3C4 /* BLEFDatabaseTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E94400C018B91B1500D2C3C4 /* BLEFDatabaseTest.m */; };
+		E95131B318B96AB700B2DDAD /* BLEFDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962D1897F94F0067A991 /* BLEFDatabase.m */; };
 		E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
 		E961B85F18AA898100AF8EA4 /* BLEFUIObservationCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E961B85E18AA898100AF8EA4 /* BLEFUIObservationCell.m */; };
 		E9829C6D189D7662004DD07F /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
@@ -37,16 +42,6 @@
 		E9E3962B1897F8830067A991 /* BLEFGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962A1897F8830067A991 /* BLEFGroup.m */; };
 		E9E3962E1897F94F0067A991 /* BLEFDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962D1897F94F0067A991 /* BLEFDatabase.m */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		5E2AD5901863B6DA00595828 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5E2AD5621863B6D900595828 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 5E2AD5691863B6D900595828;
-			remoteInfo = beLeaf;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		5E2AD56A1863B6D900595828 /* beLeaf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = beLeaf.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -66,8 +61,8 @@
 		5E2AD58B1863B6DA00595828 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		5E2AD5941863B6DA00595828 /* beLeafTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "beLeafTests-Info.plist"; sourceTree = "<group>"; };
 		5E2AD5961863B6DA00595828 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		5E2AD5981863B6DA00595828 /* beLeafTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = beLeafTests.m; sourceTree = "<group>"; };
 		5E2AD5A21863BB5A00595828 /* iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = iPhone.storyboard; sourceTree = "<group>"; };
+		E94400C018B91B1500D2C3C4 /* BLEFDatabaseTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFDatabaseTest.m; sourceTree = "<group>"; };
 		E95C85391864564000CFEC40 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		E961B85D18AA898100AF8EA4 /* BLEFUIObservationCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFUIObservationCell.h; sourceTree = "<group>"; };
 		E961B85E18AA898100AF8EA4 /* BLEFUIObservationCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFUIObservationCell.m; sourceTree = "<group>"; };
@@ -203,8 +198,8 @@
 		5E2AD5921863B6DA00595828 /* beLeafTests */ = {
 			isa = PBXGroup;
 			children = (
-				5E2AD5981863B6DA00595828 /* beLeafTests.m */,
 				5E2AD5931863B6DA00595828 /* Supporting Files */,
+				E94400C018B91B1500D2C3C4 /* BLEFDatabaseTest.m */,
 			);
 			path = beLeafTests;
 			sourceTree = "<group>";
@@ -249,7 +244,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				5E2AD5911863B6DA00595828 /* PBXTargetDependency */,
 			);
 			name = beLeafTests;
 			productName = beLeafTests;
@@ -268,9 +262,6 @@
 				TargetAttributes = {
 					5E2AD5691863B6D900595828 = {
 						DevelopmentTeam = BQWPGCX46D;
-					};
-					5E2AD5891863B6DA00595828 = {
-						TestTargetID = 5E2AD5691863B6D900595828;
 					};
 				};
 			};
@@ -340,19 +331,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5E2AD5991863B6DA00595828 /* beLeafTests.m in Sources */,
+				E9100F6C18BA439800006AF0 /* BLEFGroup.m in Sources */,
+				E9100F6D18BA439800006AF0 /* BLEFSpecimen.m in Sources */,
+				E9100F6E18BA439800006AF0 /* BLEFObservation.m in Sources */,
+				E9100F6B18BA437800006AF0 /* beLeaf.xcdatamodeld in Sources */,
+				E95131B318B96AB700B2DDAD /* BLEFDatabase.m in Sources */,
+				E94400C118B91B1500D2C3C4 /* BLEFDatabaseTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		5E2AD5911863B6DA00595828 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 5E2AD5691863B6D900595828 /* beLeaf */;
-			targetProxy = 5E2AD5901863B6DA00595828 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		5E2AD5781863B6D900595828 /* InfoPlist.strings */ = {
@@ -490,7 +478,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/beLeaf.app/beLeaf";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -504,7 +491,6 @@
 				);
 				INFOPLIST_FILE = "beLeafTests/beLeafTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Debug;
@@ -513,7 +499,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/beLeaf.app/beLeaf";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -523,7 +508,6 @@
 				GCC_PREFIX_HEADER = "beLeaf/beLeaf-Prefix.pch";
 				INFOPLIST_FILE = "beLeafTests/beLeafTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
