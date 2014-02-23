@@ -57,17 +57,14 @@ def get_next(some_iterable):
 
 
 class Tagger(object):
-    def __init__(self, batch_size=1000, channels=3, size=SIZE, model=None, threshold=0.0, 
-                 tagas=None, n_jobs=N_JOBS, more_meta=None, output_path=None, **kwargs):
+    def __init__(self, batch_size=1000, channels=3, size=SIZE, 
+                 model=None, n_jobs=N_JOBS, more_meta=None, **kwargs):
         self.batch_size = batch_size
         self.channels = channels
         self.size = size
         self.n_jobs = n_jobs
         self.more_meta = more_meta or {}
         self.model = model
-        self.threshold = threshold
-        self.tagas = tagas
-        self.output_path = output_path
         vars(self).update(**kwargs)  # O_o
 
     def __call__(self, all_names_and_labels, shuffle=False):
@@ -86,12 +83,13 @@ class Tagger(object):
             if len(names_and_labels) > 20:
                 mean = data.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
 	        data = data - mean
-            self.model.start_predictions(data,self.threshold)
+            self.model.start_predictions(data)
             if n_l_next is not None:
 	        rows = Parallel(n_jobs=self.n_jobs)(
 		    delayed(_process_tag_item)(self.size,self.channels,name)
 		    for name, label in n_l_next)
             tags = self.model.finish_predictions()
+            print tags
             self.write_to_xml(zip(tags,names_and_labels))
             batch_num += 1
 	    print "Tagged %d images in %.02f seconds" % (len(names_and_labels),time.clock()-loop_time)
@@ -99,13 +97,18 @@ class Tagger(object):
 
         
     def write_to_xml(self,data):
-        for tag,(name, label) in data:
+        for (tag, prob),(name, label) in data:
+            print label
+            print tag
+            print prob
             root = etree.Element("root")
             meta_data = etree.SubElement(root, "meta_data")
             image_name = etree.SubElement(meta_data, "Image")
             image_name.text = name
             image_tag = etree.SubElement(meta_data, "Component_Tag")
             image_tag.text = tag
+            image_prob = etree.SubElement(meta_data, "Component_Tag_Prob")
+            image_prob.text = '%.03f'%(prob)
             xml_file = open(label,'wb')
             xml_file.write(etree.tostring(root, pretty_print=True))
             xml_file.close()
@@ -116,27 +119,20 @@ class TagConvNet(convnet.ConvNet):
         convnet.ConvNet.__init__(self,op,load_dic,dp_params)
 	self.softmax_idx = self.get_layer_idx('probs', check_type='softmax')
         self.tag_names = list(self.test_data_provider.batch_meta['label_names'])
-        self.tag_names.append('Exclude')
         self.b_data = None
         self.b_labels = None
         self.b_preds = None
-        self.b_threshold = None
 
-    def start_predictions(self, data, threshold):
+    def start_predictions(self, data):
 	# Run the batch through the model
 	self.b_data = np.require(data, requirements='C')
 	self.b_labels = np.zeros((1, data.shape[1]), dtype=np.single)
-	self.b_preds = np.zeros((data.shape[1], len(self.tag_names)-1), dtype=np.single)
-        self.b_threshold = threshold;
+	self.b_preds = np.zeros((data.shape[1], len(self.tag_names)), dtype=np.single)
 	self.libmodel.startFeatureWriter([self.b_data, self.b_labels, self.b_preds], self.softmax_idx)
 
     def finish_predictions(self):
 	self.finish_batch()
-        # Process the batch
-        threshold_array = np.empty((self.b_preds.shape[0],1))
-        threshold_array.fill(self.b_threshold)
-        self.b_preds = np.hstack((self.b_preds,threshold_array))
-        return [self.tag_names[i] for i in np.nditer(self.b_preds.argmax(axis=1))]
+        return [(self.tag_names[i],float(j)) for i,j in np.nditer([self.b_preds.argmax(axis=1),self.b_preds.max(axis=1)])]
 
     def write_predictions(self):
         pass
@@ -187,8 +183,5 @@ def console():
         channels=int(cfg_dataset.get('channels', 3)),
         size=eval(cfg_dataset.get('size', '(64, 64)')),
         model=make_model(TagConvNet,'tag',sys.argv[1]),
-        threshold=float(cfg.get('threshold','0.75')),
-        tagas=cfg.get('tagas',None),
-        output_path=cfg.get('output-path',None)
         )
     create(filenames_and_labels)
