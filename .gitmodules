@@ -1,0 +1,3 @@
+[submodule "ML/tests/coveragepy"]
+	path = ML/tests/coveragepy
+	url = https://github.com/nedbat/coveragepy
