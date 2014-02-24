@@ -14,7 +14,7 @@ var parser = new xml2js.Parser();
 var NUM_PHOTOS = 100000;			//the number of photos we wish to attempt to convert and save to DB
 var IMAGE_DB_PATH = '/data2/ImageNet/train/';	//filesystem directory where image meta-data is stored
 
-var synsets = exec('ls ' + IMAGE_DB_PATH);
+var synsets = exec('ls -1 ' + IMAGE_DB_PATH);
 console.log(synsets);
 //var NUM_SYNSETS = ;
 
