@@ -1,6 +1,7 @@
 var fs = require('fs'),
     xml2js = require('xml2js'),				//ensure the xml2js package has been installed 'npm install xml2js'
     MongoClient = require('mongodb').MongoClient;	//ensure the node.js mongodb driver is installed 'npm install mongodb'
+var exec=require('child_process').exec;
 
 var collection = 'plants',				//the name of the collection we wish to insert into
     database   = 'development',				//the name of the database we wish to use
@@ -13,8 +14,11 @@ var parser = new xml2js.Parser();
 var NUM_PHOTOS = 100000;			//the number of photos we wish to attempt to convert and save to DB
 var IMAGE_DB_PATH = '/data2/ImageNet/train/';	//filesystem directory where image meta-data is stored
 
+var synsets = exec('ls ' + IMAGE_DB_PATH);
+console.log(synsets);
 //var NUM_SYNSETS = ;
 
+/*
 // connect to mongod server, read xml files, parse into json, make some tweaks and insert into collection
 MongoClient.connect(conn, function(err, db) {
 	if(err) console.log(err);
@@ -57,5 +61,5 @@ MongoClient.connect(conn, function(err, db) {
 	};
 });
 
-
+*/
 
