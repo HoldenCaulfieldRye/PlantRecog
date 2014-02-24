@@ -10,14 +10,19 @@ var collection = 'plants',				//the name of the collection we wish to insert int
 var parser = new xml2js.Parser();
 
 // CHANGE THIS ACCORDINGLY!!! They should ideally be passed via a config file
-var NUM_PHOTOS = 5;				//the number of photos we wish to attempt to convert and save to DB
-var IMAGE_DB_PATH = '/home/gerardh/data/';	//filesystem directory where image meta-data is stored
+var NUM_PHOTOS = 100000;			//the number of photos we wish to attempt to convert and save to DB
+var IMAGE_DB_PATH = '/data2/ImageNet/train/';	//filesystem directory where image meta-data is stored
+
+//var NUM_SYNSETS = ;
 
 // connect to mongod server, read xml files, parse into json, make some tweaks and insert into collection
 MongoClient.connect(conn, function(err, db) {
 	if(err) console.log(err);
-	for(var i = 1; i <= NUM_PHOTOS; i++){	//iterate through NUM_PHOTOS on disk...image xml's are named 1.xml -> <NUM_PHOTOS>.xml
-		var file = IMAGE_DB_PATH + i + '.xml';
+	for(var j = 1; j <= NUM_SYNSETS; j++){	//iterate through NUM_PHOTOS on disk...image xml's are named 1.xml -> <NUM_PHOTOS>.xml
+	  var synset = synsets[j];
+	   for(var i = 1; i <= NUM_PHOTOS; i++){	//iterate through NUM_PHOTOS on disk...image xml's are named 1.xml -> <NUM_PHOTOS>.xml
+		///var file = IMAGE_DB_PATH + i + '.xml';
+		var file = IMAGE_DB_PATH + synset + '/' + synset + '_' + i + '.xml';
 		if (fs.existsSync(file)) {	//check that the file exists first...do synchronously to ensure we subsequently read and parse the correct file
 			console.log('file exists ' + file);
 			//read xml file
@@ -25,8 +30,9 @@ MongoClient.connect(conn, function(err, db) {
 			//parse data into json
 			parser.parseString(data, function (err, result) {
 			  // make some tweaks to result 	
-			  var document = result.Image;
-			  document.FileName = [ IMAGE_DB_PATH + document.FileName ]; 					
+			  //var document = result.Image;
+			  //document.FileName = [ IMAGE_DB_PATH + document.FileName ]; 					
+			  var document = result.root.meta_data;
 			  // add bucket information at this stage
 			  (function(doc){  
 				var res = db.collection('buckets').find({species : doc.Species[0] }, {limit: 1, fields : {bucket : 1, _id : 0}});
@@ -47,6 +53,7 @@ MongoClient.connect(conn, function(err, db) {
 			  })(document);
 			});
 		}
+	   };
 	};
 });
 
