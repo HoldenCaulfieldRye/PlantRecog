@@ -6,8 +6,8 @@ import sys
 import random
 import numpy.random
 
-from .ccn import data
-from .ccn import gpumodel
+from ccn import data
+from ccn import gpumodel
 
 
 def get_options(filename, section):
@@ -55,7 +55,6 @@ def resolve(dotted):
 
 def handle_options(parser, section, cfg_filename):
     opts_dict = get_options(cfg_filename, section)
-
     data_provider = opts_dict['data-provider']
     if data_provider not in data.dp_types:
         data.DataProvider.register_data_provider(

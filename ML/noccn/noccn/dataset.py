@@ -13,9 +13,9 @@ from PIL import ImageOps
 from joblib import Parallel
 from joblib import delayed
 
-from noccn.script import get_options
-from noccn.script import random_seed
-from noccn.script import resolve
+from script import get_options
+from script import random_seed
+from script import resolve
 
 # This is used to parse the xml files
 import xml.etree.ElementTree as ET # can be speeded up using lxml possibly

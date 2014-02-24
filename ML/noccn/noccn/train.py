@@ -2,9 +2,9 @@ import sys
 
 import numpy as np
 
-from .ccn import convnet
-from .ccn import options
-from .script import run_model
+from ccn import convnet
+from ccn import options
+from script import run_model
 
 
 class ConvNet(convnet.ConvNet):

@@ -17,13 +17,13 @@ from PIL import ImageOps
 from joblib import Parallel
 from joblib import delayed
 
-from .ccn import convnet
-from .ccn import options
-from .script import get_sections
-from .script import make_model
-from .script import get_options
-from .script import random_seed
-from .script import resolve
+from ccn import convnet
+from ccn import options
+from script import get_sections
+from script import make_model
+from script import get_options
+from script import random_seed
+from script import resolve
 
 # This is used to parse the xml files
 from lxml import etree
@@ -89,7 +89,6 @@ class Tagger(object):
 		    delayed(_process_tag_item)(self.size,self.channels,name)
 		    for name, label in n_l_next)
             tags = self.model.finish_predictions()
-            print tags
             self.write_to_xml(zip(tags,names_and_labels))
             batch_num += 1
 	    print "Tagged %d images in %.02f seconds" % (len(names_and_labels),time.clock()-loop_time)
@@ -98,9 +97,6 @@ class Tagger(object):
         
     def write_to_xml(self,data):
         for (tag, prob),(name, label) in data:
-            print label
-            print tag
-            print prob
             root = etree.Element("root")
             meta_data = etree.SubElement(root, "meta_data")
             image_name = etree.SubElement(meta_data, "Image")

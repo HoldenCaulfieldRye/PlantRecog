@@ -5,10 +5,10 @@ import time
 
 import numpy as np
 
-from .ccn import convnet
-from .ccn import options
-from .script import get_sections
-from .script import run_model
+from ccn import convnet
+from ccn import options
+from script import get_sections
+from script import run_model
 
 
 def make_predictions(net, data, labels, num_classes):

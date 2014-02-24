@@ -26,6 +26,7 @@ import numpy as n
 import numpy.random as nr
 from util import *
 from data import *
+import data
 from options import *
 from gpumodel import *
 import sys
@@ -190,7 +191,6 @@ class ConvNet(IGPUModel):
         op.options['dp_type'].default = None
         
         DataProvider.register_data_provider('cifar', 'CIFAR', CIFARDataProvider)
-        DataProvider.register_data_provider('basic-leaf', 'BasicLeaf', BasicLeafDataProvider)
         DataProvider.register_data_provider('basic-leaf256', 'BasicLeaf256', BasicLeafDataProvider256)
         DataProvider.register_data_provider('dummy-cn-n', 'Dummy ConvNet', DummyConvNetDataProvider)
         DataProvider.register_data_provider('cifar-cropped', 'Cropped CIFAR', CroppedCIFARDataProvider)

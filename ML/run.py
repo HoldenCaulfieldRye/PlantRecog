@@ -17,6 +17,7 @@ from PIL import ImageOps
 from joblib import Parallel
 from joblib import delayed
 
+sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), "cuda_convnet"))
 import convnet
 import options
 from noccn.noccn.script import *
@@ -174,5 +175,4 @@ def console():
 
 
 if __name__ == "__main__":
-    sys.path.append(os.path.join(os.path.dirname(__file__), "ML"))
     console()

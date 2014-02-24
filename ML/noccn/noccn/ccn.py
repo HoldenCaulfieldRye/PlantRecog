@@ -1,8 +1,13 @@
-import sys
+import sys, os
 
 
 def add_path():
-    sys.path.append('.')
+    path_from_main = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../cuda_convnet")
+    if os.path.isdir(path_from_main):
+        sys.path.append(path_from_main)
+    path_from_folder = "./cuda_convnet"
+    if os.path.isdir(path_from_folder):
+        sys.path.append(path_from_folder)
 
 add_path()
 

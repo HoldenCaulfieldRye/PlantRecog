@@ -1,5 +1,5 @@
-from .ccn import shownet
-from .script import run_model
+from ccn import shownet
+from script import run_model
 
 
 def console():
