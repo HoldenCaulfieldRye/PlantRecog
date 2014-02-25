@@ -23,12 +23,9 @@ db = client[database]
 plantCollection = db.plants
 
 image_data = '/data2/ImageNet/train/'
-#image_data = '/home/gerardh/data/'
-#num_images = 1000000
 
 synset_cmd = 'ls -1 ' + image_data + ' > ./synsets.txt'
 os.system(synset_cmd)
-#synsets = open('/homes/gh413/group-project-master/Nodejs/lib/utils/synsets.txt', 'rb')
 synsets = open('./synsets.txt', 'rb')
 
 words = open('/homes/gh413/group-project-master/ML/bucketing/words.txt', 'rb')
@@ -50,14 +47,11 @@ words.close()
 
 for synset in synsets:
     synset = synset.strip()
-    synset_images_cmd = 'ls -1 ' + image_data + synset + '/ > ./synset_images.txt'
+    synset_images_cmd = 'ls -1 ' + image_data + synset + '/ | grep .xml > ./synset_images.txt'
     os.system(synset_images_cmd)
     synset_images = open('./synset_images.txt', 'rb')
     for img in synset_images:
-    #for i in range(num_images):
-        #fname = "%s%s/%s_%s.xml" % (image_data, synset, synset, str(i))
-        fname = "%s%s/%s" % (image_data, synset, img)
-        #if os.path.isfile(fname):
+        fname = "%s%s/%s" % (image_data, synset, img.strip())
         data = open(fname, 'rb')
         dict = xmltodict.parse(data)['root']['meta_data']
         dict['Synset_ID'] = synset
@@ -65,16 +59,14 @@ for synset in synsets:
         dict['Description'] = glossID[synset]
         dict['Exclude'] = 'false'
         doc = json.loads(json.dumps(dict))
-        #doc2 = json.loads(doc)
-'''
-            post_id = plantCollection.insert(doc)
-            if post_id is None:
-                print "Error posting image meta-data file: %s" % (fname) 
-                if not client.alive():
-                    print "Connection to mongodb has gone down!! Please retry"
-                    sys.exit(2)
+        post_id = plantCollection.insert(doc)
+        if post_id is None:
+             print "Error posting image meta-data file: %s" % (fname) 
+             if not client.alive():
+                print "Connection to mongodb has gone down!! Please retry"
+                sys.exit(2)
 print "Finished inserting image meta-data into MongoDB"
-'''
+
 
 
 
