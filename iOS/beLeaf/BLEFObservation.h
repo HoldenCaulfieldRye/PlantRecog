@@ -29,6 +29,6 @@
 - (NSData *)getImageData;
 - (UIImage *)getThumbnail;
 - (void)generateThumbnailFromImage:(UIImage *)image;
-- (void)saveImage:(UIImage *)image;
+- (void)saveImage:(UIImage *)image completion:(void (^) (BOOL success))handler;
 
 @end

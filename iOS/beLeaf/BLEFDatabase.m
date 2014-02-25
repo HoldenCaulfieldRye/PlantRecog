@@ -152,7 +152,6 @@ static NSManagedObjectContext *managedObjectContext;
     NSManagedObjectContext *context = [self getContext];
     if (context){
         [NSEntityDescription insertNewObjectForEntityForName:@"Group" inManagedObjectContext:context];
-        [self saveChanges];
     }
 }
 

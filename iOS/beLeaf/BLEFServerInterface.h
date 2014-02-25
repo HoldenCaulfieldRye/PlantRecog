@@ -14,11 +14,24 @@
 extern NSString * const BLEFUploadDidSendDataNotification;
 extern NSString * const BLEFJobDidSendDataNotification;
 extern NSString * const BLEFNetworkRetryNotification;
+extern NSString * const BLEFNewObservationNotification;
 
-- (void) grabTasksFromSpecimen:(NSManagedObjectID *)specimenID;
+// Database
+- (void) setContext:(NSManagedObjectContext*)context;
+
+// Queue
 - (void) addObservationToUploadQueue:(NSManagedObjectID *)observationID;
-- (void) processQueue;
-- (void) stopProcessingQueue;
+- (void) addObservationToJobQueue:(NSManagedObjectID *)observationID;
 - (void) enableQueueProcessing;
+- (void) stopProcessingQueue;
+
+
+// Server Interface
+- (void)uploadObservation:(NSManagedObjectID *)observationID;
+- (void)updateJobForObservation:(NSManagedObjectID *)observationID;
+
+// Notifications
+- (void) newObservationNotification:(NSNotification *)notification;
+- (void) queueItemFinishedNotification:(NSNotification *)notification;
 
 @end

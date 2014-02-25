@@ -8,7 +8,6 @@
 
 #import "BLEFServerInterface.h"
 #import "BLEFDatabase.h"
-#import "BLEFAppDelegate.h"
 #import "BLEFObservation.h"
 #import "BLEFServerConnection.h"
 
@@ -36,94 +35,190 @@
         _uploadQueueHalted = false;
         _jobQueueHalted = false;
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+        [center addObserver:self selector:@selector(newObservationNotification:) name:BLEFNewObservationNotification object:nil];
         [center addObserver:self selector:@selector(enableQueueProcessing) name:BLEFNetworkRetryNotification object:nil];
     }
     return self;
 }
 
-- (void) grabTasksFromSpecimen:(NSManagedObjectID *)specimenID
+#pragma mark - PUBLIC
+
+#pragma mark Database Methods
+
+- (void) setContext:(NSManagedObjectContext*)context
 {
-    // Fetch all observations in specimen that need uploading
+    _managedObjectContext = context;
 }
+
+#pragma mark Queue  Methods
+
 
 - (void) addObservationToUploadQueue:(NSManagedObjectID *)observationID
 {
     if (observationID){
-        NSLog(@"image added to Upload Queue");
         [_uploadQueue addObject:observationID];
-        [self processQueue];
     }
 }
 
-- (void) processQueue
+- (void) addObservationToJobQueue:(NSManagedObjectID *)observationID
 {
-    if (!_uploadQueueProcessingActive && !_uploadQueueHalted){
-        [self processNextInUploadQueue];
+    if (observationID){
+        [_jobQueue addObject:observationID];
     }
-    if (!_jobQueueProcessingActive && !_jobQueueHalted){
-        [self processNextInJobQueue];
-    }
-}
-
-- (void) stopProcessingQueue
-{
-    _uploadQueueProcessingActive = false;
-    _jobQueueProcessingActive = false;
-    _jobQueueHalted = true;
-    _uploadQueueHalted = true;
 }
 
 - (void) enableQueueProcessing
 {
-    NSLog(@"Enabling queue processing");
     _jobQueueHalted = false;
     _uploadQueueHalted = false;
-    [self processQueue];
+    [self processJobQueue];
+    [self processUploadQueue];
 }
+
+- (void) stopProcessingQueue
+{
+    _jobQueueHalted = true;
+    _uploadQueueHalted = true;
+}
+
+#pragma mark Server Interface Methods
+
+- (void)uploadObservation:(NSManagedObjectID *)observationID
+{
+    if (observationID != nil){
+        BLEFServerConnection *connection = [self createUploadConnectionFor:observationID];
+        if (connection != nil){
+            [connection start];
+            return;
+        }
+    }
+    // Else
+#warning send Nofiticafion
+}
+
+- (void)updateJobForObservation:(NSManagedObjectID *)observationID
+{
+    if (observationID != nil){
+        BLEFServerConnection *connection = [self createJobConnectionFor:observationID];
+        if (connection != nil){
+            [connection start];
+            return;
+        }
+    }
+    // Else
+#warning send notification
+}
+
+#pragma mark Notifications Methods
+
+- (void) newObservationNotification:(NSNotification *)notification
+{
+    // get observationID
+    NSDictionary *notificationInfo = [notification userInfo];
+    NSManagedObjectID *observationID = notificationInfo [@"objectID"];
+    // add to queue
+    [self addObservationToUploadQueue:observationID];
+    [self processUploadQueue];
+}
+
+- (void) queueItemFinishedNotification:(NSNotification *)notification
+{
+    // Check for error
+    [self processJobQueue];
+    [self processUploadQueue];
+}   
 
 
 NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNotification";
 NSString * const BLEFJobDidSendDataNotification = @"BLEFJobDidSendDataNotification";
 NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
+NSString * const BLEFNewObservationNotification = @"BLEFNewObservationNotification";
 
-#pragma mark Private Methods
+#pragma mark - PRIVATE
 
-- (void) addObservationToJobQueue:(NSManagedObjectID *)observationID
+- (id) nextInUploadQueue
 {
-    if (observationID){
-        NSLog(@"image added to Job Queue");
-        [_jobQueue addObject:observationID];
-        [self processQueue];
+    id nextUp = nil;
+    if (!_uploadQueueHalted){
+        if (_uploadQueue != nil){
+            if ([_uploadQueue count] > 0){
+                nextUp = [_uploadQueue firstObject];
+                if ([nextUp isMemberOfClass:[NSManagedObjectID class]]){
+                    return nextUp;
+                } else {
+                    [self removeFromUploadQueue:nextUp];
+                    return nil;
+                }
+            }
+        }
     }
+    return nextUp;
 }
 
-- (void)processNextInUploadQueue
+- (id) nextInJobQueue
 {
-    if ([_uploadQueue count] > 0){
+    id nextUp = nil;
+    if (!_jobQueueHalted){
+        if (_jobQueue != nil){
+            if ([_jobQueue count] > 0){
+                nextUp = [_jobQueue firstObject];
+                if ([nextUp isMemberOfClass:[NSManagedObjectID class]]){
+                    return nextUp;
+                } else {
+                    [self removeFromJobQueue:nextUp];
+                    return nil;
+                }
+            }
+        }
+    }
+    return nextUp;
+}
+
+- (void) removeFromJobQueue:(id)objectToRemove
+{
+    [_jobQueue removeObjectIdenticalTo:objectToRemove];
+}
+
+- (void) removeFromUploadQueue:(id)objectToRemove
+{
+    [_uploadQueue removeObjectIdenticalTo:objectToRemove];
+}
+
+- (void) processUploadQueue
+{
+    if (!_uploadQueueProcessingActive && !_uploadQueueHalted){
         _uploadQueueProcessingActive = true;
-        NSManagedObjectID *id = [_uploadQueue firstObject];
-        [_uploadQueue removeObject:id];
-        [self uploadObservation:id];
-    } else {
-        _uploadQueueProcessingActive = false;
+        id nextInQueue = [self nextInUploadQueue];
+        if (nextInQueue != nil){
+            [self uploadObservation:nextInQueue];
+        } else {
+            _uploadQueueProcessingActive = false;
+            return;
+        }
     }
 }
 
-- (void)processNextInJobQueue
+- (void) processJobQueue
 {
-    if ([_jobQueue count] > 0){
+    if (!_jobQueueProcessingActive && !_jobQueueHalted){
         _jobQueueProcessingActive = true;
-        NSManagedObjectID *id = [_jobQueue firstObject];
-        [_jobQueue removeObject:id];
-        [self updateJobAfterDelay:id];
-    } else {
-        _jobQueueProcessingActive = false;
+        id nextInQueue = [self nextInJobQueue];
+        if (nextInQueue != nil){
+            [self updateJobForObservationAfterDelay:nextInQueue];
+        } else {
+            _jobQueueProcessingActive = false;
+            return;
+        }
     }
 }
 
-- (void)uploadObservation:(NSManagedObjectID *)observationID
+- (void) updateJobForObservationAfterDelay:(NSManagedObjectID *)observationID
 {
-    NSLog(@"Observation Upload called");
+    [self performSelector:@selector(updateJobForObservation:) withObject:observationID afterDelay:1.0f];
+}
+
+- (BLEFServerConnection *)createUploadConnectionFor:(NSManagedObjectID *)observationID
+{
     NSManagedObject* fetchedObject = [self fetchObjectWithID:observationID];
     if (fetchedObject != nil){
         BLEFObservation* observation = (BLEFObservation *)fetchedObject;
@@ -137,25 +232,15 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
             BLEFServerConnection *serverConnection = [self uploadFields:params andFileData:imageData toUrl:urlString];
             [serverConnection setObjID:observationID];
             [serverConnection setUpload:true];
-            [serverConnection start];
-        } else {
-            NSLog(@"Already uploaded");
-            [self processNextInUploadQueue];
+            return serverConnection;
         }
-    } else {
-        NSLog(@"Error fetching observation for upload");
-        [self processNextInUploadQueue];
     }
+    // Else
+    return nil;
 }
 
-- (void)updateJobAfterDelay:(NSManagedObjectID*)observationID
+- (BLEFServerConnection *)createJobConnectionFor:(NSManagedObjectID *)observationID
 {
-    [self performSelector:@selector(updateJobForObservation:) withObject:observationID afterDelay:1.0f];
-}
-
-- (void)updateJobForObservation:(NSManagedObjectID *)observationID
-{
-    NSLog(@"Job GET called");
     NSManagedObject* fetchedObject = [self fetchObjectWithID:observationID];
     if (fetchedObject != nil){
         BLEFObservation *observation = (BLEFObservation *)fetchedObject;
@@ -169,16 +254,14 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
             BLEFServerConnection *serverConnection = [self sendGETwithFields:params toUrl:urlString];
             [serverConnection setObjID:observationID];
             [serverConnection setJobUpdate:true];
-            [serverConnection start];
-        } else {
-            NSLog(@"No jobID to GET");
-            [self processNextInJobQueue];
+            return serverConnection;
         }
-    } else {
-        NSLog(@"Error fetching observation for job GET");
-        [self processNextInJobQueue];
     }
+    // Else
+    return nil;
 }
+
+#pragma mark Connection Methods
 
 - (BLEFServerConnection *)uploadFields:(NSDictionary *)parameters andFileData:(NSData *)fileData toUrl:(NSString *)urlString
 {
@@ -293,11 +376,11 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
                                              @"objectID"   : [serverConnection objID]
                                              };
                 [[NSNotificationCenter defaultCenter] postNotificationName:BLEFJobDidSendDataNotification object:nil userInfo:jobInfo];
-                [self processNextInJobQueue];
+#warning TODO: Send job finished notification
             }
         }
         if (!jobComplete){
-            [self updateJobAfterDelay:[serverConnection objID]];
+#warning TODO: Send job not finished notification
         }
     }
 }
@@ -329,36 +412,21 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
     if (serverConnection.upload){
         NSLog(@"an Upload");
         [self addObservationToJobQueue:[serverConnection objID]];
-        [self processNextInUploadQueue];
+#warning send notification
     }
     if (serverConnection.jobUpdate){
         NSLog(@"a Job");
-        [self processNextInJobQueue];
+#warning send notification
     }
 }
 
 #pragma mark - Core Data Methods
 
-- (NSManagedObjectContext *)getContext
-{
-    if (_managedObjectContext != nil) {
-            return _managedObjectContext;
-    }
-    
-    NSPersistentStoreCoordinator *coordinator = [(BLEFAppDelegate *)[[UIApplication sharedApplication] delegate] persistentStoreCoordinator];
-    if (coordinator != nil) {
-        _managedObjectContext = [[NSManagedObjectContext alloc] init];
-        [_managedObjectContext setPersistentStoreCoordinator:coordinator];
-    }
-    return _managedObjectContext;
-}
-
 - (void)saveDatabaseChanges
 {
     NSError *error = nil;
-    NSManagedObjectContext *managedObjectContext = [self getContext];
-    if (managedObjectContext != nil) {
-        if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
+    if (_managedObjectContext != nil) {
+        if ([_managedObjectContext hasChanges] && ![_managedObjectContext save:&error]) {
             // Replace this implementation with code to handle the error appropriately.
             // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
             NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
@@ -369,12 +437,13 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 
 - (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID
 {
-    NSManagedObjectContext *context = [self getContext];
-    NSError* error = nil;
-    NSManagedObject* object = [context existingObjectWithID:objectID error:&error];
-    return object;
+    if (_managedObjectContext != nil){
+        NSError* error = nil;
+        NSManagedObject* object = [_managedObjectContext existingObjectWithID:objectID error:&error];
+        return object;
+    }
+    return nil;
 }
-
 
 
 //TODO: Subscribe to changes in other context

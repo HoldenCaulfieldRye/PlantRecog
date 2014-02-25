@@ -107,7 +107,6 @@
 
 - (IBAction)updateButtonClicked:(id)sender
 {
-    NSLog(@"Update button clicked");
      NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     [center postNotificationName:BLEFNetworkRetryNotification object:nil];
 }
@@ -147,16 +146,22 @@
    [cameraViewController dismissViewControllerAnimated:YES completion:^{NSLog(@"blef image picker canceled");}];
 }
 
+
+
 -(void)blefCameraViewController:(BLEFCameraViewController *)cameraViewController tookPhoto:(UIImage *)photo withInfo:(NSDictionary *)info
 {
-    NSLog(@"Photo Taken delegate method");
     BLEFObservation* observation = [BLEFDatabase addNewObservationToSpecimen:self.specimen];
     [observation generateThumbnailFromImage:photo];
     [observation setSegment:info[@"segment"]];
     [observation setLatitude:[info[@"lat"] doubleValue]];
     [observation setLongitude:[info[@"long"] doubleValue]];
     [BLEFDatabase saveChanges];
-    [observation saveImage:photo];
+    [observation saveImage:photo completion:^(BOOL success){
+        NSDictionary *observationInfo = @{
+                                          @"objectID"   : [observation objectID]
+                                  };
+        [[NSNotificationCenter defaultCenter] postNotificationName:BLEFNewObservationNotification object:nil userInfo:observationInfo];
+    }];
 }
 
 

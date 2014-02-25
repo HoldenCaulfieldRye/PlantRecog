@@ -59,28 +59,24 @@
     UIGraphicsEndImageContext();
 }
 
-- (void)saveImage:(UIImage *)image
+- (void)saveImage:(UIImage *)image completion:(void (^) (BOOL success))handler
 {
     if (image != nil) {
         NSManagedObjectID* observationID = [self objectID];
-        dispatch_queue_t imageFileProcessing = dispatch_queue_create("imageFileProcessing",NULL);
-        dispatch_async(imageFileProcessing, ^{
-            NSDate* now = [NSDate date];
-            NSTimeInterval unix_timestamp = [now timeIntervalSince1970];
-            NSString *name = [NSString stringWithFormat:@"%f.jpg",unix_timestamp];
-            NSData* data = UIImageJPEGRepresentation(image, 1.0);
+        NSDate* now = [NSDate date];
+        NSTimeInterval unix_timestamp = [now timeIntervalSince1970];
+        NSString *name = [NSString stringWithFormat:@"%f.jpg",unix_timestamp];
+        NSData* data = UIImageJPEGRepresentation(image, 1.0);
+        NSOperationQueue *operationQueue = [[NSOperationQueue alloc] init];
+        [operationQueue addOperationWithBlock:^{
             bool result = [BLEFObservation saveFile:data withFilename:name];
-            NSLog(@"File Saved result: %d", result);
-            if (result){
-                dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                if (result){
                     [BLEFObservation forObservation:observationID setFileNameTo:name];
-                    // Send to server
-                    BLEFAppDelegate* app = [[UIApplication sharedApplication] delegate];
-                    BLEFServerInterface *serverInterface = [app serverinterface];
-                    [serverInterface addObservationToUploadQueue:observationID];
-                });
-            }
-        });
+                }
+                handler(result);
+            }];
+        }];
     }
 }
 
@@ -133,7 +129,6 @@
     } else {
         BLEFObservation* observation = (BLEFObservation *)object;
         [observation setFilename:filename];
-        [BLEFDatabase saveChanges];
     }
 }
 

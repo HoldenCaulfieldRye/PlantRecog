@@ -10,15 +10,21 @@
 #import "BLEFDatabase.h"
 #import "BLEFServerInterface.h"
 
+@interface BLEFAppDelegate ()
+
+@property (readonly, strong, nonatomic) BLEFServerInterface *serverinterface;
+
+@end
+
 @implementation BLEFAppDelegate
 
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
-@synthesize serverinterface = _serverinterface;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     [self databaseInit];
+    [self serverInterfaceInit];
     return YES;
 }
 
@@ -129,13 +135,10 @@
 
 #pragma mark - Server Setup
 
-- (BLEFServerInterface *)serverinterface
+- (void)serverInterfaceInit
 {
-    if (_serverinterface != nil) {
-        return _serverinterface;
-    }
-    _serverinterface = [[BLEFServerInterface alloc] init];
-    return _serverinterface;
+    NSManagedObjectContext *databaseMOD = [self generateManagedObjectContext];
+    [_serverinterface setContext:databaseMOD];
 }
 
 #pragma mark - Database Setup

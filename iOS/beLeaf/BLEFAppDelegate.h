@@ -16,7 +16,8 @@
 
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
-@property (readonly, strong, nonatomic) BLEFServerInterface *serverinterface;
+
+extern NSString * const BLEFNewObservationNotification;
 
 - (NSURL *)applicationDocumentsDirectory;
 

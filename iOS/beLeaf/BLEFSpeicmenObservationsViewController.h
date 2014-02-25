@@ -17,5 +17,6 @@
 extern NSString * const BLEFUploadDidSendDataNotification;
 extern NSString * const BLEFJobDidSendDataNotification;
 extern NSString * const BLEFNetworkRetryNotification;
+extern NSString * const BLEFNewObservationNotification;
 
 @end

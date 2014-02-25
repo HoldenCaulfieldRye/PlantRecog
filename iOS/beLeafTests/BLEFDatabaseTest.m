@@ -200,13 +200,36 @@ extern void __gcov_flush();
     XCTAssertTrue([thumbnail isKindOfClass:[UIImage class]], @"A returned thumbnail is of type UIImage");
 }
 
-- (void)testObservationSaveImage
+- (void)testObservationSaveOpenImage
 {
     UIImage *image = [self generateTestImage];
     BLEFObservation *observation = [self generateTestObservation];
-    [observation saveImage:image];
+    
+    __block BOOL waitingForBlock = YES;
+    __block BOOL result = NO;
+    
+    
+    [observation saveImage:image completion:^(BOOL success){
+        waitingForBlock = NO;
+        result = success;
+    }];
+    
+    while(waitingForBlock) {
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+                                 beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+    }
+    
+    XCTAssertTrue(result, @"File save return value true on success");
     UIImage *savedImage = [observation getImage];
-    XCTAssertNotNil(savedImage, @"Saved Image retreived");
+    XCTAssertNotNil(savedImage, @"Saved Image retrival");
+    
+    NSData *imageData = [observation getImageData];
+    XCTAssertNotNil(imageData, @"Saved ImageData retrival");
+    
+    [testingContext deleteObject:observation];
+    [observation willSave];
+    imageData = [observation getImageData];
+    XCTAssertNil(imageData, @"ImageData should be deleted");
 }
 
 
