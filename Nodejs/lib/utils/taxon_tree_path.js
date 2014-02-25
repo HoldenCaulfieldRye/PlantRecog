@@ -28,32 +28,53 @@ function find_path_from_node(child){
 
 function bucketing(threshold, tag, prob){
 	//find leaf nodes (easiest to find)
-	var cursor = db.taxonomy.find({Children : [ ] }, {Parent : 1, _id : 0});
+	var cursor = db.taxonomy.find({Children : [ ] }, {Parent:1, Path:1, _id:0});
 	//for each leaf node traverse its path updating the count of elements below it
 	for (var i =0; i< cursor.length();i++){
 		var parent = eval(tojson(cursor[i]["Parent"]));
 		var path = eval(tojson(cursor[i]["Path"]));
-		traverse_update_descendants_count((parent + path), tag, prob);			
+		path.unshift(parent);
+		traverse_update_descendant_count(path, tag, prob);			
+	}
+	var cursor = db.taxonomy.find({Children : [ ] }, {Parent:1, Path:1, _id:0});
+	for (var i =0; i< cursor.length();i++){
+		var parent = eval(tojson(cursor[i]["Parent"]));
+		var path = eval(tojson(cursor[i]["Path"]));
+		path.unshift(parent);
+		traverse_update_bucket(path, threshold);			
 	}
 }
 
-function traverse_update_descendants_count(path, tag, prob, threshold){
-	//add condition to the following...i.e tag = X, prob = Y
+function traverse_update_descendant_count(path, tag, prob){
+	//add condition to the following...i.e tag = X, prob = Y, synset_id's in path, or 1 synset at a time
+	//ideally we'd do this once for all synsets and leave it globally defined....consider that!
 	var count_by_synset = db.plants.group({ key: {Synset_ID:1}, reduce: function(curr,res){res.count++}, initial:{count:0} })
 	var count = 0;
-	var path_index = 0;
 	for (var i in path){
 		var node = path[i];
-		//count starts at zero at leaf node and increases for each ancestor
 		count+= count_by_synset(node);
-		if(count >=threshold){
-			path_index = i;
-			}
-		//better to add to new table, but what other info do we need to include??
-		db.buckets.update({Node:node}, {$inc : { Count : count}});
+		db.buckets.update({Node:node}, {$inc:{Count:count}, Bucket:node});
 	}
-	var bucket = path[path_index];
-	for(path_index; path_index>=0; path_index--){
-		db.buckets.update({Node:path[path_index]}, {$set : { Bucket : bucket}});
+}
+
+function traverse_update_bucket(path, threshold){
+	var running_count = 0;
+	var index = 0;
+	while(running_count<threshold){
+		for (var i in path){
+			var node = path[i];
+			var data = db.buckets.findOne({Node:node}, {Count:1 , _id:0});
+			running_count+=data["Count"];
+			if(running_count >= threshold){
+				index = i;
+				break;
+			}
+		}
+	}
+	if(index>0){
+		bucket = path[index];
+		for(index; index>=0; index--){
+			db.buckets.update({Node:path[index]}, {Bucket:bucket});
+		}
 	}
 }
