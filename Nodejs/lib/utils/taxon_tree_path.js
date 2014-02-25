@@ -27,6 +27,7 @@ function find_path_from_node(child){
 
 
 function bucketing(threshold, tag, prob){
+	initialise_count_agg(tag,prob);
 	//find leaf nodes (easiest to find)
 	var cursor = db.taxonomy.find({Children : [ ] }, {Parent:1, Path:1, _id:0});
 	//for each leaf node traverse its path updating the count of elements below it
@@ -34,7 +35,7 @@ function bucketing(threshold, tag, prob){
 		var parent = eval(tojson(cursor[i]["Parent"]));
 		var path = eval(tojson(cursor[i]["Path"]));
 		path.unshift(parent);
-		traverse_update_descendant_count(path, tag, prob);			
+		traverse_update_descendant_count(path);			
 	}
 	var cursor = db.taxonomy.find({Children : [ ] }, {Parent:1, Path:1, _id:0});
 	for (var i =0; i< cursor.length();i++){
@@ -43,28 +44,52 @@ function bucketing(threshold, tag, prob){
 		path.unshift(parent);
 		traverse_update_bucket(path, threshold);			
 	}
+	//now return result
+	var res = db.plants.find({},{Image:1, Species:1, _id:0});
+	//possible add constraint:
+	//	where not count<threshold, bucket == synset_id....this suggests the item has been excluded so we dont want to ???
+	// or just simply where not exclude
+	var res = db.plants.find({},{Image:1, Species:1, _id:0});
+	return res;	
 }
 
-function traverse_update_descendant_count(path, tag, prob){
-	//add condition to the following...i.e tag = X, prob = Y, synset_id's in path, or 1 synset at a time
-	//ideally we'd do this once for all synsets and leave it globally defined....consider that!
-	var count_by_synset = db.plants.group({ key: {Synset_ID:1}, reduce: function(curr,res){res.count++}, initial:{count:0} })
+var count_by_synset;
+
+function initialise_count_agg(tag, prob){
+	count_by_synset = new Object();
+	var res = db.plants.aggregate(
+		{ $match : {Component_Tag : tag , Component_Tag_Prob : { $gte : prob } }}, 
+		{ $group : { _id : "$Synset_ID", count : { $sum : 1 } }}
+	);
+	for (var i = 0 ; i< res.result.length; i++ ){
+		count_by_synset[res.result[i]._id] = res.result[i].count;
+	}
+}
+
+function traverse_update_descendant_count(path){
 	var count = 0;
 	for (var i in path){
 		var node = path[i];
-		count+= count_by_synset(node);
-		db.buckets.update({Node:node}, {$inc:{Count:count}, Bucket:node});
+		count += count_by_synset[node];
+		//defualt bucket to itself. we won't know until all nodes have been updated with their count if they need bucketed into an ancestor node
+		//db.buckets.update({Node:node}, {$inc:{Count:count}, Bucket:node});
+		//needs to be a findAndModify query on the plants db....?
+		db.plants.findAndModify({
+			query  : { Synset_ID : node}, 
+			update : { $inc : {Count : count}, Bucket : node}
+		});
 	}
 }
 
 function traverse_update_bucket(path, threshold){
 	var running_count = 0;
 	var index = 0;
+	var bucket;
 	while(running_count<threshold){
 		for (var i in path){
-			var node = path[i];
-			var data = db.buckets.findOne({Node:node}, {Count:1 , _id:0});
-			running_count+=data["Count"];
+			bucket = path[i];
+			var data = db.buckets.findOne({Node:bucket}, {Count:1 , _id:0});
+			running_count += data.Count;
 			if(running_count >= threshold){
 				index = i;
 				break;
@@ -72,9 +97,18 @@ function traverse_update_bucket(path, threshold){
 		}
 	}
 	if(index>0){
-		bucket = path[index];
 		for(index; index>=0; index--){
-			db.buckets.update({Node:path[index]}, {Bucket:bucket});
+			//db.buckets.update({Node:path[index]}, {Bucket:bucket});
+			//var ex = db.taxonomy.findOne({Parent : bucket}, {Exclude:1, _id:0});
+			var ex = db.taxonomy.findOne({Synset_ID : bucket}, {Exclude:1, _id:0});
+			if(!ex.Exclude){
+				//db.buckets.findAndModify({
+				db.plants.findAndModify({
+					//query  : { Node   : path[index] }, 
+					query  : { Synset_ID : path[index] }, 
+					update : { Bucket : bucket }
+				});
+			}
 		}
 	}
 }
