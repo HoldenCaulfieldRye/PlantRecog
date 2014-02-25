@@ -47,19 +47,18 @@ for synset in synsets:
     for i in range(num_images):
         fname = "%s%s/%s_%s.xml" % (image_data, synset, synset, str(i))
         if os.path.isfile(fname):
-            print fname
             data = open(fname, 'rb')
             dict = xmltodict.parse(data)['root']['meta_data']
             dict['Synset_ID'] = synset
             dict['Species'] = wordsID[synset]
             dict['Description'] = glossID[synset]
+            dict['Exclude'] = 'false'
             doc = json.dumps(dict)
             doc2 = json.loads(doc)
-            print doc2
             post_id = plantCollection.insert(doc2)
             if post_id is None:
-                print "Error posting species bucket: %s" % (splitline[0]) 
+                print "Error posting image meta-data file: %s" % (fname) 
                 if not client.alive():
                     print "Connection to mongodb has gone down!! Please retry"
                     sys.exit(2)
-print "Finished inserting word data into MongoDB"
+print "Finished inserting image meta-data into MongoDB"
