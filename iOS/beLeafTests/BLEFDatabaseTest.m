@@ -15,6 +15,7 @@
 
 NSManagedObjectContext *testingContext;
 NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
 extern void __gcov_flush();
 
 @interface BLEFDatabaseTest : XCTestCase
@@ -23,6 +24,8 @@ extern void __gcov_flush();
 @end
 
 @interface BLEFDatabase (Testing)
+
+// Expose private methods for testing
 
 + (NSManagedObjectContext *) getContext;
 

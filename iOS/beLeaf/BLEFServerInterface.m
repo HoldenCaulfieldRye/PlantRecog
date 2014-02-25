@@ -35,8 +35,10 @@
         _uploadQueueHalted = false;
         _jobQueueHalted = false;
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-        [center addObserver:self selector:@selector(newObservationNotification:) name:BLEFNewObservationNotification object:nil];
-        [center addObserver:self selector:@selector(enableQueueProcessing) name:BLEFNetworkRetryNotification object:nil];
+        [center addObserver:self selector:@selector(newObservationNotification:)
+                       name:BLEFNewObservationNotification object:nil];
+        [center addObserver:self selector:@selector(enableQueueProcessing)
+                       name:BLEFNetworkRetryNotification object:nil];
     }
     return self;
 }
@@ -126,7 +128,7 @@
     // Check for error
     [self processJobQueue];
     [self processUploadQueue];
-}   
+}
 
 
 NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNotification";
@@ -139,16 +141,14 @@ NSString * const BLEFNewObservationNotification = @"BLEFNewObservationNotificati
 - (id) nextInUploadQueue
 {
     id nextUp = nil;
-    if (!_uploadQueueHalted){
-        if (_uploadQueue != nil){
-            if ([_uploadQueue count] > 0){
-                nextUp = [_uploadQueue firstObject];
-                if ([nextUp isMemberOfClass:[NSManagedObjectID class]]){
-                    return nextUp;
-                } else {
-                    [self removeFromUploadQueue:nextUp];
-                    return nil;
-                }
+    if (_uploadQueue != nil){
+        if ([_uploadQueue count] > 0){
+            nextUp = [_uploadQueue firstObject];
+            if ([nextUp isKindOfClass:[NSManagedObjectID class]]){
+                return nextUp;
+            } else {
+                [self removeFromUploadQueue:nextUp];
+                return nil;
             }
         }
     }
@@ -158,16 +158,14 @@ NSString * const BLEFNewObservationNotification = @"BLEFNewObservationNotificati
 - (id) nextInJobQueue
 {
     id nextUp = nil;
-    if (!_jobQueueHalted){
-        if (_jobQueue != nil){
-            if ([_jobQueue count] > 0){
-                nextUp = [_jobQueue firstObject];
-                if ([nextUp isMemberOfClass:[NSManagedObjectID class]]){
-                    return nextUp;
-                } else {
-                    [self removeFromJobQueue:nextUp];
+    if (_jobQueue != nil){
+        if ([_jobQueue count] > 0){
+            nextUp = [_jobQueue firstObject];
+            if ([nextUp isKindOfClass:[NSManagedObjectID class]]){
+                return nextUp;
+            } else {
+                [self removeFromJobQueue:nextUp];
                     return nil;
-                }
             }
         }
     }
@@ -204,7 +202,7 @@ NSString * const BLEFNewObservationNotification = @"BLEFNewObservationNotificati
         _jobQueueProcessingActive = true;
         id nextInQueue = [self nextInJobQueue];
         if (nextInQueue != nil){
-            [self updateJobForObservationAfterDelay:nextInQueue];
+            [self updateJobForObservation:nextInQueue];
         } else {
             _jobQueueProcessingActive = false;
             return;
@@ -224,11 +222,14 @@ NSString * const BLEFNewObservationNotification = @"BLEFNewObservationNotificati
         BLEFObservation* observation = (BLEFObservation *)fetchedObject;
         if (![observation uploaded]){
             NSData *imageData = [observation getImageData];
+            if (imageData == nil){
+                return nil;
+            }
             //NSString *urlString = @"http://sheltered-ridge-6203.herokuapp.com/upload";
             //NSString *urlString = @"http://192.168.1.78:5000/upload";
             NSString *urlString = @"http://plantrecogniser.no-ip.biz:55580/upload";
             //NSString *urlString = @"http://www.posttestserver.com/post.php";
-            NSDictionary *params = @{@"segment": [observation segment]};
+            NSDictionary *params = @{@"segment": ([observation segment] != nil ? [observation segment] : @"na")};
             BLEFServerConnection *serverConnection = [self uploadFields:params andFileData:imageData toUrl:urlString];
             [serverConnection setObjID:observationID];
             [serverConnection setUpload:true];

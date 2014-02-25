@@ -10,9 +10,9 @@
 
 @implementation BLEFServerConnection
 
-- (id)init
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id)delegate startImmediately:(BOOL)startImmediately
 {
-    self = [super init];
+    self = [super initWithRequest:request delegate:delegate startImmediately:startImmediately];
     if (self) {
         self.progress = 0;
         self.jobUpdate = false;
