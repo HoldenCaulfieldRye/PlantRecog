@@ -26,8 +26,10 @@ def mymain():
     myfile = open('taxonomyTree.pickle','rb')
     mytree = pickle.load(myfile)
     for keys in mytree.children:
-        doc = {"Parent" : keys,
-               "Children" : mytree.children[keys]}
+        doc = {"Parent" : keys,        #consider renaming this to "Node"??
+               "Children" : mytree.children[keys]
+              #"Exclude" : 'false'
+        }
         print doc
         post_id = wordnetCollection.insert(doc)
         if post_id is None:
