@@ -18,7 +18,7 @@ database = sys.argv[3]
 
 client = MongoClient(db_host, db_port)
 db = client[database]
-wordnetCollection = db.taxonomy
+taxonCollection = db.taxonomy
 
 
 def mymain():
@@ -31,13 +31,15 @@ def mymain():
               #"Exclude" : 'false'
         }
         print doc
-        post_id = wordnetCollection.insert(doc)
+        post_id = taxonCollection.insert(doc)
         if post_id is None:
             print "Error posting parent: %s" % (keys) 
             if not client.alive():
                 print "Connection to mongodb has gone down!! Please retry"
                 sys.exit(2)
     print "Finished inserting taxonomy tree into MongoDB"
+    #is it possible to add an index at this stage???
+    #taxonCollection.ensureIndex({Parent: "text"}
     myfile.close()
 
 
