@@ -32,9 +32,7 @@ function find_path_from_node(child){
 //------------BUCKETING ALGO---------------
 //-----------------------------------------
 // PUBLIC
-Date.prototype.timeNow = function () {
-     return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
-})
+Date.prototype.timeNow = function () { return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();}
 
 function bucketing(threshold, tag, prob){
 	print("Initialing aggregated count of synsets: " + new Date().timeNow());
@@ -112,12 +110,15 @@ function traverse_update_bucket(path, threshold){
 		}
 	}
 	if(index>0){
+		//would it be better to get a list of all synsets that need updating and bulk update them??? i.e.
+		// db.plants.update({ Synset_ID: $in: path.slice(0,index-1) }, Exclude : false} , {$set : { Bucket : bucket }} , {multi : true});
 		for(index; index>=0; index--){
 			// if the proposed bucket is to be excluded then don't update it.
-			var ex = db.plants.findOne({Synset_ID : bucket}, {Exclude:1, _id:0});
-			if(!ex.Exclude){
-				db.plants.update({Synset_ID : path[index]} , {$set : { Bucket : bucket }} , {multi : true});
-			}
+		//	var ex = db.plants.findOne({Synset_ID : bucket}, {Exclude:1, _id:0});
+		//	if(!ex.Exclude){
+				//db.plants.update({Synset_ID : path[index]} , {$set : { Bucket : bucket }} , {multi : true});
+				db.plants.update({Synset_ID : path[index], Exclude : false} , {$set : { Bucket : bucket }} , {multi : true});
+		//	}
 		}
 	}
 }
