@@ -32,9 +32,15 @@ function find_path_from_node(child){
 //------------BUCKETING ALGO---------------
 //-----------------------------------------
 // PUBLIC
+Date.prototype.timeNow = function () {
+     return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
+})
+
 function bucketing(threshold, tag, prob){
+	print("Initialing aggregated count of synsets: " + new Date().timeNow());
 	initialise_count_agg(tag,prob);
 	//find leaf nodes (easiest to find)
+	print("Updating count of all nodes: " + new Date().timeNow());
 	var cursor = db.taxonomy.find({Children : [ ] }, {Parent:1, Path:1, _id:0});
 	//for each leaf node traverse its path updating the count of elements below it
 	for (var i =0; i< cursor.length();i++){
@@ -43,6 +49,7 @@ function bucketing(threshold, tag, prob){
 		path.unshift(parent);
 		traverse_update_descendant_count(path);			
 	}
+	print("Updating buckets: " + new Date().timeNow());
 	var cursor = db.taxonomy.find({Children : [ ] }, {Parent:1, Path:1, _id:0});
 	for (var i =0; i< cursor.length();i++){
 		var parent = eval(tojson(cursor[i]["Parent"]));
@@ -55,6 +62,7 @@ function bucketing(threshold, tag, prob){
 	//possible add constraint:
 	//	where not count>=threshold, bucket != synset_id....this suggests the item is unclassifiable
 	// then remove all excluded images
+	print("Extrating final result set: " + new Date().timeNow());
 	var res = db.plants.find({ Exclude:false, Count : {$gte : threshold}, $where : "this.Bucket != this.Synset_ID" } , {Image:1, Species:1, _id:0});	
 	return res;	
 }
@@ -93,7 +101,7 @@ function traverse_update_bucket(path, threshold){
 	while(running_count<threshold){
 		for (var i in path){
 			bucket = path[i];
-			var data = db.plants.findOne({Node:bucket}, {Count:1 , _id:0});
+			var data = db.plants.findOne({Synset_ID : bucket}, {Count:1 , _id:0});
 			if(data){
 				running_count += data.Count;
 			}

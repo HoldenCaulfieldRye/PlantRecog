@@ -17,9 +17,13 @@ client = MongoClient('localhost', '57027')
 db = client['development']
 
 def bucketing(threshold, component, componentProb)
-    db.eval(bucketing, threshold, component, componentProb)
-
+    res = db.eval(bucketing, threshold, component, componentProb)
+    return res
 
 def exclude_synset(synset)
-    db.eval(exclude_synset,synset)
+    success = db.eval(exclude_synset,synset)
+    return success
+
+
+
 
