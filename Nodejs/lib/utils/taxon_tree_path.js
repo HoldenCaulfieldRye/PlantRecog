@@ -96,7 +96,7 @@ function traverse_update_bucket(path, threshold){
 	var running_count = 0;
 	var index = 0;
 	var bucket;
-	while(running_count<threshold){
+//	while(running_count<threshold){
 		for (var i in path){
 			bucket = path[i];
 			var data = db.plants.findOne({Synset_ID : bucket}, {Count:1 , _id:0});
@@ -108,7 +108,8 @@ function traverse_update_bucket(path, threshold){
 				break;
 			}
 		}
-	}
+//		break;
+//	}
 	if(index>0){
 		//would it be better to get a list of all synsets that need updating and bulk update them??? i.e.
 		// db.plants.update({ Synset_ID: $in: path.slice(0,index-1) }, Exclude : false} , {$set : { Bucket : bucket }} , {multi : true});
