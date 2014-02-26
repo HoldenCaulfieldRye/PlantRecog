@@ -42,7 +42,7 @@ catch (err) {
   process.exit(1);
 }
 
-if (configArgs === -1){
+if (typeof(configArgs) !== 'object'){
   console.log('Exiting App due to failed parseConfig')
 }
 
