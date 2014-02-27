@@ -12,11 +12,18 @@ var parser = new xml2js.Parser();
 
 // CHANGE THIS ACCORDINGLY!!! They should ideally be passed via a config file
 var NUM_PHOTOS = 100000;			//the number of photos we wish to attempt to convert and save to DB
-var IMAGE_DB_PATH = '/data2/ImageNet/train/';	//filesystem directory where image meta-data is stored
+//var IMAGE_DB_PATH = '/data2/ImageNet/train/';	//filesystem directory where image meta-data is stored
+var IMAGE_DB_PATH = '~/data/';	//filesystem directory where image meta-data is stored
 
-var synsets = exec('ls ' + IMAGE_DB_PATH);
-console.log(synsets);
-//var NUM_SYNSETS = ;
+//var lsss = exec('ls -1 ' + IMAGE_DB_PATH + ' > synsets.txt');
+
+var path = require('path');
+var filePath = path.join(__dirname + '/synsets.txt');
+
+var array = fs.readFileSync(filePath).toString().split("\n");
+for(i in array) {
+    console.log(array[i]);
+}
 
 /*
 // connect to mongod server, read xml files, parse into json, make some tweaks and insert into collection

@@ -1,0 +1,4 @@
+node_modules/
+uploads/development/*.jpg
+uploads/qa/*.jpg
+uploads/production/*.jpg
