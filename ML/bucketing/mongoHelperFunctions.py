@@ -44,15 +44,18 @@ def bucketing(threshold, component=None, componentProb=0):
     print bucket_cmd
     os.system(bucket_cmd)
     if component is None:
-        res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}} , {'Image':True, 'Bucket':True , '_id':False})
+        #res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}} , {'Image':True, 'Bucket':True , '_id':False})
+        res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}} , {'Image':True, 'BucketSpecies':True , '_id':False})
     else:
-        res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, 'Component_Tag': component} , {'Image':True, 'Bucket':True , '_id':False})
+        #res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, 'Component_Tag': component} , {'Image':True, 'Bucket':True , '_id':False})
+        res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, 'Component_Tag': component} , {'Image':True, 'BucketSpecies':True , '_id':False})
     
     print 'number of images returned: ' + str(res.count())
     
     for i in res:
         images.append(i['Image'])
-        species.append(i['Bucket'])
+        #species.append(i['Bucket'])
+        species.append(i['BucketSpecies'])
 
     return images, species
 
@@ -68,11 +71,11 @@ def exclude_synset(name):
 
 
 #Example usage:
-#img, spec = bucketing(900, "Leaf", 0.8)
+img, spec = bucketing(900, "Leaf", 0.8)
 #bucketing(900, componentProb=0.8)
 #bucketing(900, 'Leaf', 0.8)
 #print img
-#print spec
+print spec
 
 
 #exclude_synset("angiosperm, flowering plant")

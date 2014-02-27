@@ -5,11 +5,6 @@
 var count_by_synset;
 
 function bucketing(threshold, tag, prob){
-/*
-	print('threshold = ' + threshold);
-	print('tag = ' + tag);
-	print('probibility = ' + prob);
-*/
 	print("Initialing aggregated count of synsets: " + new Date().timeNow());
 	initialise_count_agg(tag,prob);
 	//find leaf nodes (easiest to find)
@@ -54,14 +49,18 @@ function initialise_count_agg(tag, prob){
 
 function traverse_update_descendant_count(path){
 	var count = 0;
+	var spec = "plant, flora, plant life";
 	for (var i in path){
 		var node = path[i];
 		if(count_by_synset[node]){
 			count+=count_by_synset[node];
 		};
-		//defualt bucket to itself. we won't know until all nodes have been updated with their count if they need bucketed into an ancestor node
-		db.plants.update({Synset_ID : node, Exclude : false}, {$inc : {Count : count}, $set : {Bucket : node}}, {multi : true});
-		db.plants.update({Synset_ID : node, Exclude : true }, {$inc : {Count : 0    }, $set : {Bucket : node}}, {multi : true});
+		var data = (db.plants.findOne({Synset_ID : node}, {Species:1, _id:0}));
+		if(data) spec = data.Species;
+		//db.plants.update({Synset_ID : node, Exclude : false}, {$inc : {Count : count}, $set : {Bucket : node}}, {multi : true});
+		//db.plants.update({Synset_ID : node, Exclude : true }, {$inc : {Count : 0    }, $set : {Bucket : node}}, {multi : true});
+		db.plants.update({Synset_ID : node, Exclude : false}, {$inc : {Count : count}, $set : {Bucket : node}, $set : {BucketSpecies: spec}}, {multi : true});
+		db.plants.update({Synset_ID : node, Exclude : true }, {$inc : {Count : 0    }, $set : {Bucket : node}, $set : {BucketSpecies: spec}}, {multi : true});
 	}
 }
 
@@ -81,7 +80,9 @@ function traverse_update_bucket(path, threshold){
 		}
 	}
 	if(index>0){
-		db.plants.update({ Synset_ID: {$in: path.slice(0,index)} , Exclude : false} , {$set : { Bucket : bucket }} , {multi : true});
+		var spec = (db.plants.findOne({Synset_ID : bucket}, {Species:1, _id:0})).Species;
+		//db.plants.update({ Synset_ID: {$in: path.slice(0,index)} , Exclude : false} , {$set : { Bucket : bucket }} , {multi : true});
+		db.plants.update({ Synset_ID: {$in: path.slice(0,index)} , Exclude : false} , {$set : { Bucket : bucket }, $set : {BucketSpecies: spec}} , {multi : true});
 	}
 }
 
