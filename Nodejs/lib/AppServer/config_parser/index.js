@@ -31,7 +31,7 @@ exports.parseConfig = function(confFile){
 
   if (!confFile){
     console.log('No arguments given, I cannot initialise without a .conf');
-    process.exit(1);
+    return -1;
   } 
 
   /* try and parse the file (use Sync readFile), catch any error */
@@ -40,7 +40,7 @@ exports.parseConfig = function(confFile){
   }
   catch (err) {
     console.log('Error parsing confFile: ' + err);
-    process.exit(1);
+    return -2;
   }   
 
   /* Extract our configuration variables */
@@ -82,7 +82,7 @@ exports.parseConfig = function(confFile){
   if(db_port === -1 || db_host === -1 || db_database === -1 ||
       classifier_host === -1 || classifier_port === -1 || appServer_port === -1){
     console.log('Invalid conf file provided, I cannot initialise!');
-    throw 'Invalid conf file provided, I cannot initialise!';
+    return -3;
   }
   
   /* Return our configuration object */

@@ -42,6 +42,10 @@ catch (err) {
   process.exit(1);
 }
 
+if (typeof(configArgs) !== 'object'){
+  console.log('Exiting App due to failed parseConfig')
+}
+
 //Actually connect to the database.
 try{    
   mongoClient = new mongo.MongoClient(new mongo.Server(configArgs.db_host, configArgs.db_port), {native_parser: true});
