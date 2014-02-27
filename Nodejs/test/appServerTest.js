@@ -1,6 +1,31 @@
+/******************************
+* Pre-requisites for testing 
+******************************/
+
+// Node Modules
 var assert = require('assert');
-	// Path relatve to actual test.js file
+var mongo = require('mongodb');
+var BSON = mongo.BSONPure;
+
+// Custom Modules
+// Paths here are relative to the folder in which this script lies.
 var parseConfig = require('../lib/AppServer/config_parser').parseConfig;
+var routes = require('../lib/AppServer/routes/index.js')
+
+// Connect to database so that we can test our routes
+try{    
+	var mongoClient = new mongo.MongoClient(new mongo.Server("plantrecogniser.no-ip.biz", "57027"), {native_parser: true});
+	mongoClient.open(function(err, mongoClient){if (err) throw err;});
+	testDB = mongoClient.db("development");
+}
+catch(err){
+	console.log('Error connecting to Database: ' + err);
+	process.exit(1);
+}
+
+/******************************
+* Actual tests
+******************************/
 
 describe('Application_server',function(){
 	
