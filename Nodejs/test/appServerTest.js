@@ -6,6 +6,8 @@
 var assert = require('assert');
 var mongo = require('mongodb');
 var BSON = mongo.BSONPure;
+var express = require('express');
+var app = express();
 
 // Custom Modules
 // Paths here are relative to the folder in which this script lies.
@@ -24,10 +26,9 @@ catch(err){
 	process.exit(1);
 }
 
+// Set up the middleware
+app.get('/job/:job_id', routes.getJob(testDB));
 
-// Build test requests
-//var noJobReq = {};
-//var badJobReq = { '/thisisnotaBSONObject' };
 
 /******************************
 * Actual tests
@@ -69,16 +70,45 @@ describe('Application_server',function(){
 		})
 	})
 
+	describe('.routes.getJob', function(){
+
+		it('should error with no jobID'), function(){
+			jobID = '';
+
+			/* Write a test here that takes blank jobID and makes
+			 * an HTTP GET request to the app with no jobID. It then
+			 * needs to check that the response.
+			 */
+
+			 assert.equal(res, "You did not submit a JobID");
+
+		}
+
+
+		it('should error with bad jobID'), function(){
+			jobID = 'thisIsNotAJobID';
+			
+			/* Write a test here that takes a bad jobID and makes
+			 * an HTTP GET request to the app with it. Test needs
+			 * needs to check that the response.
+			 */
+
+			 assert.equal(res, "You did not submit a valid JobID!");
+
+		}
+
+		it('should return BSON object for a good ID'), function(){
+			jobID = {}; /* put a genuine job id here */ 
+			
+			/* Write a test here that takes a good jobID and makes
+			 * an HTTP GET request to the app with it. Test needs
+			 * needs to check that the response.
+			 */
+
+			 assert.equal(res, 'thingy'/* PUT A MATCHING OBJECT HERE */);
+
+		}
+	})
+
 })
 
-/*
-describe("Here's another test",function(){
-	describe("#parseConfig",function(){
-		// Runs synchronously. 
-		it("connection parameters should be correct", function(){
-			configArgs = parseConfig('../../env/graphic_dev_env.conf')
-			assert.equal(configArgs.db_database,'development')
-		})
-	})
-})
-*/
