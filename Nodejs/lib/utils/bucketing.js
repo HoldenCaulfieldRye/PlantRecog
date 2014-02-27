@@ -30,7 +30,7 @@ function bucketing(threshold, tag, prob){
 		path.unshift(parent);
 		traverse_update_bucket(path, threshold);			
 	}
-
+	print("Bucketing finished: " + new Date().timeNow());
 }
 
 function initialise_count_agg(tag, prob){

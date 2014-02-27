@@ -40,7 +40,8 @@ def bucketing(threshold, component, componentProb):
     print bucket_cmd
     os.system(bucket_cmd)
     #res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, '$where' : "this.Bucket != this.Synset_ID" } , {'Image':True, 'Species':True , '_id':False})
-    res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}} , {'Image':True, 'Species':True , '_id':False})
+    #res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, 'Component_Tag': component, 'Component_Tag_Prob' : {'$gte' : componentProb}} , {'Image':True, 'Species':True , '_id':False})
+    res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, 'Component_Tag': component} , {'Image':True, 'Species':True , '_id':False})
     print 'number of images returned: ' + str(res.count())
     for i in res:
         images.append(i['Image'])
@@ -56,9 +57,9 @@ def exclude_synset(synset):
 
 
 #Example usage:
-img, spec = bucketing(900, "Leaf", 0.8)
-print img
-print spec
+#img, spec = bucketing(900, "Leaf", 0.8)
+#print img
+#print spec
 
 
 #exclude_synset("n00017222")
