@@ -1,1 +1,0 @@
-istanbul cover _mocha ./test/appServerTest.js 
