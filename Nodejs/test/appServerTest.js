@@ -1,4 +1,4 @@
-/******************************
+/*****************************
 * Pre-requisites for testing 
 ******************************/
 
@@ -13,7 +13,8 @@ var parseConfig = require('../lib/AppServer/config_parser').parseConfig;
 var routes = require('../lib/AppServer/routes/index.js')
 
 // Connect to database so that we can test our routes
-try{    
+ 
+try{   
 	var mongoClient = new mongo.MongoClient(new mongo.Server("plantrecogniser.no-ip.biz", "57027"), {native_parser: true});
 	mongoClient.open(function(err, mongoClient){if (err) throw err;});
 	testDB = mongoClient.db("development");
@@ -22,6 +23,11 @@ catch(err){
 	console.log('Error connecting to Database: ' + err);
 	process.exit(1);
 }
+
+
+// Build test requests
+//var noJobReq = {};
+//var badJobReq = { '/thisisnotaBSONObject' };
 
 /******************************
 * Actual tests
@@ -52,16 +58,17 @@ describe('Application_server',function(){
 
 		it('should fail on bad parse with -2', function(){
 		    // Path relative to mocha i.e. within the Nodejs folder
-			configArgs = parseConfig('nothing')
-			assert.equal(configArgs,-2)
+			configArgs = parseConfig('nothing');
+			assert.equal(configArgs,-2);
 		})
 
 		it('should fail on bad conf file with -3', function(){
 		    // Path relative to mocha i.e. within the Nodejs folder
-			configArgs = parseConfig('./test/fixtures/broken-pseudo-dist_dev_env.conf')
-			assert.equal(configArgs,-3)
+			configArgs = parseConfig('./test/fixtures/broken-pseudo-dist_dev_env.conf');
+			assert.equal(configArgs,-3);
 		})
 	})
+
 })
 
 /*
