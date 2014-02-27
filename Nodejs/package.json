@@ -14,9 +14,9 @@
     "util": "*"
   },
   "devDependencies": {
-    "assert": "*",
     "mocha": "*",
     "should": "*",
-    "istanbul": "*"
+    "istanbul": "*",
+    "supertest": "*"
   }
 }

@@ -1,4 +1,7 @@
 nohup.out
 /Nodejs/lib/AppServer/uploads/*/*.jpg
-/Nodejs/lib/GraphicServer/uploads/*/*.jpgi
-node_modules/
+/Nodejs/lib/GraphicServer/uploads/*/*.jpg
+/Nodejs/node_modules/
+/Nodejs/mocha_test_results.json
+/Nodejs/lib-cov
+/Nodejs/coverage
