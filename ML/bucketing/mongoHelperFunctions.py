@@ -58,21 +58,23 @@ def bucketing(threshold, component=None, componentProb=0):
 
 
 
-def exclude_synset(synset):
-    print "excluding synset " + synset
-    res = db.plants.update({'Synset_ID' : synset}, {'$set' : {'Exclude': True}}, False, {'multi' : True})
-    return res
+def exclude_synset(name):
+    data = db.wordnet.find({'name': name},{'wnid':True, '_id':False})
+    for i in data:
+        synset = i['wnid']
+        print "excluding synset: " + synset
+        db.plants.update({'Synset_ID' : synset}, {'$set' : {'Exclude': True}}, multi=True)
 
 
 
 #Example usage:
 #img, spec = bucketing(900, "Leaf", 0.8)
-bucketing(900, componentProb=0.8)
+#bucketing(900, componentProb=0.8)
 #bucketing(900, 'Leaf', 0.8)
 #print img
 #print spec
 
 
-#exclude_synset("n00017222")
+#exclude_synset("angiosperm, flowering plant")
 
 
