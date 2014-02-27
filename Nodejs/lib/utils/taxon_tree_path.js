@@ -27,3 +27,6 @@ function find_path_from_node(child){
 	}
 	else return child;
 }
+
+find_path_to_all_nodes()
+
