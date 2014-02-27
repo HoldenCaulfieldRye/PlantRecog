@@ -32,6 +32,7 @@ image_data = '/data2/ImageNet/train/'
 synset_cmd = 'ls -1 ' + image_data + ' > ./synsets.txt'
 os.system(synset_cmd)
 synsets = open('./synsets.txt', 'rb')
+#synsets = open('./synsets_port.txt', 'rb')
 
 words = open('/homes/gh413/group-project-master/ML/bucketing/words.txt', 'rb')
 gloss = open('/homes/gh413/group-project-master/ML/bucketing/gloss.txt', 'rb')
@@ -73,7 +74,7 @@ for synset in synsets:
         dict['Synset_ID'] = synset
         dict['Species'] = wordsID[synset]
         dict['Description'] = glossID[synset]
-        dict['Exclude'] = 'false'
+        dict['Exclude'] = False
         doc = json.loads(json.dumps(dict))
         post_id = plantCollection.insert(doc)
         if post_id is None:
@@ -104,7 +105,7 @@ print "Finished inserting taxonomy tree into MongoDB"
 #is it possible to add an index at this stage???
 #taxonCollection.ensureIndex({'Parent': 1}, {'unique' : True})
 #add path
-taxon_tree_path_cmd = "mongo " + db_host + ":" + str(db_port) + "/" + db + "../../Nodejs/lib/utils/taxon_tree_path.js"
+taxon_tree_path_cmd = "mongo " + db_host + ":" + str(db_port) + "/" + database + "../../Nodejs/lib/utils/taxon_tree_path.js"
 print bucket_cmd
 os.system(taxon_tree_path_cmd)
 myfile.close()

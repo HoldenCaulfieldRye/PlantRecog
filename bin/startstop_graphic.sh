@@ -18,7 +18,7 @@ GRAPHIC_SERVER_LOG="/tmp/GraphicServer_${ENV}_${DATE}.log"
 
 cd $HOME/group-project-master
 
-GRAPHIC_MONGODB_CMD="nohup mongod --config ./env/graphic_${ENV}_env.conf &"
+GRAPHIC_MONGODB_CMD="nohup mongod --smallfiles --config ./env/graphic_${ENV}_env.conf &"
 echo $STUBS | grep graphicserver
 if [ $? -eq 0 ]; then
 	GRAPHIC_SERVER_CMD="nohup node ./bin/stubs/graphicserver_stub.js ./env/graphic_${ENV}_env.conf  > $GRAPHIC_SERVER_LOG 2>&1 &"

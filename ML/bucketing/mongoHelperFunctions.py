@@ -29,14 +29,14 @@ import os
 import pymongo
 from   pymongo import MongoClient
 
-client = MongoClient('localhost', 57027)
-db = client['development']
+client = MongoClient('localhost', 57127)
+db = client['qa']
 
 def bucketing(threshold, component, componentProb):
     images = list()
     species = list()
     #exec bucketing.js on mongo instance
-    bucket_cmd = "mongo localhost:57027/development --eval \"THRES=" + str(threshold) + ", TAG=\'" + component + "\', PROB=\'" + str(componentProb) + "\';\" bucketing.js"
+    bucket_cmd = "mongo localhost:57127/qa --eval \"THRES=" + str(threshold) + ", TAG=\'" + component + "\', PROB=\'" + str(componentProb) + "\';\" bucketing.js"
     print bucket_cmd
     os.system(bucket_cmd)
     #res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, '$where' : "this.Bucket != this.Synset_ID" } , {'Image':True, 'Species':True , '_id':False})
@@ -56,9 +56,9 @@ def exclude_synset(synset):
 
 
 #Example usage:
-#img, spec = bucketing(900, "Leaf", 0.8)
-#print img
-#print spec
+img, spec = bucketing(900, "Leaf", 0.8)
+print img
+print spec
 
 
 #exclude_synset("n00017222")
