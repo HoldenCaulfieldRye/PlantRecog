@@ -45,18 +45,18 @@ exports.getJob = function(db) {
  * POST Image
  */
 exports.upload = function(db, graphicServer, configArgs) {
-
-    // Make formidable the multipart form parser
-    var form = new formidable.IncomingForm()
-    form.uploadDir = path.join('./Nodejs/lib/AppServer/uploads', configArgs.db_database)
-    form.keepExtensions = true;
-    
-    // preset wait time at the moment
-    var waitTime = 2;
     
     return function(req, res) {
+
+	// Make formidable the multipart form parser
+	var form = new formidable.IncomingForm()
+	form.uploadDir = path.join('./Nodejs/lib/AppServer/uploads', configArgs.db_database)
+	form.keepExtensions = true;
+    
+	// preset wait time at the moment
+	var waitTime = 2;
 	
-	//setTimeout(function() {
+
 	
 	/* log the body of this upload */
 	form.parse(req, function (err, fields, files) {

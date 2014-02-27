@@ -1,7 +1,13 @@
 REPORTER = json
 
+install:
+	npm install --production
+
+dev-install:
+	npm install
+
 test:
-	@NODE_ENV=test; /usr/bin/mocha --reporter $(REPORTER) > mocha_test_results.json
+	./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/
 
 test-cov: lib-cov
 	@PLANT_COV=1; $(MAKE) test REPORTER=json-cov

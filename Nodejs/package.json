@@ -1,10 +1,7 @@
 {
-  "name": "BeLeaf_GraphicServer",
+  "name": "BeLeaf",
   "version": "0.0.1",
   "private": true,
-  "scripts": {
-    "start": "node graphic.js"
- },
   "dependencies": {
     "express": "*",
     "jade": "*",
@@ -15,5 +12,11 @@
     "async": "*",
     "formidable": "*",
     "util": "*"
+  },
+  "devDependencies": {
+    "assert": "*",
+    "mocha": "*",
+    "should": "*",
+    "istanbul": "*"
   }
 }
