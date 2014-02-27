@@ -16,6 +16,7 @@
   "devDependencies": {
     "assert": "*",
     "mocha": "*",
-    "should": "*"
+    "should": "*",
+    "istanbul": "*"
   }
 }
