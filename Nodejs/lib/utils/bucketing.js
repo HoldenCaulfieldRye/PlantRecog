@@ -5,11 +5,11 @@
 var count_by_synset;
 
 function bucketing(threshold, tag, prob){
-
+/*
 	print('threshold = ' + threshold);
 	print('tag = ' + tag);
 	print('probibility = ' + prob);
-
+*/
 	print("Initialing aggregated count of synsets: " + new Date().timeNow());
 	initialise_count_agg(tag,prob);
 	//find leaf nodes (easiest to find)
@@ -35,10 +35,18 @@ function bucketing(threshold, tag, prob){
 
 function initialise_count_agg(tag, prob){
 	count_by_synset = new Object();
-	var res = db.plants.aggregate(
-		{ $match : {Component_Tag : tag , Component_Tag_Prob : { $gte : prob } , Exclude : false }}, 
-		{ $group : { _id : "$Synset_ID", count : { $sum : 1 } }}
-	);
+	if(tag){
+	    var res = db.plants.aggregate(
+			{ $match : {Component_Tag : tag , Component_Tag_Prob : { $gte : prob } , Exclude : false }}, 
+			{ $group : { _id : "$Synset_ID", count : { $sum : 1 } }}
+		);
+	}
+	else{
+	    var res = db.plants.aggregate(
+			{ $match : {Component_Tag_Prob : { $gte : prob } , Exclude : false }}, 
+			{ $group : { _id : "$Synset_ID", count : { $sum : 1 } }}
+		);
+	}
 	for (var i = 0 ; i< res.result.length; i++ ){
 		count_by_synset[res.result[i]._id] = res.result[i].count;
 	}
@@ -73,11 +81,7 @@ function traverse_update_bucket(path, threshold){
 		}
 	}
 	if(index>0){
-		//would it be better to get a list of all synsets that need updating and bulk update them??? i.e.
 		db.plants.update({ Synset_ID: {$in: path.slice(0,index)} , Exclude : false} , {$set : { Bucket : bucket }} , {multi : true});
-		//for(index; index>=0; index--){
-		//		db.plants.update({Synset_ID : path[index], Exclude : false} , {$set : { Bucket : bucket }} , {multi : true});
-		//}
 	}
 }
 
@@ -85,5 +89,7 @@ Date.prototype.timeNow = function () {
 	return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
 }
 
+var TAG = null;
+var PROB =0.0;
 bucketing(THRES, TAG, PROB)
 

@@ -32,20 +32,28 @@ from   pymongo import MongoClient
 client = MongoClient('localhost', 57127)
 db = client['qa']
 
-def bucketing(threshold, component, componentProb):
+def bucketing(threshold, component=None, componentProb=0):
     images = list()
     species = list()
     #exec bucketing.js on mongo instance
-    bucket_cmd = "mongo localhost:57127/qa --eval \"THRES=" + str(threshold) + ", TAG=\'" + component + "\', PROB=\'" + str(componentProb) + "\';\" bucketing.js"
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../Nodejs/lib/utils/bucketing.js")
+    if component is None:
+        bucket_cmd = "mongo localhost:57127/qa --eval \"THRES=" + str(threshold) + ", PROB=\'" + str(componentProb) + "\'\" " + path
+    else:
+        bucket_cmd = "mongo localhost:57127/qa --eval \"THRES=" + str(threshold) + ", TAG=\'" + component + "\', PROB=\'" + str(componentProb) + "\';\" " + path
     print bucket_cmd
     os.system(bucket_cmd)
-    #res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, '$where' : "this.Bucket != this.Synset_ID" } , {'Image':True, 'Species':True , '_id':False})
-    #res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, 'Component_Tag': component, 'Component_Tag_Prob' : {'$gte' : componentProb}} , {'Image':True, 'Species':True , '_id':False})
-    res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, 'Component_Tag': component} , {'Image':True, 'Species':True , '_id':False})
+    if component is None:
+        res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}} , {'Image':True, 'Bucket':True , '_id':False})
+    else:
+        res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, 'Component_Tag': component} , {'Image':True, 'Bucket':True , '_id':False})
+    
     print 'number of images returned: ' + str(res.count())
+    
     for i in res:
         images.append(i['Image'])
-        species.append(i['Species'])
+        species.append(i['Bucket'])
+
     return images, species
 
 
@@ -56,8 +64,11 @@ def exclude_synset(synset):
     return res
 
 
+
 #Example usage:
 #img, spec = bucketing(900, "Leaf", 0.8)
+bucketing(900, componentProb=0.8)
+#bucketing(900, 'Leaf', 0.8)
 #print img
 #print spec
 
