@@ -179,6 +179,7 @@ describe('Application_server',function(){
 			.post('/upload')
 			.field('{"date": null, "latitude": null, "longitude": null}')
 			.attach('datafile','./test/fixtures/sample.jpg')
+			.expect(200)
 			.end(function(err,res){
 			    if(err){
 				done(err);
