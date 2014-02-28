@@ -8,6 +8,8 @@ var request = require('supertest');
 var mongo = require('mongodb');
 var BSON = mongo.BSONPure;
 var express = require('express');
+var formidable = require ('formidable');
+var util = require ('util');
 var app = express();
 
 // Custom Modules
@@ -25,7 +27,15 @@ app.use(express.bodyParser());
 describe('Application_server',function(){
 
     var testDB;
+    var configArgs = {};
+    configArgs.db_port = "55517";
+    configArgs.db_host = "theplant.guru";
+    configArgs.db_database = "development";
+    configArgs.classifier_host = "graphic02.doc.ic.ac.uk";
+    configArgs.classifier_port = "55581";
+    configArgs.appServer_port = "55580";
 
+ 
     // Open DB connection before doing tests.
     before(function(done){
 	/* Code to allow connection to mongo, gets new instance of MongoClient */
@@ -47,6 +57,7 @@ describe('Application_server',function(){
 	    	// Set up the middleware for testing
 	    	app.get('/job/:job_id', routes.getJob(testDB));
 	    	app.get('/job', routes.getJob(testDB));
+		app.post('/upload', routes.upload(testDB,configArgs));
 	    	done();
 	    }
 	});
@@ -155,7 +166,30 @@ describe('Application_server',function(){
 		    };
 		});
 	});
+	
 
+    });
+
+    describe('routes.upload', function(){
+
+		it('should accept an image upload and respond with new objectID', function(done){
+
+		    // Correct ObjectID but ID does not exist
+		    request(app)
+			.post('/upload')
+			//.field('{"date": null, "latitude": null, "longitude": null}')
+			.attach('datafile','./test/fixtures/test.jpg')
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+				done();
+			    };
+			});
+
+		});
     })
+
 
 })
