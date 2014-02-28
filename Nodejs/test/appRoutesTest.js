@@ -22,7 +22,7 @@ var Server = mongo.Server,
 Db = mongo.Db,
 BSON = mongo.BSONPure;
 
-app.use(express.bodyParser());
+//app.use(express.bodyParser());
 
 describe('Application_server',function(){
 
@@ -177,8 +177,8 @@ describe('Application_server',function(){
 		    // Correct ObjectID but ID does not exist
 		    request(app)
 			.post('/upload')
-			//.field('{"date": null, "latitude": null, "longitude": null}')
-			.attach('datafile','./test/fixtures/test.jpg')
+			.field('{"date": null, "latitude": null, "longitude": null}')
+			.attach('datafile','./test/fixtures/sample.jpg')
 			.end(function(err,res){
 			    if(err){
 				done(err);
