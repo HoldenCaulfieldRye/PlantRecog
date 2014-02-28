@@ -71,11 +71,12 @@ def exclude_synset(name):
 
 
 #Example usage:
-img, spec = bucketing(900, "Leaf", 0.8)
-#bucketing(900, componentProb=0.8)
-#bucketing(900, 'Leaf', 0.8)
-#print img
-print spec
+if __name__ == '__main__':
+    img, spec = bucketing(900, "Leaf", 0.8)
+    #bucketing(900, componentProb=0.8)
+    #bucketing(900, 'Leaf', 0.8)
+    print img
+    print spec
 
 
 #exclude_synset("angiosperm, flowering plant")
