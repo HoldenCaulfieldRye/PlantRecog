@@ -1,6 +1,6 @@
 /*****************************
-* Pre-requisites for testing 
-******************************/
+ * Pre-requisites for testing 
+ ******************************/
 
 // Node Modules
 var assert = require('assert');
@@ -24,122 +24,138 @@ app.use(express.bodyParser());
 
 describe('Application_server',function(){
 
-	var testDB;
+    var testDB;
 
-	// Open DB connection before doing tests.
-	before(function(done){
-		/* Code to allow connection to mongo, gets new instance of MongoClient */
+    // Open DB connection before doing tests.
+    before(function(done){
+	/* Code to allow connection to mongo, gets new instance of MongoClient */
 
-		var server = new Server('theplant.guru','55517',{auto_reconnect:true, native_parser: true});
-		testDB = new Db('development',server, {safe: true});
+	var server = new Server('theplant.guru','55517',{auto_reconnect:true, native_parser: true});
+	testDB = new Db('development',server, {safe: true});
 
-	    //Actually connect to the database.
-	    testDB.open(function(err, testDB) {
-	    	if(!err) {
-	    		console.log("Connected to " + 'development' + " database");
-	    		testDB.collection('usercollection', {strict:true}, function(err, collection) {
-	    			if (err) {
-	    				console.log("The 'usercollection' collection doesn't exist!");
-	    				return -1;
-	    			}
-	    		});
+	//Actually connect to the database.
+	testDB.open(function(err, testDB) {
+	    if(!err) {
+	    	console.log("Connected to " + 'development' + " database");
+	    	testDB.collection('usercollection', {strict:true}, function(err, collection) {
+	    	    if (err) {
+	    		console.log("The 'usercollection' collection doesn't exist!");
+	    		return -1;
+	    	    }
+	    	});
 
-	    	    // Set up the middleware for testing
-	    		app.get('/job/:job_id', routes.getJob(testDB));
-	    		app.get('/job', routes.getJob(testDB));
-	    		done();
-	    	}
-	    });
-
-
-	});
-
-	// Close DB connection after completed tests
-	after(function(done){
-
-		testDB.close();
-		done();
+	    	// Set up the middleware for testing
+	    	app.get('/job/:job_id', routes.getJob(testDB));
+	    	app.get('/job', routes.getJob(testDB));
+	    	done();
+	    }
 	});
 
 
-	// Run some tests!
-	describe('.routes.getJob', function(){
+    });
+
+    // Close DB connection after completed tests
+    after(function(done){
+
+	testDB.close();
+	done();
+    });
 
 
-		it('should error with invalid jobID', function(done){
-			jobID = '';
-			request(app)
-			.get('/job/xx')
-			.expect(200,'You did not submit a valid JobID!')
-			.end(function(err,res){
-				if(err){
-					done(err);
-				}
-				else {
-					done();
-				};
-			});
+    // Run some tests!
+    describe('.routes.getJob', function(){
+
+
+	it('should error with invalid jobID', function(done){
+	    jobID = '';
+	    request(app)
+		.get('/job/xx')
+		.expect(200,'You did not submit a valid JobID!')
+		.end(function(err,res){
+		    if(err){
+			done(err);
+		    }
+		    else {
+			done();
+		    };
 		});
+	});
 
-		it('should error with no jobID', function(done){
-			request(app)
-			.get('/job')
-			.expect(200,'You did not submit a JobID')
-			.end(function(err,res){
-				if(err){
-					done(err);
-				}
-				else {
-					done();
-				};
-			});
+	it('should error with no jobID', function(done){
+	    request(app)
+		.get('/job')
+		.expect(200,'You did not submit a JobID')
+		.end(function(err,res){
+		    if(err){
+			done(err);
+		    }
+		    else {
+			done();
+		    };
 		});
+	});
 
-		it('should error with no jobID', function(done){
-			request(app)
-			.get('/job/')
-			.expect(200,'You did not submit a JobID')
-			.end(function(err,res){
-				if(err){
-					done(err);
-				}
-				else {
-					done();
-				};
-			});
+	it('should error with no jobID', function(done){
+	    request(app)
+		.get('/job/')
+		.expect(200,'You did not submit a JobID')
+		.end(function(err,res){
+		    if(err){
+			done(err);
+		    }
+		    else {
+			done();
+		    };
 		});
+	});
 
-		it('should return the right BSON', function(done){
+	it('should return the right BSON', function(done){
 
-			// Actual document in Database.
-			var returnedObject = {
-				"_id": "5308b98ba073dc607f240ac1",
-				"classification": "{ \"Lemon tree\":0.217, \"Pine\":0.174, \"Maple\":0.152 }",
-				"graphic_filepath": "Nodejs/lib/GraphicServer/uploads/development/12319-twlq79.jpg",
-				"image_metadata": {
-					"date": null,
-					"latitude": null,
-					"longitude": null
-				},
-				"image_segment": "flower",
-				"submission_state": "Image classified",
-				"submission_time": 1393080715,
-				"vm_filepath": "Nodejs/lib/AppServer/uploads/development/641d11ec6af0d44d2009f7baa68a729e.jpg"
-			}
+	    // Actual document in Database.
+	    var returnedObject = {
+		"_id": "5308b98ba073dc607f240ac1",
+		"classification": "{ \"Lemon tree\":0.217, \"Pine\":0.174, \"Maple\":0.152 }",
+		"graphic_filepath": "Nodejs/lib/GraphicServer/uploads/development/12319-twlq79.jpg",
+		"image_metadata": {
+		    "date": null,
+		    "latitude": null,
+		    "longitude": null
+		},
+		"image_segment": "flower",
+		"submission_state": "Image classified",
+		"submission_time": 1393080715,
+		"vm_filepath": "Nodejs/lib/AppServer/uploads/development/641d11ec6af0d44d2009f7baa68a729e.jpg"
+	    }
 
-			request(app)
-			.get('/job/5308b98ba073dc607f240ac1')
-			.expect(200, returnedObject)
-			.end(function(err,res){
-				if(err){
-					done(err);
-				}
-				else {
-					done();
-				};
-			});
+	    request(app)
+		.get('/job/5308b98ba073dc607f240ac1')
+		.expect(200, returnedObject)
+		.end(function(err,res){
+		    if(err){
+			done(err);
+		    }
+		    else {
+			done();
+		    };
 		});
+	});
 
-	})
+	it('should gracefully say no item', function(done){
+
+	    // Correct ObjectID but ID does not exist
+	    request(app)
+		.get('/job/5308b98ba073dc607f240ac2')
+		.expect(200, 'There is no document in the collection matching that JobID!')
+		.end(function(err,res){
+		    if(err){
+			done(err);
+		    }
+		    else {
+			done();
+		    };
+		});
+	});
+
+    })
 
 })

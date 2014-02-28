@@ -8,17 +8,6 @@ var util = require ('util');
 
 var BSON = mongo.BSONPure;
 
-
-//try{    
-  //mongoClient = new mongo.MongoClient(new mongo.Server(configArgs.db_host, configArgs.db_port), {native_parser: true});
-  //mongoClient.open(function(err, mongoClient){if (err) throw err;});
-  //db = mongoClient.db(configArgs.db_database);
-//}
-//catch(err){
-  //console.log('Error connecting to Database: ' + err);
-  //process.exit(1);
-//}
-
 /*
  * GET Job
  */
@@ -38,7 +27,12 @@ exports.getJob = function(db) {
             console.log('Retrieving job: ' + job_id);
             try{
 		collection.findOne({'_id':new BSON.ObjectID(job_id)}, function(err, item) {
+		    if(item === null){
+			res.send('There is no document in the collection matching that JobID!');
+		    }
+		    else {
 		    res.send(item);
+		    }
 		});
             }
             catch(err){
