@@ -6,8 +6,13 @@ function find_path_to_all_nodes(){
 	for (var i =0; i< cursor.length();i++){
 		var parent = tojson(cursor[i]["Parent"]);
 		var path = find_path_from_node(eval(parent));
-		path = path.split(',');
-		traverse_update_path(path);
+		if(!path.length){
+			db.taxonomy.update({Parent:parent}, {$set:{Path:["n00017222"]}});
+		}
+		else{
+			path = path.split(',');
+			traverse_update_path(path);
+		}
 	}
 }
 
