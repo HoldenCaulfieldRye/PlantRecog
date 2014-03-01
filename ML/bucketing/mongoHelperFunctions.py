@@ -32,7 +32,7 @@ from   pymongo import MongoClient
 client = MongoClient('localhost', 57127)
 db = client['qa']
 
-def bucketing(threshold, component=None, componentProb=0):
+def bucketing(threshold, component=None, componentProb=0.0):
     images = list()
     species = list()
     #exec bucketing.js on mongo instance
@@ -43,21 +43,25 @@ def bucketing(threshold, component=None, componentProb=0):
         bucket_cmd = "mongo localhost:57127/qa --eval \"THRES=" + str(threshold) + ", TAG=\'" + component + "\', PROB=\'" + str(componentProb) + "\';\" " + path
     print bucket_cmd
     os.system(bucket_cmd)
-    if component is None:
-        #res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}} , {'Image':True, 'Bucket':True , '_id':False})
-        res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}} , {'Image':True, 'BucketSpecies':True , '_id':False})
-    else:
-        #res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, 'Component_Tag': component} , {'Image':True, 'Bucket':True , '_id':False})
-        res = db.plants.find({ 'Exclude' : False, 'Count' : {'$gte' : threshold}, 'Component_Tag': component} , {'Image':True, 'BucketSpecies':True , '_id':False})
-    
+    buckets = get_buckets(threshold, component, componentProb)
+    res = db.plants.find({'Bucket':{'$in':buckets}, 'Exclude':False}, {'Image':True, 'BucketSpecies':True , '_id':False})
     print 'number of images returned: ' + str(res.count())
-    
     for i in res:
         images.append(i['Image'])
-        #species.append(i['Bucket'])
         species.append(i['BucketSpecies'])
-
     return images, species
+
+
+def get_buckets(threshold, component, componentProb):
+    exclude_buckets = db.plants.find({'Exclude':True},{'Bucket':True,'_id':False}).distinct('Bucket')
+    if component is None:
+        pipe = [{'$match':{'Component_Tag_Prob':{'$gte':componentProb}, 'Exclude':False, 'Bucket':{'$nin':exclude_buckets}}}, {'$group':{'_id':"$Bucket", 'count':{'$sum':1}}}]
+    else:
+        pipe = [{'$match':{'Component_Tag':tag, 'Component_Tag_Prob':{'$gte':componentProb}, 'Exclude':False, 'Bucket':{'$nin':exclude_buckets}}}, {'$group':{'_id':"$Bucket", 'count':{'$sum':1}}}]
+    res = db.plants.aggregate(pipeline=pipe)
+    r_res = res['result']
+    results = [r['_id'] for r in r_res if r['count'] >= threshold]
+    return results 
 
 
 
@@ -69,7 +73,7 @@ def exclude_synset(name):
         db.plants.update({'Synset_ID' : synset}, {'$set' : {'Exclude': True}}, multi=True)
 
 
-
+'''
 #Example usage:
 if __name__ == '__main__':
     img, spec = bucketing(900, "Leaf", 0.8)
@@ -78,7 +82,6 @@ if __name__ == '__main__':
     print img
     print spec
 
-
 #exclude_synset("angiosperm, flowering plant")
-
+'''
 

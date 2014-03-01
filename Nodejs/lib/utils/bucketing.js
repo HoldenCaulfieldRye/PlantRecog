@@ -9,7 +9,7 @@ function bucketing(threshold, tag, prob){
 	
 	//reset count to zero!!!
 	print("Resetting collection for new bucketing session...");
-	db.plants.update({}, {$set:{Count:0, Bucket:"", BucketSpecies:""}}, {multi : true});
+	db.plants.update({}, {$set:{Count:0, BucketCount:0, Bucket:"", BucketSpecies:""}}, {multi : true});
 	var counts = db.plants.distinct('Count');
 	if(counts.length>1 || counts[0]!=0){
 		print("ERROR: Doesn't look like all documents were reset");
@@ -22,7 +22,6 @@ function bucketing(threshold, tag, prob){
 	//find leaf nodes (easiest to find)
 	print("Updating count of all nodes: " + new Date().timeNow());
 	var cursor = db.taxonomy.find({Children : [ ] }, {Parent:1, Path:1, _id:0});
-	
 	//for each leaf node traverse its path updating the count of elements below it
 	for (var i =0; i< cursor.length();i++){
 		var parent = eval(tojson(cursor[i]["Parent"]));
@@ -39,6 +38,10 @@ function bucketing(threshold, tag, prob){
 		path.unshift(parent);
 		traverse_update_bucket(path, threshold);			
 	}
+/*
+	print("Finalising bucket count: " + new Date().timeNow());
+	finalise_bucket_count(tag,prob);
+*/
 	print("Bucketing finished: " + new Date().timeNow());
 }
 
@@ -73,8 +76,9 @@ function traverse_update_descendant_count(path){
 	if(!path.length) { print("WARN: path with no length");}
 	for (var i in path){
 		var node = path[i];
+		//count+=(count_by_synset[node] || 0);
 		count+=(count_by_synset[node] || 0);
-		var data = (db.plants.findOne({Synset_ID : node}, {Species:1, _id:0}));
+		var data = (db.plants.findOne({Synset_ID : node}, {Species:1,Count:1, _id:0}));
 		if(data){
 			//spec = data.Species;
 			//db.plants.update({Synset_ID : node, Exclude : false}, {$inc : {Count : count}, $set : {Bucket : node}}, {multi : true});
@@ -83,6 +87,7 @@ function traverse_update_descendant_count(path){
 			//db.plants.update({Synset_ID : node, Exclude : true }, {$inc : {Count : 0    }, $set : {Bucket : node}, $set : {BucketSpecies: spec}}, {multi : true});
 			//db.plants.update({Synset_ID : node}, {$inc : {Count : count}, $set: {Bucket:node, BucketSpecies:data.Species}}, {multi : true});
 			db.plants.update({Synset_ID : node}, {$set: {Bucket:node, BucketSpecies:data.Species}, $inc : {Count:count}}, {multi : true});
+			//db.plants.update({Synset_ID : node}, {$set: {Bucket:node, BucketSpecies:data.Species, Count:count}}, {multi : true});
 		}
 		else{
 			//print("Synset_ID: " + node + " NOT in database");
@@ -91,17 +96,19 @@ function traverse_update_descendant_count(path){
 	}
 }
 
+//db.plants.findOne({Synset_ID : "n12271643"}).Count - (db.taxonomy.findOne({Parent : "n12271643"}).Children.length * db.plants.findOne({Synset_ID : "n12271643"}).Count)
+
+
 function traverse_update_bucket(path, threshold){
-	var running_count = 0;
+	//var running_count = 0;
+	var count = 0;
 	var index = 0;
 	var bucket;
-	for (var i in path){
+	for (var i=0; i<path.length; i++){
 		bucket = path[i];
 		var data = db.plants.findOne({Synset_ID : bucket}, {Count:1 , _id:0});
-		if(data){
-			running_count+=(data.Count || 0);
-		}
-		if(running_count >= threshold){
+		if(data) count=(data.Count || 0);
+		if(count >= threshold){
 			index = i;
 			break;
 		}
@@ -113,6 +120,28 @@ function traverse_update_bucket(path, threshold){
 		db.plants.update({ Synset_ID: {$in: path.slice(0,index)}} , {$set: {Bucket:bucket, BucketSpecies:spec}} , {multi : true});
 	}
 }
+
+
+function finalise_bucket_count(tag, prob){
+	if(tag){
+	    var res = db.plants.aggregate(
+			{ $match : {Component_Tag : tag , Component_Tag_Prob : { $gte : prob } , Exclude : false }}, 
+			{ $group : { _id : "$Bucket", count : { $sum : 1 } }}
+		);
+	}
+	else{
+	    var res = db.plants.aggregate(
+			{ $match : {Component_Tag_Prob : { $gte : prob } , Exclude : false }}, 
+			{ $group : { _id : "$Bucket", count : { $sum : 1 } }}
+		);
+	}
+	for (var i = 0 ; i< res.result.length; i++ ){
+		db.plants.update({Bucket:res.result[i]._id}, {$set : {BucketCount : res.result[i].count}}, {multi:true});
+	}
+}
+
+
+
 
 Date.prototype.timeNow = function () { 
 	return ((this.getHours() < 10) ? "0" : "") +
