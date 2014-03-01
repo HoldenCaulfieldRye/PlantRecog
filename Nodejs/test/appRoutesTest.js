@@ -26,6 +26,8 @@ BSON = mongo.BSONPure;
 
 describe('Application_server',function(){
 
+	// RegExp to test id returned //
+	var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$")
     var testDB;
     var configArgs = {};
     configArgs.db_port = "55517";
@@ -172,12 +174,14 @@ describe('Application_server',function(){
 
     describe('routes.upload', function(){
 
-		it('should accept an image upload and respond with new objectID', function(done){
+		it('should accept an image upload and respond with valid objectID', function(done){
 
 		    // Correct ObjectID but ID does not exist
 		    request(app)
 			.post('/upload')
-			.field('{"date": null, "latitude": null, "longitude": null}')
+			.field("date", null)
+			.field("latitude", null)
+			.field("longitude", null)
 			.attach('datafile','./test/fixtures/sample.jpg')
 			.expect(200)
 			.end(function(err,res){
@@ -185,6 +189,7 @@ describe('Application_server',function(){
 				done(err);
 			    }
 			    else {
+			    assert(checkForHexRegExp.test(res.body.id));
 				done();
 			    };
 			});
