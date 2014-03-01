@@ -27,6 +27,8 @@
 		E9100F6D18BA439800006AF0 /* BLEFSpecimen.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396271897F8830067A991 /* BLEFSpecimen.m */; };
 		E9100F6E18BA439800006AF0 /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
 		E923896518BCDD40001066A9 /* BLEFServerInterfaceTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E923896418BCDD40001066A9 /* BLEFServerInterfaceTest.m */; };
+		E923896718BD466E001066A9 /* BLEFServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DF5BF918A1351700B2BFDB /* BLEFServerConnection.m */; };
+		E923896818BD46D8001066A9 /* BLEFServerInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */; };
 		E94400C118B91B1500D2C3C4 /* BLEFDatabaseTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E94400C018B91B1500D2C3C4 /* BLEFDatabaseTest.m */; };
 		E95131B318B96AB700B2DDAD /* BLEFDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962D1897F94F0067A991 /* BLEFDatabase.m */; };
 		E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
@@ -334,6 +336,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E923896818BD46D8001066A9 /* BLEFServerInterface.m in Sources */,
+				E923896718BD466E001066A9 /* BLEFServerConnection.m in Sources */,
 				E9100F6C18BA439800006AF0 /* BLEFGroup.m in Sources */,
 				E9100F6D18BA439800006AF0 /* BLEFSpecimen.m in Sources */,
 				E9100F6E18BA439800006AF0 /* BLEFObservation.m in Sources */,

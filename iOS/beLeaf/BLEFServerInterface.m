@@ -37,6 +37,8 @@
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
         [center addObserver:self selector:@selector(newObservationNotification:)
                        name:BLEFNewObservationNotification object:nil];
+        [center addObserver:self selector:@selector(queueItemFinishedNotification:)
+                       name:BLEFNetworkResultNotification object:nil];
         [center addObserver:self selector:@selector(enableQueueProcessing)
                        name:BLEFNetworkRetryNotification object:nil];
     }
@@ -85,33 +87,37 @@
 
 #pragma mark Server Interface Methods
 
-- (void)uploadObservation:(NSManagedObjectID *)observationID
+- (BOOL)uploadObservation:(NSManagedObjectID *)observationID
 {
     if (observationID != nil){
         BLEFServerConnection *connection = [self createUploadConnectionFor:observationID];
         if (connection != nil){
             [connection start];
-            return;
+            return true;
         }
     }
-    // Else
-#warning send Nofiticafion
+    return false;
 }
 
-- (void)updateJobForObservation:(NSManagedObjectID *)observationID
+- (BOOL)updateJobForObservation:(NSManagedObjectID *)observationID
 {
     if (observationID != nil){
         BLEFServerConnection *connection = [self createJobConnectionFor:observationID];
         if (connection != nil){
             [connection start];
-            return;
+            return true;
         }
     }
-    // Else
-#warning send notification
+    return false;
 }
 
 #pragma mark Notifications Methods
+
+NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNotification";
+NSString * const BLEFJobDidReceiveDataNotification = @"BLEFJobDidReceiveDataNotification";
+NSString * const BLEFNetworkResultNotification = @"BLEFNetworkResultNotification";
+NSString * const BLEFNewObservationNotification = @"BLEFNewObservationNotification";
+NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 
 - (void) newObservationNotification:(NSNotification *)notification
 {
@@ -130,11 +136,6 @@
     [self processUploadQueue];
 }
 
-
-NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNotification";
-NSString * const BLEFJobDidSendDataNotification = @"BLEFJobDidSendDataNotification";
-NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
-NSString * const BLEFNewObservationNotification = @"BLEFNewObservationNotification";
 
 #pragma mark - PRIVATE
 
@@ -252,7 +253,7 @@ NSString * const BLEFNewObservationNotification = @"BLEFNewObservationNotificati
             NSDictionary *params = @{@"jobID": jobID};
             //NSString *testjobID = @"52ff886a27d625b55344093e";
             //NSDictionary *params = @{@"jobID": testjobID};
-            BLEFServerConnection *serverConnection = [self sendGETwithFields:params toUrl:urlString];
+            BLEFServerConnection *serverConnection = [self GETwithFields:params toUrl:urlString];
             [serverConnection setObjID:observationID];
             [serverConnection setJobUpdate:true];
             return serverConnection;
@@ -296,7 +297,7 @@ NSString * const BLEFNewObservationNotification = @"BLEFNewObservationNotificati
     return serverConnection;
 }
 
-- (BLEFServerConnection *)sendGETwithFields:(NSDictionary *)parameters toUrl:(NSString *)urlString
+- (BLEFServerConnection *)GETwithFields:(NSDictionary *)parameters toUrl:(NSString *)urlString
 {
     __block NSString *urlFields = @"";
     if (parameters){
@@ -376,48 +377,62 @@ NSString * const BLEFNewObservationNotification = @"BLEFNewObservationNotificati
                                              @"status" : [NSNumber numberWithBool:true],
                                              @"objectID"   : [serverConnection objID]
                                              };
-                [[NSNotificationCenter defaultCenter] postNotificationName:BLEFJobDidSendDataNotification object:nil userInfo:jobInfo];
-#warning TODO: Send job finished notification
+                [[NSNotificationCenter defaultCenter] postNotificationName:BLEFJobDidReceiveDataNotification object:nil userInfo:jobInfo];
             }
         }
         if (!jobComplete){
-#warning TODO: Send job not finished notification
+            NSDictionary *jobInfo = @{
+                                      @"status" : [NSNumber numberWithBool:false],
+                                      @"objectID"   : [serverConnection objID]
+                                      };
+            [[NSNotificationCenter defaultCenter] postNotificationName:BLEFJobDidReceiveDataNotification object:nil userInfo:jobInfo];
         }
     }
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    NSLog(@"Connection Failed");
     BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
     if (serverConnection.upload){
-        _uploadQueueProcessingActive = false;
-        NSDictionary *uploadInfo = @{
-                                     @"percentage" : @0.0,
-                                     @"objectID"   : [serverConnection objID]
-                                     };
-        [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
-        [self stopProcessingQueue];
-        [self addObservationToUploadQueue:[serverConnection objID]];
+        NSDictionary *retryInfo = @{
+                                    @"job" : [NSNumber numberWithBool:false],
+                                    @"upload" : [NSNumber numberWithBool:true],
+                                    @"objectID"   : [serverConnection objID],
+                                    @"fail" : [NSNumber numberWithBool:true]
+                                    };
+        [[NSNotificationCenter defaultCenter] postNotificationName:BLEFNetworkResultNotification object:nil userInfo:retryInfo];
     }
     if (serverConnection.jobUpdate){
-        [self stopProcessingQueue];
-        [self addObservationToJobQueue:[serverConnection objID]];
+        NSDictionary *retryInfo = @{
+                                    @"job" : [NSNumber numberWithBool:true],
+                                    @"upload" : [NSNumber numberWithBool:false],
+                                    @"objectID"   : [serverConnection objID],
+                                    @"fail" : [NSNumber numberWithBool:true]
+                                    };
+        [[NSNotificationCenter defaultCenter] postNotificationName:BLEFNetworkResultNotification object:nil userInfo:retryInfo];
     }
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    NSLog(@"didFinishLoading...");
     BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
     if (serverConnection.upload){
-        NSLog(@"an Upload");
-        [self addObservationToJobQueue:[serverConnection objID]];
-#warning send notification
+        NSDictionary *retryInfo = @{
+                                    @"job" : [NSNumber numberWithBool:false],
+                                    @"upload" : [NSNumber numberWithBool:true],
+                                    @"objectID"   : [serverConnection objID],
+                                    @"fail" : [NSNumber numberWithBool:false]
+                                    };
+        [[NSNotificationCenter defaultCenter] postNotificationName:BLEFNetworkResultNotification object:nil userInfo:retryInfo];
     }
     if (serverConnection.jobUpdate){
-        NSLog(@"a Job");
-#warning send notification
+        NSDictionary *retryInfo = @{
+                                    @"job" : [NSNumber numberWithBool:true],
+                                    @"upload" : [NSNumber numberWithBool:false],
+                                    @"objectID"   : [serverConnection objID],
+                                    @"fail" : [NSNumber numberWithBool:false]
+                                    };
+        [[NSNotificationCenter defaultCenter] postNotificationName:BLEFNetworkResultNotification object:nil userInfo:retryInfo];
     }
 }
 

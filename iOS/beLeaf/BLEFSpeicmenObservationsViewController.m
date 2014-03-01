@@ -94,7 +94,7 @@
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     
         [center addObserver:cell selector:@selector(updateProgress:) name:BLEFUploadDidSendDataNotification object:nil];
-        [center addObserver:cell selector:@selector(updateJobStatus:) name:BLEFJobDidSendDataNotification object:nil];
+        [center addObserver:cell selector:@selector(updateJobStatus:) name:BLEFJobDidReceiveDataNotification object:nil];
     
         return cell;
     }

@@ -12,9 +12,10 @@
 
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 extern NSString * const BLEFUploadDidSendDataNotification;
-extern NSString * const BLEFJobDidSendDataNotification;
-extern NSString * const BLEFNetworkRetryNotification;
+extern NSString * const BLEFJobDidReceiveDataNotification;
+extern NSString * const BLEFNetworkResultNotification;
 extern NSString * const BLEFNewObservationNotification;
+extern NSString * const BLEFNetworkRetryNotification;
 
 // Database
 - (void) setContext:(NSManagedObjectContext*)context;
@@ -27,8 +28,8 @@ extern NSString * const BLEFNewObservationNotification;
 
 
 // Server Interface
-- (void)uploadObservation:(NSManagedObjectID *)observationID;
-- (void)updateJobForObservation:(NSManagedObjectID *)observationID;
+- (BOOL)uploadObservation:(NSManagedObjectID *)observationID;
+- (BOOL)updateJobForObservation:(NSManagedObjectID *)observationID;
 
 // Notifications
 - (void) newObservationNotification:(NSNotification *)notification;
