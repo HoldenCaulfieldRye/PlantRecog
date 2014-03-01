@@ -33,7 +33,7 @@ describe('Application_server',function(){
     configArgs.db_port = "55517";
     configArgs.db_host = "theplant.guru";
     configArgs.db_database = "development";
-    configArgs.classifier_host = "graphic02.doc.ic.ac.uk";
+    configArgs.classifier_host = "theplant.guru";
     configArgs.classifier_port = "55581";
     configArgs.appServer_port = "55580";
 
@@ -59,7 +59,8 @@ describe('Application_server',function(){
 	    	// Set up the middleware for testing
 	    	app.get('/job/:job_id', routes.getJob(testDB));
 	    	app.get('/job', routes.getJob(testDB));
-		app.post('/upload', routes.upload(testDB,configArgs));
+	    	app.post('/upload', routes.upload(testDB,configArgs));
+	    	app.post('/upload_no_db', routes.upload(null,configArgs));
 	    	done();
 	    }
 	});
@@ -176,7 +177,6 @@ describe('Application_server',function(){
 
 		it('should accept an image upload and respond with valid objectID', function(done){
 
-		    // Correct ObjectID but ID does not exist
 		    request(app)
 			.post('/upload')
 			.field("date", null)
@@ -190,6 +190,45 @@ describe('Application_server',function(){
 			    }
 			    else {
 			    assert(checkForHexRegExp.test(res.body.id));
+				done();
+			    };
+			});
+
+		});
+
+		it('should gracefully say no image attached', function(done){
+
+		    request(app)
+			.post('/upload')
+			.field("date", null)
+			.field("latitude", null)
+			.field("longitude", null)
+			.expect(200, 'Nothing to add to database: there is no Datafile attached!')
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+				done();
+			    };
+			});
+
+		});
+
+		it('should gracefully say db err', function(done){
+
+		    request(app)
+			.post('/upload_no_db/')
+			.field("date", null)
+			.field("latitude", null)
+			.field("longitude", null)
+			.attach('datafile','./test/fixtures/sample.jpg')
+			.expect(200, 'Error connecting to Database collection!')
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
 				done();
 			    };
 			});

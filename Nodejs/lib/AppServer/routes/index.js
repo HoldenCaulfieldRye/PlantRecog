@@ -66,17 +66,28 @@ exports.upload = function(db, configArgs) {
 	form.parse(req, function (err, fields, files) {
 
 	    console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
-	    
-	    filePath = files.datafile.path;
-	    
+	    	    
 	    if (files){
 		
+	    	try {
+	    		 filePath = files.datafile.path;
+	    		}
+	    	catch(err){
+	    		res.send('Nothing to add to database: there is no Datafile attached!');
+	    		return err;
+	    	}
 		/* output where we saved the file */
 		console.log("FilePath is: \n" + filePath);
 		
 		// Set our collection
-		var collection = db.collection('usercollection');
-
+		try{
+			var collection = db.collection('usercollection');
+		}
+		catch(err){
+			res.send("Error connecting to Database collection!");
+			console.log(err);
+			return err;
+		}
 		// Submit to the DB
 		collection.insert({
 		    vm_filepath : filePath,
@@ -94,6 +105,7 @@ exports.upload = function(db, configArgs) {
 		     		      if (db_err) {
 			 		  // If it failed, return error
 			 		  res.send("There was a problem adding the information to the database.");
+			 		  return db_err;
 		     		      }
 		     		      else {
 			 		  // If it worked, return JSON object from collection to App//
