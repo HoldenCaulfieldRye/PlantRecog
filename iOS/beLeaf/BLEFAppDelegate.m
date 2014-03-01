@@ -13,6 +13,7 @@
 @interface BLEFAppDelegate ()
 
 @property (readonly, strong, nonatomic) BLEFServerInterface *serverinterface;
+@property (readonly, strong, nonatomic) BLEFDatabase *mainDatabaseInterface;
 
 @end
 
@@ -20,6 +21,8 @@
 
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
+@synthesize serverinterface = _serverinterface;
+@synthesize mainDatabaseInterface = _mainDatabaseInterface;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -146,8 +149,7 @@
 - (void)databaseInit
 {
     NSManagedObjectContext *databaseMOD = [self generateManagedObjectContext];
-    [BLEFDatabase setContext:databaseMOD];
-    [BLEFDatabase ensureGroupsExist];
+    [_mainDatabaseInterface setManagedObjectContext:databaseMOD];
 }
 
 

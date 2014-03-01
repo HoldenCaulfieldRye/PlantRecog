@@ -32,8 +32,8 @@
 	// Do any additional setup after loading the view.
     NSManagedObject *fetchedObj = [BLEFDatabase fetchObjectWithID:[self resultID]];
     if (fetchedObj){
-        BLEFObservation *observation = (BLEFObservation*)fetchedObj;
-        NSString *result = [observation result];
+        //BLEFObservation *observation = (BLEFObservation*)fetchedObj;
+        NSString *result = nil;
         
         /* JSON PARSE */
         if (result){

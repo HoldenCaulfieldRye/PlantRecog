@@ -29,11 +29,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    if (self.group == nil){
-        [BLEFDatabase ensureGroupsExist];
-        self.group = [[BLEFDatabase getGroups] objectAtIndex:0];
-    }
 
     self.tableView.rowHeight = 50;
     [self loadTableData];
@@ -49,7 +44,7 @@
 
 - (void)loadTableData
 {
-    self.Specimen = [BLEFDatabase getSpecimensFromGroup:self.group];
+    self.Specimen = [BLEFDatabase getAllSpecimens];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -132,7 +127,7 @@
 - (IBAction)addButtonPressed:(id)sender
 {
     // create new speimen
-    [BLEFDatabase addNewSpecimentToGroup:self.group];
+    //[BLEFDatabase addNewSpecimentToGroup:self.group];
     [BLEFDatabase saveChanges];
     [self loadTableData];
     [self.tableView reloadData];

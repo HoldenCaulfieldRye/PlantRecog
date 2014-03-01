@@ -9,22 +9,14 @@
 #import "BLEFObservation.h"
 #import "BLEFSpecimen.h"
 #import "BLEFDatabase.h"
-#import "BLEFAppDelegate.h"
-#import "BLEFServerInterface.h"
 
 
 @implementation BLEFObservation
 
-@dynamic date;
 @dynamic filename;
-@dynamic job;
-@dynamic latitude;
-@dynamic longitude;
-@dynamic result;
 @dynamic segment;
 @dynamic thumbnail;
 @dynamic uploaded;
-@dynamic uploadProgress;
 @dynamic specimen;
 
 - (UIImage *)getImage
@@ -62,7 +54,6 @@
 - (void)saveImage:(UIImage *)image completion:(void (^) (BOOL success))handler
 {
     if (image != nil) {
-        NSManagedObjectID* observationID = [self objectID];
         NSDate* now = [NSDate date];
         NSTimeInterval unix_timestamp = [now timeIntervalSince1970];
         NSString *name = [NSString stringWithFormat:@"%f.jpg",unix_timestamp];
@@ -71,8 +62,8 @@
         [operationQueue addOperationWithBlock:^{
             bool result = [BLEFObservation saveFile:data withFilename:name];
             [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                if (result){
-                    [BLEFObservation forObservation:observationID setFileNameTo:name];
+                if (result && self){
+                    [self setFilename:name];
                 }
                 handler(result);
             }];
@@ -118,18 +109,6 @@
         return true;
     }
     return false;
-}
-
-+ (void)forObservation:(NSManagedObjectID *)observationID setFileNameTo:(NSString *)filename
-{
-    NSManagedObject* object = [BLEFDatabase fetchObjectWithID:observationID];
-    if (object == nil){
-        NSLog(@"Error fetching observation with id: %@", observationID);
-        return;
-    } else {
-        BLEFObservation* observation = (BLEFObservation *)object;
-        [observation setFilename:filename];
-    }
 }
 
 @end

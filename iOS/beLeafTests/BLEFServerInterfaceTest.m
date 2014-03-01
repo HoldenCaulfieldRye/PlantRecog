@@ -9,7 +9,6 @@
 #import <XCTest/XCTest.h>
 #import <objc/runtime.h> // To force _gcov_flush (coverage files)
 #import "BLEFServerInterface.h"
-#import "BLEFServerConnection.h"
 #import "BLEFObservation.h"
 #import "BLEFDatabase.h"
 
@@ -25,15 +24,13 @@ extern void __gcov_flush();
 
 @interface BLEFServerInterface (testing)
 
+// Expose Database For Testing
+@property (strong, nonatomic) BLEFDatabase * database;
+
 // Expose private methods for testing
-- (id) nextInUploadQueue;
-- (id) nextInJobQueue;
-- (void) removeFromJobQueue:(id)objectToRemove;
+- (NSManagedObjectID *) nextInUploadQueue;
 - (void) removeFromUploadQueue:(id)objectToRemove;
-- (void) processUploadQueue;
-- (void) processJobQueue;
-- (BLEFServerConnection *)createUploadConnectionFor:(NSManagedObjectID *)observationID;
-- (BLEFServerConnection *)createJobConnectionFor:(NSManagedObjectID *)observationID;
+
 
 @end
 
@@ -53,12 +50,6 @@ extern void __gcov_flush();
     [persistentStoreCoordinator addPersistentStoreWithType:NSInMemoryStoreType
                                              configuration:nil URL:nil
                                                    options:nil error:nil];
-    UIImage *testImage = [self generateTestImage];
-    NSData *imagedata = UIImageJPEGRepresentation(testImage, 1.0);
-    NSString *imageDirectory = [self getImageDirectory];
-    NSString* pathToFile = [imageDirectory stringByAppendingPathComponent:@"test.jpg"];
-    [[NSFileManager defaultManager] createFileAtPath:pathToFile contents:imagedata attributes:nil];
-    imagePath = pathToFile;
 }
 
 + (void)tearDown
@@ -70,7 +61,7 @@ extern void __gcov_flush();
     [super tearDown];
 }
 
-+ (UIImage*) generateTestImage
+- (UIImage*) generateTestImage
 {
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(150, 150), YES, 0.0);
     CGContextRef context = UIGraphicsGetCurrentContext();
@@ -81,7 +72,7 @@ extern void __gcov_flush();
     return blackImage;
 }
 
-+ (NSString *)getImageDirectory
+- (NSString *)getImageDirectory
 {
     NSArray *directories = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                                NSUserDomainMask, YES);
@@ -94,6 +85,13 @@ extern void __gcov_flush();
     [super setUp];
     // Put setup code here. This method is called before the invocation of each test method in the class.
     [self initContext];
+    UIImage *testImage = [self generateTestImage];
+    NSData *imagedata = UIImageJPEGRepresentation(testImage, 1.0);
+    NSString *imageDirectory = [self getImageDirectory];
+    NSString* pathToFile = [imageDirectory stringByAppendingPathComponent:@"test.jpg"];
+    [[NSFileManager defaultManager] createFileAtPath:pathToFile contents:imagedata attributes:nil];
+    imagePath = @"test.jpg";
+
 }
 
 - (void)initContext
@@ -101,7 +99,6 @@ extern void __gcov_flush();
     testingContext = [[NSManagedObjectContext alloc] init];
     [testingContext setPersistentStoreCoordinator: persistentStoreCoordinator];
     XCTAssertNotNil(testingContext, @"Database context not nil");
-    [BLEFDatabase setContext:testingContext];
 }
 
 - (BLEFServerInterface *)createServerInterface
@@ -114,87 +111,64 @@ extern void __gcov_flush();
 - (void)tearDown
 {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [BLEFDatabase setContext:nil];
     testingContext = nil;
     [super tearDown];
 }
 
-- (BLEFObservation *) generateTestObservation
+- (BLEFObservation *)createTestObservation:(BLEFServerInterface *)server
 {
-    [BLEFDatabase ensureGroupsExist];
-    BLEFGroup *group = (BLEFGroup *)[[BLEFDatabase getGroups] firstObject];
-    BLEFSpecimen *specimen = [BLEFDatabase addNewSpecimentToGroup:group];
-    BLEFObservation *observation = [BLEFDatabase addNewObservationToSpecimen:specimen];
-    XCTAssertTrue([observation isKindOfClass:[BLEFObservation class]], @"Generating a test observation object");
-    [observation setFilename:@"test.jpg"];
+    BLEFDatabase *serverDB = [server database];
+    BLEFSpecimen *specimen = [serverDB newSpecimen];
+    BLEFObservation *observation = [serverDB addNewObservationToSpecimen:specimen];
     return observation;
 }
 
-- (void)testAddingObservationToUploadQueue
+- (BLEFSpecimen *)createTestSpecimen:(BLEFServerInterface *)server
 {
-    BLEFServerInterface *serverInterface = [self createServerInterface];
-    BLEFObservation *observation = [self generateTestObservation];
-    [serverInterface addObservationToUploadQueue:[observation objectID]];
-    id nextup = [serverInterface nextInUploadQueue];
-    XCTAssertNotNil(nextup, @"Asserting an object has been added to the queue");
+    BLEFDatabase *serverDB = [server database];
+    return [serverDB newSpecimen];
 }
 
-- (void)testAddingObservationToJobQueue
+- (void)testInit
 {
-    BLEFServerInterface *serverInterface = [self createServerInterface];
-    BLEFObservation *observation = [self generateTestObservation];
-    [serverInterface addObservationToJobQueue:[observation objectID]];
-    id nextup = [serverInterface nextInJobQueue];
-    XCTAssertNotNil(nextup, @"Assering an object has been added to the queue");
+    BLEFServerInterface *server = [self createServerInterface];
+    XCTAssertNotNil(server, @"Test:Server is initialised");
 }
 
-- (void)testRemovingObservationFromUploadQueue
+- (void)testUploadQueueEmpty
 {
-    BLEFServerInterface *serverInterface = [self createServerInterface];
-    BLEFObservation *observation = [self generateTestObservation];
-    [serverInterface addObservationToUploadQueue:[observation objectID]];
-    [serverInterface removeFromUploadQueue:[observation objectID]];
-    id nextup = [serverInterface nextInUploadQueue];
-    XCTAssertNil(nextup, @"Assering object has been removed from queue");
+    BLEFServerInterface *server = [self createServerInterface];
+    NSManagedObjectID *nextInQueue = [server nextInUploadQueue];
+    XCTAssertNil(nextInQueue, @"Test: Queue is empty");
 }
 
-- (void)testRemovingObservationFromJobQueue
+-(void)testUploadQueueInsertion
 {
-    BLEFServerInterface *serverInterface = [self createServerInterface];
-    BLEFObservation *observation = [self generateTestObservation];
-    [serverInterface addObservationToJobQueue:[observation objectID]];
-    [serverInterface removeFromJobQueue:[observation objectID]];
-    id nextup = [serverInterface nextInJobQueue];
-    XCTAssertNil(nextup, @"Assering object has been removed from queue");
+    BLEFServerInterface *server = [self createServerInterface];
+    BLEFObservation *observation = [self createTestObservation:server];
+    [server addObservationToUploadQueue:[observation objectID]];
+    NSManagedObjectID *nextInQueue = [server nextInUploadQueue];
+    XCTAssertNotNil(nextInQueue, @"Test: Queue Inserted ID");
 }
 
-- (void)testEnablingEmptyQueues
+-(void)testCreateUploadTask
 {
-    BLEFServerInterface *serverInterface = [self createServerInterface];
-    [serverInterface enableQueueProcessing];
+    BLEFServerInterface *server = [self createServerInterface];
+    BLEFObservation *observation = [self createTestObservation:server];
+    [observation setSegment:@"Branch"];
+    [observation setFilename:imagePath];
+    NSURLSessionUploadTask *task = [server createUploadTaskForObservation:[observation objectID] completion:nil];
+    XCTAssertNotNil(task, @"Test: Upload Task generated");
 }
 
-- (void)testStoppingQueues
+-(void)testCreateUpdateTask
 {
-    BLEFServerInterface *serverInterface = [self createServerInterface];
-    [serverInterface stopProcessingQueue];
+    BLEFServerInterface *server = [self createServerInterface];
+    BLEFSpecimen *specimen = [self createTestSpecimen:server];
+    [specimen setGroupid:@"ABCDEFGHIKJLMNOP"];
+    NSURLSessionDataTask *task = [server createUpdateTaskForSpecimen:[specimen objectID] completion:nil];
+    XCTAssertNotNil(task, @"Test: Update Task generated");
 }
 
-- (void)testUploadQueueProcess
-{
-    BLEFServerInterface *serverInterface = [self createServerInterface];
-    BLEFObservation *observation = [self generateTestObservation];
-    [serverInterface addObservationToUploadQueue:[observation objectID]];
-    [serverInterface processUploadQueue];
-}
-
-- (void)testJobQueueProcess
-{
-    BLEFServerInterface *serverInterface = [self createServerInterface];
-    BLEFObservation *observation = [self generateTestObservation];
-    [observation setJob:@"ABC123"];
-    [serverInterface addObservationToJobQueue:[observation objectID]];
-    [serverInterface processJobQueue];
-}
 
 @end

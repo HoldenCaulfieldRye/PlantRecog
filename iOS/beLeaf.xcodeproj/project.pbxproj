@@ -23,26 +23,25 @@
 		5E2AD5971863B6DA00595828 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5951863B6DA00595828 /* InfoPlist.strings */; };
 		5E2AD5A31863BB5A00595828 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
 		E9100F6B18BA437800006AF0 /* beLeaf.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5811863B6DA00595828 /* beLeaf.xcdatamodeld */; };
-		E9100F6C18BA439800006AF0 /* BLEFGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962A1897F8830067A991 /* BLEFGroup.m */; };
 		E9100F6D18BA439800006AF0 /* BLEFSpecimen.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396271897F8830067A991 /* BLEFSpecimen.m */; };
 		E9100F6E18BA439800006AF0 /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
-		E923896518BCDD40001066A9 /* BLEFServerInterfaceTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E923896418BCDD40001066A9 /* BLEFServerInterfaceTest.m */; };
-		E923896718BD466E001066A9 /* BLEFServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DF5BF918A1351700B2BFDB /* BLEFServerConnection.m */; };
-		E923896818BD46D8001066A9 /* BLEFServerInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */; };
+		E9364FFD18C23895000E5C75 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E2AD56F1863B6D900595828 /* CoreGraphics.framework */; };
+		E9364FFE18C23A83000E5C75 /* BLEFServerInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */; };
+		E936500018C27372000E5C75 /* BLEFServerInterfaceTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E923896418BCDD40001066A9 /* BLEFServerInterfaceTest.m */; };
 		E94400C118B91B1500D2C3C4 /* BLEFDatabaseTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E94400C018B91B1500D2C3C4 /* BLEFDatabaseTest.m */; };
 		E95131B318B96AB700B2DDAD /* BLEFDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962D1897F94F0067A991 /* BLEFDatabase.m */; };
 		E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
 		E961B85F18AA898100AF8EA4 /* BLEFUIObservationCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E961B85E18AA898100AF8EA4 /* BLEFUIObservationCell.m */; };
 		E9829C6D189D7662004DD07F /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
 		E996A0DD189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E996A0DC189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.m */; };
+		E9A5C87618C20EC000F9F6CF /* BLEFResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E9A5C87518C20EC000F9F6CF /* BLEFResult.m */; };
+		E9A5C87718C212BD00F9F6CF /* BLEFResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E9A5C87518C20EC000F9F6CF /* BLEFResult.m */; };
 		E9B5BA3318982F5B000161F7 /* BLEFServerInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */; };
 		E9BD3A471898399E001B8570 /* BLEFSpecimenTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9BD3A461898399E001B8570 /* BLEFSpecimenTableViewController.m */; };
 		E9BEE40A18A68FFF00F3A648 /* BLEFResultsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9BEE40918A68FFF00F3A648 /* BLEFResultsViewController.m */; };
-		E9DF5BFA18A1351700B2BFDB /* BLEFServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DF5BF918A1351700B2BFDB /* BLEFServerConnection.m */; };
 		E9DF5C0718A15E9B00B2BFDB /* BLEFCameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9DF5C0618A15E9B00B2BFDB /* BLEFCameraViewController.m */; };
 		E9DF5C0D18A16A3D00B2BFDB /* BLEFCameraView.xib in Resources */ = {isa = PBXBuildFile; fileRef = E9DF5C0C18A16A3D00B2BFDB /* BLEFCameraView.xib */; };
 		E9E396281897F8830067A991 /* BLEFSpecimen.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396271897F8830067A991 /* BLEFSpecimen.m */; };
-		E9E3962B1897F8830067A991 /* BLEFGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962A1897F8830067A991 /* BLEFGroup.m */; };
 		E9E3962E1897F94F0067A991 /* BLEFDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962D1897F94F0067A991 /* BLEFDatabase.m */; };
 /* End PBXBuildFile section */
 
@@ -74,21 +73,19 @@
 		E9829C6C189D7662004DD07F /* BLEFObservation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFObservation.m; sourceTree = "<group>"; };
 		E996A0DB189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSpeicmenObservationsViewController.h; sourceTree = "<group>"; };
 		E996A0DC189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSpeicmenObservationsViewController.m; sourceTree = "<group>"; };
+		E9A5C87418C20EC000F9F6CF /* BLEFResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFResult.h; sourceTree = "<group>"; };
+		E9A5C87518C20EC000F9F6CF /* BLEFResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFResult.m; sourceTree = "<group>"; };
 		E9B5BA3118982F5B000161F7 /* BLEFServerInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFServerInterface.h; sourceTree = "<group>"; };
 		E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFServerInterface.m; sourceTree = "<group>"; };
 		E9BD3A451898399E001B8570 /* BLEFSpecimenTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSpecimenTableViewController.h; sourceTree = "<group>"; };
 		E9BD3A461898399E001B8570 /* BLEFSpecimenTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSpecimenTableViewController.m; sourceTree = "<group>"; };
 		E9BEE40818A68FFF00F3A648 /* BLEFResultsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFResultsViewController.h; sourceTree = "<group>"; };
 		E9BEE40918A68FFF00F3A648 /* BLEFResultsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFResultsViewController.m; sourceTree = "<group>"; };
-		E9DF5BF818A1351700B2BFDB /* BLEFServerConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFServerConnection.h; sourceTree = "<group>"; };
-		E9DF5BF918A1351700B2BFDB /* BLEFServerConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFServerConnection.m; sourceTree = "<group>"; };
 		E9DF5C0518A15E9B00B2BFDB /* BLEFCameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFCameraViewController.h; sourceTree = "<group>"; };
 		E9DF5C0618A15E9B00B2BFDB /* BLEFCameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFCameraViewController.m; sourceTree = "<group>"; };
 		E9DF5C0C18A16A3D00B2BFDB /* BLEFCameraView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BLEFCameraView.xib; sourceTree = "<group>"; };
 		E9E396261897F8830067A991 /* BLEFSpecimen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSpecimen.h; sourceTree = "<group>"; };
 		E9E396271897F8830067A991 /* BLEFSpecimen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSpecimen.m; sourceTree = "<group>"; };
-		E9E396291897F8830067A991 /* BLEFGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFGroup.h; sourceTree = "<group>"; };
-		E9E3962A1897F8830067A991 /* BLEFGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFGroup.m; sourceTree = "<group>"; };
 		E9E3962C1897F94F0067A991 /* BLEFDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFDatabase.h; sourceTree = "<group>"; };
 		E9E3962D1897F94F0067A991 /* BLEFDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFDatabase.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -110,6 +107,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9364FFD18C23895000E5C75 /* CoreGraphics.framework in Frameworks */,
 				5E2AD58C1863B6DA00595828 /* XCTest.framework in Frameworks */,
 				5E2AD58F1863B6DA00595828 /* CoreData.framework in Frameworks */,
 				5E2AD58E1863B6DA00595828 /* UIKit.framework in Frameworks */,
@@ -162,16 +160,14 @@
 				E9E3962D1897F94F0067A991 /* BLEFDatabase.m */,
 				E9B5BA3118982F5B000161F7 /* BLEFServerInterface.h */,
 				E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */,
-				E9DF5BF818A1351700B2BFDB /* BLEFServerConnection.h */,
-				E9DF5BF918A1351700B2BFDB /* BLEFServerConnection.m */,
 				5E2AD5841863B6DA00595828 /* Images.xcassets */,
 				5E2AD5811863B6DA00595828 /* beLeaf.xcdatamodeld */,
-				E9E396291897F8830067A991 /* BLEFGroup.h */,
-				E9E3962A1897F8830067A991 /* BLEFGroup.m */,
 				E9E396261897F8830067A991 /* BLEFSpecimen.h */,
 				E9E396271897F8830067A991 /* BLEFSpecimen.m */,
 				E9829C6B189D7662004DD07F /* BLEFObservation.h */,
 				E9829C6C189D7662004DD07F /* BLEFObservation.m */,
+				E9A5C87418C20EC000F9F6CF /* BLEFResult.h */,
+				E9A5C87518C20EC000F9F6CF /* BLEFResult.m */,
 				5E2AD5761863B6D900595828 /* Supporting Files */,
 				E9BD3A451898399E001B8570 /* BLEFSpecimenTableViewController.h */,
 				E9BD3A461898399E001B8570 /* BLEFSpecimenTableViewController.m */,
@@ -315,7 +311,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E9E3962B1897F8830067A991 /* BLEFGroup.m in Sources */,
 				E9829C6D189D7662004DD07F /* BLEFObservation.m in Sources */,
 				E9BEE40A18A68FFF00F3A648 /* BLEFResultsViewController.m in Sources */,
 				E9DF5C0718A15E9B00B2BFDB /* BLEFCameraViewController.m in Sources */,
@@ -325,7 +320,7 @@
 				5E2AD5831863B6DA00595828 /* beLeaf.xcdatamodeld in Sources */,
 				E9E396281897F8830067A991 /* BLEFSpecimen.m in Sources */,
 				E9E3962E1897F94F0067A991 /* BLEFDatabase.m in Sources */,
-				E9DF5BFA18A1351700B2BFDB /* BLEFServerConnection.m in Sources */,
+				E9A5C87618C20EC000F9F6CF /* BLEFResult.m in Sources */,
 				E961B85F18AA898100AF8EA4 /* BLEFUIObservationCell.m in Sources */,
 				E9B5BA3318982F5B000161F7 /* BLEFServerInterface.m in Sources */,
 				E996A0DD189A774700A27AC4 /* BLEFSpeicmenObservationsViewController.m in Sources */,
@@ -336,15 +331,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E923896818BD46D8001066A9 /* BLEFServerInterface.m in Sources */,
-				E923896718BD466E001066A9 /* BLEFServerConnection.m in Sources */,
-				E9100F6C18BA439800006AF0 /* BLEFGroup.m in Sources */,
+				E936500018C27372000E5C75 /* BLEFServerInterfaceTest.m in Sources */,
+				E9364FFE18C23A83000E5C75 /* BLEFServerInterface.m in Sources */,
 				E9100F6D18BA439800006AF0 /* BLEFSpecimen.m in Sources */,
 				E9100F6E18BA439800006AF0 /* BLEFObservation.m in Sources */,
+				E9A5C87718C212BD00F9F6CF /* BLEFResult.m in Sources */,
+				E94400C118B91B1500D2C3C4 /* BLEFDatabaseTest.m in Sources */,
 				E9100F6B18BA437800006AF0 /* beLeaf.xcdatamodeld in Sources */,
 				E95131B318B96AB700B2DDAD /* BLEFDatabase.m in Sources */,
-				E94400C118B91B1500D2C3C4 /* BLEFDatabaseTest.m in Sources */,
-				E923896518BCDD40001066A9 /* BLEFServerInterfaceTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

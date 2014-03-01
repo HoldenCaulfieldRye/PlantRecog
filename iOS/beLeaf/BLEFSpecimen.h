@@ -9,17 +9,16 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class BLEFGroup, BLEFObservation;
+@class BLEFObservation, BLEFResult;
 
 @interface BLEFSpecimen : NSManagedObject
 
 @property (nonatomic) NSTimeInterval created;
-@property (nonatomic, retain) NSString * name;
-@property (nonatomic) BOOL finished;
-@property (nonatomic) int16_t order;
-@property (nonatomic) int16_t id;
-@property (nonatomic, retain) BLEFGroup *group;
-@property (nonatomic, retain) NSSet *observations;
+@property (nonatomic, retain) NSString * groupid;
+@property (nonatomic) double latitude;
+@property (nonatomic) double longitude;
+@property (nonatomic, retain) NSSet * observations;
+@property (nonatomic, retain) NSSet * results;
 @end
 
 @interface BLEFSpecimen (CoreDataGeneratedAccessors)
@@ -28,5 +27,11 @@
 - (void)removeObservationsObject:(BLEFObservation *)value;
 - (void)addObservations:(NSSet *)values;
 - (void)removeObservations:(NSSet *)values;
+
+- (void)addResultsObject:(BLEFResult *)value;
+- (void)removeResultssObject:(BLEFResult *)value;
+- (void)addResults:(NSSet *)values;
+- (void)removeResults:(NSSet *)values;
+
 
 @end

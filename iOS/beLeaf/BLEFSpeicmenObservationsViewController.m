@@ -86,11 +86,11 @@
             [[cell progressBar] setProgress:0];
         }
         
-        if ([observation result])
+        /*if ([observation result])
             [cell updateJobStatusUI:true];
         else
             [cell updateJobStatusUI:false];
-    
+        */
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     
         [center addObserver:cell selector:@selector(updateProgress:) name:BLEFUploadDidSendDataNotification object:nil];
@@ -153,8 +153,8 @@
     BLEFObservation* observation = [BLEFDatabase addNewObservationToSpecimen:self.specimen];
     [observation generateThumbnailFromImage:photo];
     [observation setSegment:info[@"segment"]];
-    [observation setLatitude:[info[@"lat"] doubleValue]];
-    [observation setLongitude:[info[@"long"] doubleValue]];
+    //[observation setLatitude:[info[@"lat"] doubleValue]];
+    //[observation setLongitude:[info[@"long"] doubleValue]];
     [BLEFDatabase saveChanges];
     [observation saveImage:photo completion:^(BOOL success){
         NSDictionary *observationInfo = @{

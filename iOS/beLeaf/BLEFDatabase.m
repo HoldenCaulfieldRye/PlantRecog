@@ -7,48 +7,43 @@
 //
 
 #import "BLEFDatabase.h"
-#import "BLEFAppDelegate.h"
-
-static NSManagedObjectContext *managedObjectContext;
-
 
 @implementation BLEFDatabase
 
-+ (void)initialize
+- (id)init
 {
-    [[NSNotificationCenter defaultCenter]   addObserver:self
-                                            selector:@selector(_mocDidSaveNotification:)
-                                            name:NSManagedObjectContextDidSaveNotification
-                                            object:nil];
+    self = [super init];
+    if (self){
+        [[NSNotificationCenter defaultCenter]   addObserver:self
+                                                   selector:@selector(_mocDidSaveNotification:)
+                                                       name:NSManagedObjectContextDidSaveNotification
+                                                     object:nil];
+    }
+    return self;
 }
 
-+ (void) setContext:(NSManagedObjectContext*)context;
+- (NSManagedObjectContext *) getContext
 {
-    managedObjectContext = context;
+    return [self managedObjectContext];
 }
 
-+ (NSManagedObjectContext *) getContext
-{
-    return managedObjectContext;
-}
-
-+ (void)_mocDidSaveNotification:(NSNotification *)notification
+- (void)_mocDidSaveNotification:(NSNotification *)notification
 {
     NSManagedObjectContext *savedContext = [notification object];
-    if (managedObjectContext == savedContext)
+    if ([self managedObjectContext] == savedContext)
     {
         return;
     } else {
-        if (managedObjectContext)
-            [managedObjectContext mergeChangesFromContextDidSaveNotification:notification];
+        if ([self managedObjectContext])
+            [[self managedObjectContext] mergeChangesFromContextDidSaveNotification:notification];
     }
 }
 
-+ (void)saveChanges
+- (void)saveChanges
 {
     NSError *error = nil;
-    if (managedObjectContext != nil) {
-        if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
+    if ([self managedObjectContext] != nil) {
+        if ([[self managedObjectContext] hasChanges] && ![[self managedObjectContext] save:&error]) {
             // Replace this implementation with code to handle the error appropriately.
             // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
             NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
@@ -57,38 +52,33 @@ static NSManagedObjectContext *managedObjectContext;
     }
 }
 
-+ (NSArray*)getGroups
+- (NSArray*)getAllSpecimens
 {
     NSManagedObjectContext *context = [self getContext];
-    if (context == nil)
+    if (context == nil){
         return nil;
-    // Construct request
+    }
+    // Construct Request
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Group" inManagedObjectContext:context];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Specimen"
+                                              inManagedObjectContext:context];
     [fetchRequest setEntity:entity];
     
-    // Sort ascending
-    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"order" ascending:YES];
-    NSArray *sortDesriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
-    [fetchRequest setSortDescriptors:sortDesriptors];
+    // Sort by date
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"created" ascending:NO];
+    NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
+    [fetchRequest setSortDescriptors:sortDescriptors];
     
     // Fetch
     NSError *error = nil;
-    NSArray* array = [context executeFetchRequest:fetchRequest error:&error];
-
-    return array;
-}
-
-+ (NSArray*)getSpecimensFromGroup:(BLEFGroup *)group;
-{
-    NSArray* array = nil;
-    if (group != nil){
-        array = [group.specimens allObjects];
+    NSArray *array = [context executeFetchRequest:fetchRequest error:&error];
+    if (!error){
+        return array;
     }
-    return array;
+    return nil;
 }
 
-+ (NSArray*)getObservationsFromSpecimen:(BLEFSpecimen *)specimen
+- (NSArray*)getObservationsFromSpecimen:(BLEFSpecimen *)specimen
 {
     NSArray* array = nil;
     if (specimen != nil){
@@ -97,7 +87,16 @@ static NSManagedObjectContext *managedObjectContext;
     return array;
 }
 
-+ (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID
+- (NSArray*)getResultsFromSpecimen:(BLEFSpecimen *)specimen
+{
+    NSArray* array = nil;
+    if (specimen != nil){
+        array = [specimen.results allObjects];
+    }
+    return array;
+}
+
+- (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID
 {
     NSManagedObjectContext *context = [self getContext];
     if (context == nil)
@@ -107,52 +106,50 @@ static NSManagedObjectContext *managedObjectContext;
     return object;
 }
 
-+ (BLEFSpecimen*)addNewSpecimentToGroup:(BLEFGroup *)group
+- (BLEFSpecimen*)newSpecimen;
 {
     NSManagedObjectContext *context = [self getContext];
-    if (context == nil)
+    if (context == nil){
         return nil;
+    }
     BLEFSpecimen *specimen = [NSEntityDescription insertNewObjectForEntityForName:@"Specimen" inManagedObjectContext:context];
     
     NSDate* now = [NSDate date];
     specimen.created = [now timeIntervalSince1970];
-    
-    [group addSpecimensObject:specimen];
-    [specimen setGroup:group];
-    
     return specimen;
 }
 
-+ (BLEFObservation*)addNewObservationToSpecimen:(BLEFSpecimen *)specimen
+- (BLEFObservation*)addNewObservationToSpecimen:(BLEFSpecimen *)specimen
 {
     NSManagedObjectContext *context = [self getContext];
-    if (context == nil)
+    if (context == nil){
         return nil;
+    }
     BLEFObservation *observation = [NSEntityDescription insertNewObjectForEntityForName:@"Observation" inManagedObjectContext:context];
     
-    NSDate* now = [NSDate date];
-    observation.date = [now timeIntervalSince1970];
-    
-    [observation setSpecimen:specimen];
-    [specimen addObservationsObject:observation];
-    
-    return observation;
-}
-
-+ (void) ensureGroupsExist
-{
-    NSArray* groups = [self getGroups];
-    if (groups == nil || [groups count] == 0) {
-        [self createStartingPoint];
+    if (observation != nil){
+        [observation setSpecimen:specimen];
+        [specimen addObservationsObject:observation];
+        return  observation;
     }
+    return nil;
 }
 
-+ (void)createStartingPoint
+- (BLEFResult*)addNewResultToSpecimen:(BLEFSpecimen *)specimen
 {
     NSManagedObjectContext *context = [self getContext];
-    if (context){
-        [NSEntityDescription insertNewObjectForEntityForName:@"Group" inManagedObjectContext:context];
+    if (context == nil){
+        return nil;
     }
+    BLEFResult *result = [NSEntityDescription insertNewObjectForEntityForName:@"Result" inManagedObjectContext:context];
+    if (result != nil){
+        [result setSpecimen:specimen];
+        [specimen addResultsObject:result];
+        return result;
+    }
+    return nil;
 }
+
+
 
 @end

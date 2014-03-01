@@ -7,25 +7,24 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BLEFGroup.h"
 #import "BLEFSpecimen.h"
 #import "BLEFObservation.h"
+#import "BLEFResult.h"
 
 @interface BLEFDatabase : NSObject
 
-+ (NSArray*)getGroups;
-+ (NSArray*)getSpecimensFromGroup:(BLEFGroup *)group;
-+ (NSArray*)getObservationsFromSpecimen:(BLEFSpecimen *)specimen;
+- (NSArray*)getAllSpecimens;
+- (NSArray*)getObservationsFromSpecimen:(BLEFSpecimen *)specimen;
+- (NSArray*)getResultsFromSpecimen:(BLEFSpecimen *)specimen;
 
-+ (BLEFSpecimen*)addNewSpecimentToGroup:(BLEFGroup *)group;
-+ (BLEFObservation*)addNewObservationToSpecimen:(BLEFSpecimen *)specimen;
+- (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID;
 
-+ (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID;
+- (BLEFSpecimen*)newSpecimen;
+- (BLEFObservation*)addNewObservationToSpecimen:(BLEFSpecimen *)specimen;
+- (BLEFResult*)addNewResultToSpecimen:(BLEFSpecimen *)specimen;
 
-+ (void)saveChanges;
+- (void)saveChanges;
 
-+ (void) ensureGroupsExist;
-+ (void) createStartingPoint;
-+ (void) setContext:(NSManagedObjectContext*)context;
+@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
 @end

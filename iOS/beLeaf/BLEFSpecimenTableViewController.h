@@ -7,11 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BLEFGroup.h"
 
 @interface BLEFSpecimenTableViewController : UITableViewController
 
-@property (strong, nonatomic) BLEFGroup* group;
 @property (strong, nonatomic) NSArray *Specimen;
 
 - (IBAction)addButtonPressed:(id)sender;

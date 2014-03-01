@@ -9,9 +9,9 @@
 #import <XCTest/XCTest.h>
 #import <objc/runtime.h> // To force _gcov_flush (coverage files)
 #import "BLEFDatabase.h"
-#import "BLEFGroup.h"
 #import "BLEFSpecimen.h"
 #import "BLEFObservation.h"
+#import "BLEFResult.h"
 
 NSManagedObjectContext *testingContext;
 NSPersistentStoreCoordinator *persistentStoreCoordinator;
@@ -20,14 +20,13 @@ extern void __gcov_flush();
 
 @interface BLEFDatabaseTest : XCTestCase
 
-
 @end
 
 @interface BLEFDatabase (Testing)
 
 // Expose private methods for testing
 
-+ (NSManagedObjectContext *) getContext;
+- (NSManagedObjectContext *) getContext;
 
 @end
 
@@ -74,7 +73,6 @@ extern void __gcov_flush();
     testingContext = [[NSManagedObjectContext alloc] init];
     [testingContext setPersistentStoreCoordinator: persistentStoreCoordinator];
     XCTAssertNotNil(testingContext, @"Database context not nil");
-    [BLEFDatabase setContext:testingContext];
 }
 
 - (void)tearDown
@@ -85,84 +83,73 @@ extern void __gcov_flush();
     [super tearDown];
 }
 
+- (BLEFDatabase *)createDatabaseWithContext:(NSManagedObjectContext *)context
+{
+    BLEFDatabase* database = [[BLEFDatabase alloc] init];
+    [database setManagedObjectContext:context];
+    return database;
+}
+
 - (void)testForNil
 {
     // When there is no context to use, or nil is a parameter methods return NIL
-    [BLEFDatabase setContext:nil];
-    XCTAssertNil([BLEFDatabase getContext], @"Context is set to NIL for tests");
-    XCTAssertNil([BLEFDatabase getGroups], @"Getting groups when no context correctly returns NIL");
-    XCTAssertNil([BLEFDatabase fetchObjectWithID:nil], @"Fetching for nil when no context correctly returns NIL");
-    XCTAssertNil([BLEFDatabase getSpecimensFromGroup:nil], @"Getting a groups specimens when no context correctly return NIL");
-    XCTAssertNil([BLEFDatabase getObservationsFromSpecimen:nil], @"Getting a specimens observations when no context correctly returns NIL");
-    XCTAssertNil([BLEFDatabase addNewObservationToSpecimen:nil], @"Adding an observation to a speimen when nil corrctly returns NIL");
-    XCTAssertNil([BLEFDatabase addNewSpecimentToGroup:nil], @"Adding a specimen to a group with nil correctly returns nil");
-}
-
-- (void)testGettingGroups
-{
-    // Add a group
-    [BLEFDatabase ensureGroupsExist];
-    
-    // Try and fetch the group
-    NSArray *groups = [BLEFDatabase getGroups];
-    XCTAssertNotNil(groups, @"Getting the DB's specimen groups");
-    id firstobject = [groups firstObject];
-    XCTAssertNotNil(firstobject, @"Getting the first specimen group");
-    XCTAssertTrue([firstobject isKindOfClass:[BLEFGroup class]], @"The first specimen group can be cast as a group");
+    BLEFDatabase * database = [self createDatabaseWithContext:nil];
+    XCTAssertNil([database getContext], @"Context should be NIL for this test");
+    XCTAssertNil([database fetchObjectWithID:nil], @"Fetching for nil when no context correctly should return NIL");
+    XCTAssertNil([database getAllSpecimens], @"Getting a groups specimens when no context should return NIL");
+    XCTAssertNil([database getObservationsFromSpecimen:nil], @"Getting a specimens observations when no context correctly should return NIL");
+    XCTAssertNil([database addNewObservationToSpecimen:nil], @"Adding an observation to a nil specimen should return NIL");
+    XCTAssertNil([database newSpecimen], @"Adding a specimen to a group with nil correctly should return nil");
+    XCTAssertNil([database addNewResultToSpecimen:nil], @"Adding a result to a nil specimen should return NIL");
 }
 
 - (void)testSpecimenInteraction
 {
-    [BLEFDatabase ensureGroupsExist];
-    NSArray *groups = [BLEFDatabase getGroups];
-    BLEFGroup *group = (BLEFGroup*)[groups firstObject];
-    NSArray *specimens = [BLEFDatabase getSpecimensFromGroup:group];
-    XCTAssertTrue([specimens count] == 0, @"Checking no specimen currently exist");
-    BLEFSpecimen *specimen = [BLEFDatabase addNewSpecimentToGroup:group];
-    specimens = [BLEFDatabase getSpecimensFromGroup:group];
-    XCTAssertTrue([specimens count] == 1, @"Checking one specimen currently exist");
-    XCTAssertTrue([specimen isKindOfClass:[BLEFSpecimen class]], @"Specimen is of type BLEFSpecimen");
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    NSArray *specimens = [database getAllSpecimens];
+    XCTAssertTrue([specimens count] == 0, @"Database should start empty");
+    BLEFSpecimen *specimen = [database newSpecimen];
+    specimens = [database getAllSpecimens];
+    XCTAssertTrue([specimens count] == 1, @"One specimen should now exist");
+    XCTAssertTrue([specimen isKindOfClass:[BLEFSpecimen class]], @"Specimen should be of type BLEFSpecimen");
 }
 
 - (void)testObservationInteraction
 {
-    [BLEFDatabase ensureGroupsExist];
-    BLEFGroup *group = (BLEFGroup *)[[BLEFDatabase getGroups] firstObject];
-    BLEFSpecimen *specimen = [BLEFDatabase addNewSpecimentToGroup:group];
-    NSArray *observations = [BLEFDatabase getObservationsFromSpecimen:specimen];
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    BLEFSpecimen *specimen = [database newSpecimen];
+    NSArray *observations = [database getObservationsFromSpecimen:specimen];
     XCTAssertTrue([observations count] == 0, @"Checking no observations currently exist");
-    BLEFObservation *observation = [BLEFDatabase addNewObservationToSpecimen:specimen];
-    observations = [BLEFDatabase getObservationsFromSpecimen:specimen];
+    BLEFObservation *observation = [database addNewObservationToSpecimen:specimen];
+    observations = [database getObservationsFromSpecimen:specimen];
     XCTAssertTrue([observations count] == 1, @"One observation has been created");
     XCTAssertTrue([observation isKindOfClass:[BLEFObservation class]], @"Observation is type of BLEFObservation");
 }
 
 - (void)testFetchingObject
 {
-    [BLEFDatabase ensureGroupsExist];
-    BLEFGroup *group = (BLEFGroup *)[[BLEFDatabase getGroups] firstObject];
-    BLEFSpecimen *specimen = [BLEFDatabase addNewSpecimentToGroup:group];
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    BLEFSpecimen *specimen = [database newSpecimen];
     NSManagedObjectID *objID = [specimen objectID];
-    NSManagedObject *fetchedObj = [BLEFDatabase fetchObjectWithID:objID];
+    NSManagedObject *fetchedObj = [database fetchObjectWithID:objID];
     XCTAssertTrue([fetchedObj isKindOfClass:[BLEFSpecimen class]], @"Fetched object is of correct type");
 }
 
 - (void)testFetchingDeletedObject
 {
-    [BLEFDatabase ensureGroupsExist];
-    BLEFGroup *group = (BLEFGroup *)[[BLEFDatabase getGroups] firstObject];
-    BLEFSpecimen *specimen = [BLEFDatabase addNewSpecimentToGroup:group];
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    BLEFSpecimen *specimen = [database newSpecimen];
     NSManagedObjectID *objID = [specimen objectID];
-    NSManagedObject *fetchedObj = [BLEFDatabase fetchObjectWithID:objID];
+    NSManagedObject *fetchedObj = [database fetchObjectWithID:objID];
     
     // Reset context (removing object)
-    [BLEFDatabase setContext:nil];
+    [database setManagedObjectContext:nil];
     
     // Open new context
     [self initContext];
     
     // Re-attempt fetch
-    fetchedObj = [BLEFDatabase fetchObjectWithID:objID];
+    fetchedObj = [database fetchObjectWithID:objID];
     XCTAssertNil(fetchedObj, @"Fetching deleted object returns nil");
 }
 
@@ -179,20 +166,19 @@ extern void __gcov_flush();
     return blackImage;
 }
 
-- (BLEFObservation *) generateTestObservation
+- (BLEFObservation *) generateTestObservationWithDataBase:(BLEFDatabase *)database
 {
-    [BLEFDatabase ensureGroupsExist];
-    BLEFGroup *group = (BLEFGroup *)[[BLEFDatabase getGroups] firstObject];
-    BLEFSpecimen *specimen = [BLEFDatabase addNewSpecimentToGroup:group];
-    BLEFObservation *observation = [BLEFDatabase addNewObservationToSpecimen:specimen];
+    BLEFSpecimen *specimen = [database newSpecimen];
+    BLEFObservation *observation = [database addNewObservationToSpecimen:specimen];
     XCTAssertTrue([observation isKindOfClass:[BLEFObservation class]], @"Generating a test observation object");
     return observation;
 }
 
 - (void)testObservationThumbnail
 {
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
     UIImage *image = [self generateTestImage];
-    BLEFObservation *observation = [self generateTestObservation];
+    BLEFObservation *observation = [self generateTestObservationWithDataBase:database];
 
     UIImage *thumbnail = [observation getThumbnail];
     XCTAssertNil(thumbnail, @"Default thumbnail is NIL");
@@ -205,8 +191,9 @@ extern void __gcov_flush();
 
 - (void)testObservationSaveOpenImage
 {
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
     UIImage *image = [self generateTestImage];
-    BLEFObservation *observation = [self generateTestObservation];
+    BLEFObservation *observation = [self generateTestObservationWithDataBase:database];
     
     __block BOOL waitingForBlock = YES;
     __block BOOL result = NO;
@@ -233,6 +220,33 @@ extern void __gcov_flush();
     [observation willSave];
     imageData = [observation getImageData];
     XCTAssertNil(imageData, @"ImageData should be deleted");
+}
+
+- (void) testCreatingResult
+{
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    BLEFSpecimen *specimen = [database newSpecimen];
+    BLEFResult *result = [database addNewResultToSpecimen:specimen];
+    XCTAssertNotNil(result, @"Created result should not be nill");
+}
+
+- (void) testGettingResults
+{
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    BLEFSpecimen *specimen = [database newSpecimen];
+    NSArray *results = [database getResultsFromSpecimen:specimen];
+    XCTAssertTrue([results count] == 0, @"Should be no results");
+    [database addNewResultToSpecimen:specimen];
+    results = [database getResultsFromSpecimen:specimen];
+    XCTAssertTrue([results count] == 1, @"Should be one result returned");
+    BLEFResult *fetchedResult = [results firstObject];
+    XCTAssertTrue([fetchedResult isKindOfClass:[BLEFResult class]], @"Returned result should be of type BLEFResult");
+}
+
+- (void) testSave
+{
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    [database saveChanges];
 }
 
 
