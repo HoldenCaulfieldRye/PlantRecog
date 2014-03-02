@@ -9,11 +9,11 @@
 #import "BLEFAppDelegate.h"
 #import "BLEFDatabase.h"
 #import "BLEFServerInterface.h"
+#import "BLEFSpecimenTableViewController.h"
 
 @interface BLEFAppDelegate ()
 
 @property (readonly, strong, nonatomic) BLEFServerInterface *serverinterface;
-@property (readonly, strong, nonatomic) BLEFDatabase *mainDatabaseInterface;
 
 @end
 
@@ -22,11 +22,9 @@
 @synthesize managedObjectModel = _managedObjectModel;
 @synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
 @synthesize serverinterface = _serverinterface;
-@synthesize mainDatabaseInterface = _mainDatabaseInterface;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    [self databaseInit];
     [self serverInterfaceInit];
     return YES;
 }
@@ -56,7 +54,7 @@
 - (void)applicationWillTerminate:(UIApplication *)application
 {
     // Saves changes in the application's managed object context before the application terminates.
-    [BLEFDatabase saveChanges];
+    //[_serverinterface saveChanges];
 }
 
 #pragma mark - Core Data stack
@@ -142,14 +140,6 @@
 {
     NSManagedObjectContext *databaseMOD = [self generateManagedObjectContext];
     [_serverinterface setContext:databaseMOD];
-}
-
-#pragma mark - Database Setup
-
-- (void)databaseInit
-{
-    NSManagedObjectContext *databaseMOD = [self generateManagedObjectContext];
-    [_mainDatabaseInterface setManagedObjectContext:databaseMOD];
 }
 
 

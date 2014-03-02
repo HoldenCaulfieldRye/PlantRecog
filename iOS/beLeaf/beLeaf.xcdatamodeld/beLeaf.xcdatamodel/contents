@@ -14,7 +14,7 @@
         <relationship name="specimen" maxCount="1" deletionRule="Nullify" destinationEntity="Specimen" inverseName="results" inverseEntity="Specimen" syncable="YES"/>
     </entity>
     <entity name="Specimen" representedClassName="BLEFSpecimen" syncable="YES">
-        <attribute name="created" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="created" attributeType="Date" syncable="YES"/>
         <attribute name="groupid" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="latitude" attributeType="Double" minValueString="-90" maxValueString="90" defaultValueString="0.0" syncable="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Double" minValueString="-180" maxValueString="180" defaultValueString="0.0" syncable="YES"/>
@@ -23,7 +23,7 @@
     </entity>
     <elements>
         <element name="Observation" positionX="0" positionY="0" width="0" height="0"/>
-        <element name="Specimen" positionX="0" positionY="0" width="0" height="0"/>
         <element name="Result" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="Specimen" positionX="0" positionY="0" width="0" height="0"/>
     </elements>
 </model>

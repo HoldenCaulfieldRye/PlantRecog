@@ -6,16 +6,22 @@
 //  Copyright (c) 2014 DocMcs13group12. All rights reserved.
 //
 
+#import "BLEFAppDelegate.h"
 #import "BLEFSpecimenTableViewController.h"
-#import "BLEFSpeicmenObservationsViewController.h"
+#import "BLEFResultsViewController.h"
 #import "BLEFSpecimen.h"
 #import "BLEFDatabase.h"
 
 @interface BLEFSpecimenTableViewController ()
 
+@property (retain, nonatomic) NSFetchedResultsController *fetchedResultsController;
+@property (strong, nonatomic) BLEFDatabase *database;
+
 @end
 
 @implementation BLEFSpecimenTableViewController
+
+@synthesize fetchedResultsController = _fetchedResultsController;
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -30,6 +36,13 @@
 {
     [super viewDidLoad];
 
+    // Setup UI Database
+    _database = [[BLEFDatabase alloc] init];
+    BLEFAppDelegate *appdelegate = (BLEFAppDelegate *)[UIApplication sharedApplication].delegate;
+    NSManagedObjectContext *UIContext = [appdelegate generateManagedObjectContext];
+    [_database setManagedObjectContext:UIContext];
+    
+    // Load TableView
     self.tableView.rowHeight = 50;
     [self loadTableData];
 }
@@ -37,14 +50,30 @@
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    _fetchedResultsController = nil;
 }
 
 #pragma mark - Table View Methods
 
+- (NSFetchedResultsController *)fetchedResultsController
+{
+    if (_fetchedResultsController != nil){
+        return _fetchedResultsController;
+    }
+    
+    NSFetchedResultsController *fetchController = [_database fetchSpecimen];
+    fetchController.delegate = self;
+    _fetchedResultsController = fetchController;
+    return fetchController;
+}
+
 - (void)loadTableData
 {
-    self.Specimen = [BLEFDatabase getAllSpecimens];
+    NSError *error;
+    if (![[self fetchedResultsController] performFetch:&error]){
+        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+		exit(-1);  // Fail
+    }
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -56,7 +85,18 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return [[self Specimen] count];
+    id sectionInfo = [[[self fetchedResultsController] sections] objectAtIndex:section];
+    NSInteger number = [sectionInfo numberOfObjects];
+    return number;
+}
+
+- (void)configureCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath
+{
+    //BLEFSpecimen *specimen = [_fetchedResultsController objectAtIndexPath:indexPath];
+    cell.textLabel.text = @"Unnamed Specimen";
+    // Thumbnail
+    //[cell.imageView setImage:thumbnail];
+    //[cell.imageView setHidden:false];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -69,13 +109,7 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
     
-    // BLEFSpecimen *specimen = [[self Specimen] objectAtIndex:indexPath.row];
-    
-    // Thumbnail
-    //[cell.imageView setImage:thumbnail];
-    //[cell.imageView setHidden:false];
-    
-    cell.textLabel.text = @"Unnamed Specimen";
+    [self configureCell:cell atIndexPath:indexPath];
     
     return cell;
 }
@@ -126,19 +160,15 @@
 
 - (IBAction)addButtonPressed:(id)sender
 {
-    // create new speimen
-    //[BLEFDatabase addNewSpecimentToGroup:self.group];
-    [BLEFDatabase saveChanges];
-    [self loadTableData];
-    [self.tableView reloadData];
-    // go to specimen ?
+    [self performSegueWithIdentifier:@"HOMEtoCAMERA" sender:self];
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if ([[segue identifier] isEqualToString:@"specimenToObservations"]) {
-        BLEFSpeicmenOberservationsViewController *destination = [segue destinationViewController];
-        [destination setSpecimen:sender];
+    if ([[segue identifier] isEqualToString:@"HOMEtoRESULT"]) {
+        BLEFResultsViewController *destination = [segue destinationViewController];
+        [destination setDatabase:_database];
+        [destination setSpecimen:(BLEFSpecimen *)sender];
     }
 }
 
@@ -155,8 +185,63 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    BLEFSpecimen* specimen = [self.Specimen objectAtIndex:indexPath.row];
-    [self performSegueWithIdentifier:@"specimenToObservations" sender:specimen];
+    BLEFSpecimen *specimen = [_fetchedResultsController objectAtIndexPath:indexPath];
+    [self performSegueWithIdentifier:@"HOMEtoRESULT" sender:specimen];
+}
+
+#pragma mark - Fetched Controller Delegate Methods
+
+- (void)controllerWillChangeContent:(NSFetchedResultsController *)controller
+{
+    [self.tableView beginUpdates];
+}
+
+- (void)controller:(NSFetchedResultsController *)controller didChangeObject:(id)anObject atIndexPath:(NSIndexPath *)indexPath
+     forChangeType:(NSFetchedResultsChangeType)type newIndexPath:(NSIndexPath *)newIndexPath
+{
+    UITableView *tableView = self.tableView;
+    
+    switch(type) {
+            
+        case NSFetchedResultsChangeInsert:
+            [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationFade];
+            break;
+            
+        case NSFetchedResultsChangeDelete:
+            [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+            break;
+            
+        case NSFetchedResultsChangeUpdate:
+            [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
+            break;
+            
+        case NSFetchedResultsChangeMove:
+            [tableView deleteRowsAtIndexPaths:[NSArray
+                                               arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+            [tableView insertRowsAtIndexPaths:[NSArray
+                                               arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationFade];
+            break;
+    }
+}
+
+- (void)controller:(NSFetchedResultsController *)controller didChangeSection:(id<NSFetchedResultsSectionInfo>)sectionInfo
+           atIndex:(NSUInteger)sectionIndex forChangeType:(NSFetchedResultsChangeType)type
+{
+    switch(type) {
+            
+        case NSFetchedResultsChangeInsert:
+            [self.tableView insertSections:[NSIndexSet indexSetWithIndex:sectionIndex] withRowAnimation:UITableViewRowAnimationFade];
+            break;
+            
+        case NSFetchedResultsChangeDelete:
+            [self.tableView deleteSections:[NSIndexSet indexSetWithIndex:sectionIndex] withRowAnimation:UITableViewRowAnimationFade];
+            break;
+    }
+}
+
+- (void)controllerDidChangeContent:(NSFetchedResultsController *)controller
+{
+    [self.tableView endUpdates];
 }
 
 @end

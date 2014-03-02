@@ -51,16 +51,15 @@
     UIGraphicsEndImageContext();
 }
 
-- (void)saveImage:(UIImage *)image completion:(void (^) (BOOL success))handler
+- (void)saveImage:(NSData *)imageData completion:(void (^) (BOOL success))handler;
 {
-    if (image != nil) {
+    if (imageData != nil) {
         NSDate* now = [NSDate date];
         NSTimeInterval unix_timestamp = [now timeIntervalSince1970];
         NSString *name = [NSString stringWithFormat:@"%f.jpg",unix_timestamp];
-        NSData* data = UIImageJPEGRepresentation(image, 1.0);
         NSOperationQueue *operationQueue = [[NSOperationQueue alloc] init];
         [operationQueue addOperationWithBlock:^{
-            bool result = [BLEFObservation saveFile:data withFilename:name];
+            bool result = [BLEFObservation saveFile:imageData withFilename:name];
             [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                 if (result && self){
                     [self setFilename:name];

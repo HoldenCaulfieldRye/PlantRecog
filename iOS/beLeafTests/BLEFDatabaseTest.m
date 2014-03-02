@@ -114,6 +114,13 @@ extern void __gcov_flush();
     XCTAssertTrue([specimen isKindOfClass:[BLEFSpecimen class]], @"Specimen should be of type BLEFSpecimen");
 }
 
+- (void)testFetchController
+{
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    NSFetchedResultsController *fetchController = [database fetchSpecimen];
+    XCTAssertNotNil(fetchController, @"Test: Specimen Fetch controller created");
+}
+
 - (void)testObservationInteraction
 {
     BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
@@ -193,13 +200,14 @@ extern void __gcov_flush();
 {
     BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
     UIImage *image = [self generateTestImage];
+    NSData *imageAsData = UIImageJPEGRepresentation(image, 1.0);
     BLEFObservation *observation = [self generateTestObservationWithDataBase:database];
     
     __block BOOL waitingForBlock = YES;
     __block BOOL result = NO;
     
     
-    [observation saveImage:image completion:^(BOOL success){
+    [observation saveImage:imageAsData  completion:^(BOOL success){
         waitingForBlock = NO;
         result = success;
     }];

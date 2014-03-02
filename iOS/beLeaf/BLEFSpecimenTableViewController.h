@@ -8,9 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface BLEFSpecimenTableViewController : UITableViewController
-
-@property (strong, nonatomic) NSArray *Specimen;
+@interface BLEFSpecimenTableViewController : UITableViewController <NSFetchedResultsControllerDelegate>
 
 - (IBAction)addButtonPressed:(id)sender;
 

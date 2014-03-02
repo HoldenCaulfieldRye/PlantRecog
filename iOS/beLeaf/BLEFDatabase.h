@@ -14,6 +14,7 @@
 @interface BLEFDatabase : NSObject
 
 - (NSArray*)getAllSpecimens;
+- (NSFetchedResultsController*)fetchSpecimen;
 - (NSArray*)getObservationsFromSpecimen:(BLEFSpecimen *)specimen;
 - (NSArray*)getResultsFromSpecimen:(BLEFSpecimen *)specimen;
 
