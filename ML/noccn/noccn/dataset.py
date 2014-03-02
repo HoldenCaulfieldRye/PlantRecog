@@ -62,12 +62,10 @@ class BatchCreator(object):
             all_ids_and_info.append((id, name, label))
         labels_sorted = sorted(set(p[1] for p in all_names_and_labels))
 
-        if shuffle:
-            from sklearn.utils import shuffle as skshuffle
-            names_and_labels, ids_and_names = skshuffle(
-            names_and_labels, ids_and_names)
-
         batch_num = 1
+        number_of_means_to_take = 500
+        batches_per_mean_sample = (all_ids_and_info[-1][0]/500)
+        number_of_means_taken = 0
         batch_means = np.zeros(((self.size[0]**2)*self.channels,1))
         for ids_and_info in list(chunks(all_ids_and_info,self.batch_size)):
             print "Generating data_batch_" + `batch_num`
@@ -80,7 +78,10 @@ class BatchCreator(object):
             batch['data'] = data.T
             batch['labels'] = np.array([labels_sorted.index(label) for ((a_id, name, label), row) 
                                     in zip(ids_and_info, rows) if row is not None]).reshape((1,self.batch_size))
-            batch_means = np.hstack((batch_means,batch['data'].mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))))
+
+            if batch_num > (number_of_means_taken*batches_per_mean_sample):
+                batch_means = np.hstack((batch_means,batch['data'].mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))))
+                number_of_means_taken += 1
             path = os.path.join(self.output_path, 'data_batch_%s' % batch_num)
             with open(path, 'wb') as f:
                 cPickle.dump(batch, f, -1)
@@ -100,7 +101,7 @@ class BatchCreator(object):
             f.close()
 
     def load(self, name):
-        return Image.open(name)
+        return Image.open(name).convert("RGB")
 
     def preprocess(self, im):
         """Takes an instance of what self.load returned and returns an
