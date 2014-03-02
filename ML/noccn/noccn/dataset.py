@@ -6,6 +6,7 @@ import random
 import sys
 import traceback
 import math
+import collections
 
 import numpy as np
 from PIL import Image
@@ -16,6 +17,7 @@ from joblib import delayed
 from script import get_options
 from script import random_seed
 from script import resolve
+from ccn import mongoHelperFunctions
 
 # This is used to parse the xml files
 import xml.etree.ElementTree as ET # can be speeded up using lxml possibly
@@ -55,45 +57,47 @@ class BatchCreator(object):
         print '{0}                                   \r'.format(count),
 
     def __call__(self, all_names_and_labels, shuffle=False):
-	all_ids_and_info = []
-	for id, (name, label) in enumerate(all_names_and_labels):
-	    all_ids_and_info.append((id, name, label))
-	labels_sorted = sorted(set(p[1] for p in all_names_and_labels))
+        all_ids_and_info = []
+        for id, (name, label) in enumerate(all_names_and_labels):
+            all_ids_and_info.append((id, name, label))
+        labels_sorted = sorted(set(p[1] for p in all_names_and_labels))
 
-	if shuffle:
-	    from sklearn.utils import shuffle as skshuffle
-	    names_and_labels, ids_and_names = skshuffle(
-		names_and_labels, ids_and_names)
+        if shuffle:
+            from sklearn.utils import shuffle as skshuffle
+            names_and_labels, ids_and_names = skshuffle(
+            names_and_labels, ids_and_names)
 
         batch_num = 1
         batch_means = np.zeros(((self.size[0]**2)*self.channels,1))
         for ids_and_info in list(chunks(all_ids_and_info,self.batch_size)):
             print "Generating data_batch_" + `batch_num`
-	    rows = Parallel(n_jobs=self.n_jobs)(
-		delayed(_process_item)(self, name)
-		for a_id, name, label in ids_and_info)
-	    data = np.vstack([r for r in rows if r is not None])
-	    data = self.preprocess_data(data)
-	    batch = {'data': None, 'labels': [], 'metadata': []}
-	    batch['data'] = data.T
-	    batch['labels'] = np.array([labels_sorted.index(label) for ((a_id, name, label), row) 
-                                in zip(ids_and_info, rows) if row is not None]).reshape((1,self.batch_size))
+            rows = Parallel(n_jobs=self.n_jobs)(
+                            delayed(_process_item)(self, name)
+                            for a_id, name, label in ids_and_info)
+            data = np.vstack([r for r in rows if r is not None])
+            data = self.preprocess_data(data)
+            batch = {'data': None, 'labels': [], 'metadata': []}
+            batch['data'] = data.T
+            batch['labels'] = np.array([labels_sorted.index(label) for ((a_id, name, label), row) 
+                                    in zip(ids_and_info, rows) if row is not None]).reshape((1,self.batch_size))
             batch_means = np.hstack((batch_means,batch['data'].mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))))
-	    path = os.path.join(self.output_path, 'data_batch_%s' % batch_num)
-	    with open(path, 'wb') as f:
-	        cPickle.dump(batch, f, -1)
-            batch_num += 1
+            path = os.path.join(self.output_path, 'data_batch_%s' % batch_num)
+            with open(path, 'wb') as f:
+                cPickle.dump(batch, f, -1)
+                batch_num += 1
+                f.close()
 
-	batches_meta = {}
-	batches_meta['label_names'] = labels_sorted
-	batches_meta['metadata'] = dict(
-	    (a_id, {'name': name}) for (a_id, name, label) in all_ids_and_info)
+        batches_meta = {}
+        batches_meta['label_names'] = labels_sorted
+        batches_meta['metadata'] = dict(
+            (a_id, {'name': name}) for (a_id, name, label) in all_ids_and_info)
         batch_means = np.delete(batch_means,(0),axis=1)
-	batches_meta['data_mean'] = batch_means.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
-	batches_meta.update(self.more_meta)
-	with open(os.path.join(self.output_path, 'batches.meta'), 'wb') as f:
-	    cPickle.dump(batches_meta, f, -1)
-        print 'Batch processing complete'
+        batches_meta['data_mean'] = batch_means.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
+        batches_meta.update(self.more_meta)
+        with open(os.path.join(self.output_path, 'batches.meta'), 'wb') as f:
+            cPickle.dump(batches_meta, f, -1)
+            print 'Batch processing complete'
+            f.close()
 
     def load(self, name):
         return Image.open(name)
@@ -122,29 +126,29 @@ class BatchCreator(object):
         return data
 
     def transform_image_into_many_of_size(im, size):
-	ims = []
-	# Get current and desired ratio for the images
-	im_ratio = im.size[0] / float(im.size[1])
-	ratio = size[0] / float(size[1])
-	# The image is scaled/cropped vertically or horizontally depending on the ratio
-	if ratio > im_ratio:
-	    im = im.resize((size[0], size[0] * im.size[1] / im.size[0]), Image.ANTIALIAS)
-	    sub_crops = math.ceil(im.size[1]/im.size[0])
-	    # And divide it into its subgroups
-	    for base in xrange(0,im.size[1]-size[1]+1,int((im.size[1]-size[1]+1)/sub_crops)):
-		box = (0,base,size[0],base+size[1])
-		ims.append(im.crop(box))
-	elif ratio < im_ratio:
-	    im = im.resize((size[1] * im.size[0] / im.size[1], size[1]), Image.ANTIALIAS)
-	    sub_crops = math.ceil(im.size[0]/im.size[1])
-	    # And divide it into its subgroups
-	    for base in xrange(0,im.size[0]-size[0]+1,int((im.size[0]-size[0]+1)/sub_crops)):
-		box = (base,0,base+size[0],size[1])
-		ims.append(im.crop(box))
-	else:
-	    im = im.resize((size[0], size[1]), Image.ANTIALIAS)
-	    ims.append(im)
-	return ims 
+        ims = []
+        # Get current and desired ratio for the images
+        im_ratio = im.size[0] / float(im.size[1])
+        ratio = size[0] / float(size[1])
+        # The image is scaled/cropped vertically or horizontally depending on the ratio
+        if ratio > im_ratio:
+            im = im.resize((size[0], size[0] * im.size[1] / im.size[0]), Image.ANTIALIAS)
+            sub_crops = math.ceil(im.size[1]/im.size[0])
+            # And divide it into its subgroups
+            for base in xrange(0,im.size[1]-size[1]+1,int((im.size[1]-size[1]+1)/sub_crops)):
+                box = (0,base,size[0],base+size[1])
+                ims.append(im.crop(box))
+        elif ratio < im_ratio:
+            im = im.resize((size[1] * im.size[0] / im.size[1], size[1]), Image.ANTIALIAS)
+            sub_crops = math.ceil(im.size[0]/im.size[1])
+            # And divide it into its subgroups
+            for base in xrange(0,im.size[0]-size[0]+1,int((im.size[0]-size[0]+1)/sub_crops)):
+                box = (base,0,base+size[0],size[1])
+                ims.append(im.crop(box))
+        else:
+            im = im.resize((size[0], size[1]), Image.ANTIALIAS)
+            ims.append(im)
+        return ims 
 
 def find(root, pattern):
     for path, folders, files in os.walk(root, followlinks=True):
@@ -203,10 +207,28 @@ def _collect_filenames_and_labels(cfg):
 
 def console():
     cfg = get_options(sys.argv[1], 'dataset')
-    random_seed(int(cfg.get('seed', '42')))
-    collector = resolve(
-        cfg.get('collector', 'noccn.dataset._collect_filenames_and_labels'))
-    filenames_and_labels = collector(cfg)
+    if int(cfg.get('xml_query',1)) is not 0:
+        random_seed(int(cfg.get('seed', '42')))
+        collector = resolve(
+            cfg.get('collector', 'noccn.dataset._collect_filenames_and_labels'))
+        filenames_and_labels = collector(cfg)
+    else:
+        images, labels = mongoHelperFunctions.bucketing(
+                        threshold=int(cfg.get('class_image_thres',1000)),
+                        component=cfg.get('limit_by_component',None),
+                        componentProb=cfg.get('component_prob_thres',0.0),
+                        )
+        output_path=cfg.get('output-path', '/tmp/noccn-dataset')
+        c = collections.Counter(labels)
+        stats_file = open(os.path.join(output_path, 'batch_stats.txt'), 'wb')
+        stats_file.write(str(c))
+        stats_file.write('\n')
+        stats_file.write('Number of label classes: %i \n'%(len(set(labels))))
+        stats_file.write('Number of images: %i \n'%(len(images)))
+        stats_file.write('Number of labels: %i'%(len(labels)))
+        stats_file.close()
+        filenames_and_labels = zip(images,labels)
+        random.shuffle(filenames_and_labels)
     creator = resolve(cfg.get('creator', 'noccn.dataset.BatchCreator'))
     create = creator(
         batch_size=int(cfg.get('batch-size', 1000)),
