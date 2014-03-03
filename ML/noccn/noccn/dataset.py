@@ -65,7 +65,7 @@ class BatchCreator(object):
 
         batch_num = 1
         number_of_means_to_take = 500
-        batches_per_mean_sample = (all_ids_and_info[-1][0]/500)
+        batches_per_mean_sample = (all_ids_and_info[-1][0]/500)/self.batch_size
         print 'Taking mean every %i batches'%(int(batches_per_mean_sample))
         number_of_means_taken = 0
         batch_means = np.zeros(((self.size[0]**2)*self.channels,1))
