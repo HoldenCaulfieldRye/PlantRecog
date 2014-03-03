@@ -63,6 +63,12 @@ class BatchCreator(object):
             all_ids_and_info.append((id, name, label))
         labels_sorted = sorted(set(p[1] for p in all_names_and_labels))
 
+        # Making backup
+        batches_meta = {}
+        batches_meta['label_names'] = labels_sorted
+        batches_meta['metadata'] = dict( (a_id, {'name': name}) for (a_id, name, label) in all_ids_and_info)
+
+        # Starting loop
         batch_num = 1
         number_of_means_to_take = 500
         batches_per_mean_sample = (all_ids_and_info[-1][0]/500)/self.batch_size
@@ -74,17 +80,27 @@ class BatchCreator(object):
             rows = Parallel(n_jobs=self.n_jobs)(
                             delayed(_process_item)(self, name)
                             for a_id, name, label in ids_and_info)
+            if self.backup_image is None:
+                print 'Saving backup image'
+                self.backup_image = np.array(rows[0])
             data = np.vstack([r for r in rows if r is not None])
             data = self.preprocess_data(data)
             batch = {'data': None, 'labels': [], 'metadata': []}
             batch['data'] = data.T
             batch['labels'] = np.array([labels_sorted.index(label) for ((a_id, name, label), row) 
                                     in zip(ids_and_info, rows) if row is not None]).reshape((1,self.batch_size))
-
             if batch_num > (number_of_means_taken*batches_per_mean_sample):
                 print 'Taking mean of batch'
                 batch_means = np.hstack((batch_means,batch['data'].mean(axis=1).reshape(-1,1)))
                 number_of_means_taken += 1
+                # Storing backup
+                if number_of_means_taken == 50:
+                    batches_meta['data_mean'] = batch_means.mean(axis=1).reshape(-1,1)
+                    batches_meta.update(self.more_meta)
+                    with open(os.path.join(self.output_path, 'batches_bckup.meta'), 'wb') as f:
+                        cPickle.dump(batches_meta, f, -1)
+                        print 'Batch file backed_up'
+                        f.close()
             path = os.path.join(self.output_path, 'data_batch_%s' % batch_num)
             with open(path, 'wb') as f:
                 cPickle.dump(batch, f, -1)
@@ -120,12 +136,10 @@ class BatchCreator(object):
         try:
             data = self.load(name)
             data = self.preprocess(data)
-            if self.backup_image is None:
-                self.backup_image = np.array(data)
             return data
         except:
             print "Error processing %s using backup filler" % name
-            return self.backup_image
+            return np.array(self.backup_image)
 
     def preprocess_data(self, data):
         return data
@@ -242,4 +256,3 @@ def console():
         output_path=cfg.get('output-path', '/tmp/noccn-dataset'),
         )
     create(filenames_and_labels)
-
