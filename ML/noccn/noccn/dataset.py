@@ -46,6 +46,7 @@ class BatchCreator(object):
         self.size = size
         self.output_path = output_path
         self.n_jobs = n_jobs
+        self.backup_image = None
 
         if not os.path.exists(output_path):
             os.mkdir(output_path)
@@ -65,6 +66,7 @@ class BatchCreator(object):
         batch_num = 1
         number_of_means_to_take = 500
         batches_per_mean_sample = (all_ids_and_info[-1][0]/500)
+        print 'Taking mean every %i batches'%(int(batches_per_mean_sample))
         number_of_means_taken = 0
         batch_means = np.zeros(((self.size[0]**2)*self.channels,1))
         for ids_and_info in list(chunks(all_ids_and_info,self.batch_size)):
@@ -80,7 +82,8 @@ class BatchCreator(object):
                                     in zip(ids_and_info, rows) if row is not None]).reshape((1,self.batch_size))
 
             if batch_num > (number_of_means_taken*batches_per_mean_sample):
-                batch_means = np.hstack((batch_means,batch['data'].mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))))
+                print 'Taking mean of batch'
+                batch_means = np.hstack((batch_means,batch['data'].mean(axis=1).reshape(-1,1)))
                 number_of_means_taken += 1
             path = os.path.join(self.output_path, 'data_batch_%s' % batch_num)
             with open(path, 'wb') as f:
@@ -93,7 +96,7 @@ class BatchCreator(object):
         batches_meta['metadata'] = dict(
             (a_id, {'name': name}) for (a_id, name, label) in all_ids_and_info)
         batch_means = np.delete(batch_means,(0),axis=1)
-        batches_meta['data_mean'] = batch_means.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
+        batches_meta['data_mean'] = batch_means.mean(axis=1).reshape(-1,1)
         batches_meta.update(self.more_meta)
         with open(os.path.join(self.output_path, 'batches.meta'), 'wb') as f:
             cPickle.dump(batches_meta, f, -1)
@@ -117,11 +120,12 @@ class BatchCreator(object):
         try:
             data = self.load(name)
             data = self.preprocess(data)
+            if self.backup_image is None:
+                self.backup_image = np.array(data)
             return data
         except:
-            print "Error processing %s" % name
-            traceback.print_exc()
-            return None
+            print "Error processing %s using backup filler" % name
+            return self.backup_image
 
     def preprocess_data(self, data):
         return data
