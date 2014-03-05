@@ -176,7 +176,7 @@ describe('Application_server',function(){
     describe('routes.upload', function(){
 
 		it('should accept an image upload and respond with valid objectID', function(done){
-
+			this.timeout(4000);
 		    request(app)
 			.post('/upload')
 			.field("date", null)
@@ -190,7 +190,7 @@ describe('Application_server',function(){
 			    }
 			    else {
 			    assert(checkForHexRegExp.test(res.body.id));
-				done();
+			    setTimeout(done, 3000);
 			    };
 			});
 
