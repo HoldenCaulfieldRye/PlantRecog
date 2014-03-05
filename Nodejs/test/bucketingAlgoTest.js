@@ -7,39 +7,56 @@ var assert = require('assert');
 var mongo = require('mongodb');
 var BSON = mongo.BSONPure;
 
+// Requirements for mongo connection
+var Server = mongo.Server,
+    Db = mongo.Db,
+    BSON = mongo.BSONPure;
+var db;
+var server = new Server('theplant.guru','55517',{auto_reconnect:true, native_parser: true});
+db = new Db('development',server, {safe: true});
+db.open(function(err, db) {
+    	if(!err) console.log("Connected to " + 'development' + " database");
+ });
+
+exports.db = db;
 // Custom Modules
 // Paths here are relative to the folder in which this script lies.
 //var bucketing = require('../lib/utils/bucketing').bucketing;
 //var aggregation_count = require(module, '../lib/utils/node_bucketing');
-var aggregation_count = require('../lib/utils/node_bucketing').aggregation_count;
-var traverse_update_descendant_count = require('../lib/utils/node_bucketing').traverse_update_descendant_count;
-var traverse_update_bucket = require('../lib/utils/node_bucketing').traverse_update_bucket;
+var aggregation_count = require('../lib/utils/node_bucketing.js').aggregation_count;
+var traverse_update_descendant_count = require('../lib/utils/node_bucketing.js').traverse_update_descendant_count;
+var traverse_update_bucket = require('../lib/utils/node_bucketing.js').traverse_update_bucket;
 
-// Requirements for mongo connection
-var Server = mongo.Server,
-Db = mongo.Db,
-BSON = mongo.BSONPure;
+console.log(aggregation_count);
+console.log(traverse_update_bucket);
+console.log(traverse_update_descendant_count);
+
 
 /******************************
 * Actual tests
 ******************************/
-
 describe('Bucketing Algorithm',function(){
-	var db;
+	//var db;
 	// Open DB connection before doing tests.
+	/*
 	before(function(done){
 	    var server = new Server('theplant.guru','55517',{auto_reconnect:true, native_parser: true});
 	    db = new Db('development',server, {safe: true});
-	    db.open(function(err, testDB) {
+	    db.open(function(err, db) {
 	    	if(!err) console.log("Connected to " + 'development' + " database");
 	    });
 	    done();
 	});
-
+	
 	after(function(done){
 		db.close();
 		done();
 	});
+	*/
+//var res = traverse_update_bucket(["n11545714","n11545524","n13083586","n00017222"]);
+//console.log(res);
+var res = aggregation_count('Leaf',  0.0);
+console.log(res);
 
 	describe('aggregation_count',function(){
 		it('should pass with any plant tag and probability', function(){

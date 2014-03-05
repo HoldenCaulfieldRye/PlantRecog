@@ -2,9 +2,15 @@
 //------------BUCKETING ALGO---------------
 //-----------------------------------------
 
+
+if(process.env.NODE_ENV ==='test'){
+  var db = module.parent.exports.db;
+}
+
+
 var count_by_synset = new Object();
 
-function bucketing(threshold, tag, prob){
+var bucketing = function(threshold, tag, prob){
 	print("Bucketing with the following params: "+threshold+":"+tag+":"+prob);
 	print("Resetting collection for new bucketing session...");
 	db.plants.update({}, {$set:{Count:0, BucketCount:0, Bucket:"", BucketSpecies:""}}, {multi : true});
@@ -41,14 +47,14 @@ var aggregation_count = function(tag, prob){
 	var running_count = 0;
 	var res;
 	if(tag){
-		print("...Aggregating by tag and prob: " + tag, ", " + prob);
+//		print("...Aggregating by tag and prob: " + tag, ", " + prob);
 	    res = db.plants.aggregate(
 			{ $match : {Component_Tag : tag , Component_Tag_Prob : { $gte : prob } , Exclude : false }}, 
 			{ $group : { _id : "$Synset_ID", count : { $sum : 1 } }}
 		);
 	}
 	else{
-		print("...No tag provided, aggregating by prob only");
+//		print("...No tag provided, aggregating by prob only");
 	    res = db.plants.aggregate(
 			{ $match : {Component_Tag_Prob : { $gte : prob } , Exclude : false }}, 
 			{ $group : { _id : "$Synset_ID", count : { $sum : 1 } }}
@@ -72,9 +78,10 @@ var traverse_update_descendant_count = function(path){
 		var node = path[i];
 		count+=(count_by_synset[node] || 0);
 		var data = (db.plants.findOne({Synset_ID : node}, {Species:1,Count:1, _id:0}));
-		if(data){
+		if(data)
 			db.plants.update({Synset_ID : node}, {$set: {Bucket:node, BucketSpecies:data.Species}, $inc : {Count:count}}, {multi : true});
-		}
+		else 
+			return -2;
 	}
 	return 1;
 }
@@ -101,6 +108,7 @@ var traverse_update_bucket = function traverse_update_bucket(path, threshold){
 	return 1;
 }
 exports.traverse_update_bucket = traverse_update_bucket;
+
 
 Date.prototype.timeNow = function () { 
 	return ((this.getHours() < 10) ? "0" : "") +
