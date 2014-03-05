@@ -57,7 +57,8 @@ exports.upload = function(db, configArgs) {
 	var graphicServer = "http://" + configArgs.classifier_host + ":" + configArgs.classifier_port;
 	// Make formidable the multipart form parser
 	var form = new formidable.IncomingForm();
-	form.uploadDir = path.join('./lib/AppServer/uploads', configArgs.db_database);
+	form.uploadDir = path.join('./Nodejs/lib/AppServer/uploads', configArgs.db_database);
+	// TEST - form.uploadDir = path.join('./lib/AppServer/uploads', configArgs.db_database);
 	form.keepExtensions = true;	
 	// preset wait time at the moment
 	var waitTime = 2;
