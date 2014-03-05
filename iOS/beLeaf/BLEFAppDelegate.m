@@ -139,6 +139,7 @@
 - (void)serverInterfaceInit
 {
     NSManagedObjectContext *databaseMOD = [self generateManagedObjectContext];
+    _serverinterface = [[BLEFServerInterface alloc] init];
     [_serverinterface setContext:databaseMOD];
 }
 

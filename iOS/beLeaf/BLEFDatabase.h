@@ -14,8 +14,10 @@
 @interface BLEFDatabase : NSObject
 
 - (NSArray*)getAllSpecimens;
+- (NSArray*)getSpecimenNeedingUpdate;
 - (NSFetchedResultsController*)fetchSpecimen;
 - (NSArray*)getObservationsFromSpecimen:(BLEFSpecimen *)specimen;
+- (NSArray*)getObservationsNeedingUploading;
 - (NSArray*)getResultsFromSpecimen:(BLEFSpecimen *)specimen;
 
 - (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID;
@@ -27,5 +29,7 @@
 - (void)saveChanges;
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+
+extern NSString * const BLEFDatabaseUpdateNotification;
 
 @end

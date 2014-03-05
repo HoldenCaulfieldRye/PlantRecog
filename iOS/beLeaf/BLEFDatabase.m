@@ -34,8 +34,10 @@
     {
         return;
     } else {
-        if ([self managedObjectContext])
+        if ([self managedObjectContext]){
             [[self managedObjectContext] mergeChangesFromContextDidSaveNotification:notification];
+            [[NSNotificationCenter defaultCenter] postNotificationName:BLEFDatabaseUpdateNotification object:self userInfo:nil];
+        }
     }
 }
 
@@ -80,6 +82,22 @@
     return nil;
 }
 
+- (NSArray*)getSpecimenNeedingUpdate
+{
+    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Specimen"];
+    [request setPredicate:[NSPredicate predicateWithFormat: @"updatePolling != TRUE"]];
+    
+    [request setSortDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO]]];
+
+    NSManagedObjectContext *context = [self getContext];
+    NSError *error = nil;
+    NSArray *array = [context executeFetchRequest:request error:&error];
+    if (!error){
+        return array;
+    }
+    return nil;
+}
+
 - (NSFetchedResultsController*)fetchSpecimen
 {
     NSManagedObjectContext *context = [self getContext];
@@ -103,6 +121,25 @@
         array = [specimen.observations allObjects];
     }
     return array;
+}
+
+- (NSArray*)getObservationsNeedingUploading
+{
+    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Observation"];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"uploaded != TRUE"]];
+    
+    
+    request.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"filename" ascending:YES]];
+    
+    NSManagedObjectContext *context = [self getContext];
+    
+    NSError *error = nil;
+    NSArray *array = [context executeFetchRequest:request error:&error];
+    
+    if (!error){
+        return array;
+    }
+    return nil;
 }
 
 - (NSArray*)getResultsFromSpecimen:(BLEFSpecimen *)specimen

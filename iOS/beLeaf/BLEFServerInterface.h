@@ -8,29 +8,32 @@
 
 #import <Foundation/Foundation.h>
 
+@class BLEFSpecimen, BLEFObservation;
+
 @interface BLEFServerInterface : NSObject <NSURLConnectionDataDelegate>
 
 extern NSString * const BLEFUploadDidSendDataNotification;
 extern NSString * const BLEFJobDidReceiveDataNotification;
 extern NSString * const BLEFNetworkResultNotification;
-extern NSString * const BLEFNewObservationNotification;
+extern NSString * const BLEFDatabaseUpdateNotification;
 extern NSString * const BLEFNetworkRetryNotification;
 
 // Database
 - (void) setContext:(NSManagedObjectContext*)context;
 
-// Queue
-- (BOOL) addObservationToUploadQueue:(NSManagedObjectID *)observationID;
-- (BOOL) enableQueueProcessing;
-- (BOOL) stopProcessingQueue;
+// Upload
+- (BOOL) processUploads;
+- (BOOL) reStartUploadProcessing;
+- (BOOL) stopUploadProcessing;
 
-// Poller
-- (BOOL) addSpecimenToUpdatePool:(NSManagedObjectID *)specimenID;
+// Update
+- (BOOL) processUpdates;
+- (BOOL) addSpecimenToUpdatePool:(BLEFSpecimen *)specimen;
 - (void) startPollers;
 - (void) stopPollers;
 
 // Server Interface
-- (NSURLSessionUploadTask *)createUploadTaskForObservation:(NSManagedObjectID *)observationID completion:(void (^)(BOOL success))handler;
-- (NSURLSessionDataTask *)createUpdateTaskForSpecimen:(NSManagedObjectID *)specimenID completion:(void (^)(BOOL updated))handler;
+- (NSURLSessionDataTask *)createUpdateTaskForSpecimen:(BLEFSpecimen *)specimen completion:(void (^)(BOOL updated))handler;
+- (NSURLSessionUploadTask *)createUploadTaskForObservation:(BLEFObservation *)observation completion:(void (^)(BOOL success))handler;
 
 @end

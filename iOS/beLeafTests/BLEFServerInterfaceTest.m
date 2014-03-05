@@ -28,9 +28,9 @@ extern void __gcov_flush();
 @property (strong, nonatomic) BLEFDatabase * database;
 
 // Expose private methods for testing
-- (NSManagedObjectID *) nextInUploadQueue;
-- (void) removeFromUploadQueue:(id)objectToRemove;
-
+- (BLEFObservation *) nextInUploadQueue;
+- (BOOL) updateObservation:(NSManagedObjectID *)observationID usingData:(NSData *)data andError:(NSError *)error;
+- (BOOL) updateSpecimen:(NSManagedObjectID *)specimenID usingData:(NSData *)data andError:(NSError *)error;
 
 @end
 
@@ -138,16 +138,15 @@ extern void __gcov_flush();
 - (void)testUploadQueueEmpty
 {
     BLEFServerInterface *server = [self createServerInterface];
-    NSManagedObjectID *nextInQueue = [server nextInUploadQueue];
+    BLEFObservation *nextInQueue = [server nextInUploadQueue];
     XCTAssertNil(nextInQueue, @"Test: Queue is empty");
 }
 
 -(void)testUploadQueueInsertion
 {
     BLEFServerInterface *server = [self createServerInterface];
-    BLEFObservation *observation = [self createTestObservation:server];
-    [server addObservationToUploadQueue:[observation objectID]];
-    NSManagedObjectID *nextInQueue = [server nextInUploadQueue];
+    [self createTestObservation:server];
+    BLEFObservation *nextInQueue = [server nextInUploadQueue];
     XCTAssertNotNil(nextInQueue, @"Test: Queue Inserted ID");
 }
 
@@ -157,7 +156,7 @@ extern void __gcov_flush();
     BLEFObservation *observation = [self createTestObservation:server];
     [observation setSegment:@"Branch"];
     [observation setFilename:imagePath];
-    NSURLSessionUploadTask *task = [server createUploadTaskForObservation:[observation objectID] completion:nil];
+    NSURLSessionUploadTask *task = [server createUploadTaskForObservation:observation completion:nil];
     XCTAssertNotNil(task, @"Test: Upload Task generated");
 }
 
@@ -166,8 +165,39 @@ extern void __gcov_flush();
     BLEFServerInterface *server = [self createServerInterface];
     BLEFSpecimen *specimen = [self createTestSpecimen:server];
     [specimen setGroupid:@"ABCDEFGHIKJLMNOP"];
-    NSURLSessionDataTask *task = [server createUpdateTaskForSpecimen:[specimen objectID] completion:nil];
+    NSURLSessionDataTask *task = [server createUpdateTaskForSpecimen:specimen completion:nil];
     XCTAssertNotNil(task, @"Test: Update Task generated");
+}
+
+-(void)testObservationUpdate
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    BLEFObservation *observation = [self createTestObservation:server];
+    XCTAssertFalse([observation uploaded], @"Test: Observation starts as not-uploaded");
+    
+    NSString *jsonResponse = @"{\"groupID\":\"123ABC\"}";
+    
+    NSData *dataFromServer = [jsonResponse dataUsingEncoding:NSUTF8StringEncoding];
+    
+    bool returned = [server updateObservation:[observation objectID] usingData:dataFromServer andError:nil];
+    
+    XCTAssertTrue(returned, @"Test: Method returned true");
+    XCTAssertTrue([observation uploaded], @"Test: Observation marked as uploaded after receiving data from server");
+    XCTAssertEqualObjects([[observation specimen] groupid], @"123ABC", @"Test: Obsevation's GroupID correctly set from server response data");
+}
+
+-(void)testSpecimenUpdate
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    BLEFSpecimen *specimen = [self createTestSpecimen:server];
+    
+    NSString *jsonResponse = @"{\"classification\":\"oak\"}";
+    NSData *dataFromServer = [jsonResponse dataUsingEncoding:NSUTF8StringEncoding];
+    
+    bool returned = [server updateSpecimen:[specimen objectID] usingData:dataFromServer andError:nil];
+    
+    XCTAssertTrue(returned, @"Test: Method returned true");
+    
 }
 
 

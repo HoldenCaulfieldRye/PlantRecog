@@ -114,6 +114,34 @@ extern void __gcov_flush();
     XCTAssertTrue([specimen isKindOfClass:[BLEFSpecimen class]], @"Specimen should be of type BLEFSpecimen");
 }
 
+- (void)testSpecimenNeedingUpdating
+{
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    BLEFSpecimen * specimen1 = [database newSpecimen];
+    [database addNewObservationToSpecimen:specimen1];
+    [[database addNewObservationToSpecimen:specimen1] setUploaded:true];
+    [specimen1 setGroupid:@"GROUPID111"];
+    
+    BLEFSpecimen *specimen2 = [database newSpecimen];
+    [[database addNewObservationToSpecimen:specimen2] setUploaded:true];
+    [[database addNewObservationToSpecimen:specimen2] setUploaded:true];
+    [specimen2 setGroupid:@"GROUPID222"];
+    
+    BLEFSpecimen *specimen3 = [database newSpecimen];
+    [[database addNewObservationToSpecimen:specimen3] setUploaded:true];
+    [specimen3 setGroupid:@"GROUPID333"];
+    
+    
+    NSArray *specimenNeedingUpdating = [database getSpecimenNeedingUpdate];
+    XCTAssertNotNil(specimenNeedingUpdating, @"Test: Specimen needing Updating returns an object");
+    XCTAssertTrue([specimenNeedingUpdating count] == 2, @"Test: Correct number of specimen needing updating returned");
+    
+    [specimen3 setUpdatePolling:true];
+    
+    specimenNeedingUpdating = [database getSpecimenNeedingUpdate];
+    XCTAssertTrue([specimenNeedingUpdating count] == 1, @"Test: Number of specimen needing updating reflects those already in the 'update pool'");
+}
+
 - (void)testFetchController
 {
     BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
@@ -131,6 +159,23 @@ extern void __gcov_flush();
     observations = [database getObservationsFromSpecimen:specimen];
     XCTAssertTrue([observations count] == 1, @"One observation has been created");
     XCTAssertTrue([observation isKindOfClass:[BLEFObservation class]], @"Observation is type of BLEFObservation");
+}
+
+- (void)testObservationsNeedingUploading
+{
+    BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    BLEFSpecimen *specimen = [database newSpecimen];
+    [database addNewObservationToSpecimen:specimen];
+    [database addNewObservationToSpecimen:specimen];
+    
+    BLEFSpecimen *spcimen2 = [database newSpecimen];
+    [database addNewObservationToSpecimen:spcimen2];
+    [[database addNewObservationToSpecimen:spcimen2] setUploaded:true];
+    
+    NSArray *obNeedingUploading = [database getObservationsNeedingUploading];
+    XCTAssertNotNil(obNeedingUploading, @"Test: Array of observations needing uploading is returned");
+    XCTAssertTrue([obNeedingUploading count] == 3, @"Test: The 3 Observations needing uploading were returned");
+    
 }
 
 - (void)testFetchingObject

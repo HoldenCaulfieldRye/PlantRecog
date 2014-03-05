@@ -7,7 +7,6 @@
 //
 
 #import "BLEFCameraViewController.h"
-#import "BLEFAppDelegate.h"
 
 @interface BLEFCameraViewController ()
 
@@ -34,10 +33,9 @@
     
     // Database
     // Setup UI Database
+    if (_database == nil){
     _database = [[BLEFDatabase alloc] init];
-    BLEFAppDelegate *appdelegate = (BLEFAppDelegate *)[UIApplication sharedApplication].delegate;
-    NSManagedObjectContext *UIContext = [appdelegate generateManagedObjectContext];
-    [_database setManagedObjectContext:UIContext];
+    }
     
     // Camera Images
     _sessionImages = [NSMutableArray arrayWithObjects:[NSNull null], [NSNull null], [NSNull null], [NSNull null], nil];
@@ -93,20 +91,11 @@
 
             [newObservation generateThumbnailFromImage:[UIImage imageWithData:(NSData *)dataObject]];
             
-            __block bool waiting = true;
             [newObservation saveImage:(NSData *)dataObject completion:^(BOOL success) {
-                waiting = false;
+                [_database saveChanges];
             }];
-            
-            while(waiting){
-                [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
-                                         beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
-
-            }
         }
     }
-
-    [_database saveChanges];
 
     // Dismiss view
 
@@ -175,7 +164,6 @@
     }
     
     //Setup Output
-    
     _AVImageOutput = [[AVCaptureStillImageOutput alloc] init];
     if ([_captureSession canAddOutput:_AVImageOutput]){
         [_captureSession addOutput:_AVImageOutput];
@@ -186,7 +174,7 @@
     [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
     CALayer *rootLayer = [_previewView layer];
     [rootLayer setMasksToBounds:YES];
-    [previewLayer setFrame:CGRectMake(-70, 0, rootLayer.bounds.size.height, rootLayer.bounds.size.height)];
+    [previewLayer setFrame:rootLayer.bounds];
     [rootLayer insertSublayer:previewLayer atIndex:0];
 }
 

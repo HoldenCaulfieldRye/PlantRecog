@@ -17,6 +17,7 @@
 @dynamic groupid;
 @dynamic latitude;
 @dynamic longitude;
+@dynamic updatePolling;
 
 @dynamic observations;
 @dynamic results;

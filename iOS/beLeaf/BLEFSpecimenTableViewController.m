@@ -9,6 +9,7 @@
 #import "BLEFAppDelegate.h"
 #import "BLEFSpecimenTableViewController.h"
 #import "BLEFResultsViewController.h"
+#import "BLEFCameraViewController.h"
 #import "BLEFSpecimen.h"
 #import "BLEFDatabase.h"
 
@@ -169,6 +170,9 @@
         BLEFResultsViewController *destination = [segue destinationViewController];
         [destination setDatabase:_database];
         [destination setSpecimen:(BLEFSpecimen *)sender];
+    } else if ([[segue identifier] isEqualToString:@"HOMEtoCAMERA"]){
+        BLEFCameraViewController *destination = [segue destinationViewController];
+        [destination setDatabase:_database];
     }
 }
 
