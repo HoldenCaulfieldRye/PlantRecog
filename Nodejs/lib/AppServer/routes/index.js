@@ -8,17 +8,6 @@ var util = require ('util');
 
 var BSON = mongo.BSONPure;
 
-
-//try{    
-  //mongoClient = new mongo.MongoClient(new mongo.Server(configArgs.db_host, configArgs.db_port), {native_parser: true});
-  //mongoClient.open(function(err, mongoClient){if (err) throw err;});
-  //db = mongoClient.db(configArgs.db_database);
-//}
-//catch(err){
-  //console.log('Error connecting to Database: ' + err);
-  //process.exit(1);
-//}
-
 /*
  * GET Job
  */
@@ -38,7 +27,12 @@ exports.getJob = function(db) {
             console.log('Retrieving job: ' + job_id);
             try{
 		collection.findOne({'_id':new BSON.ObjectID(job_id)}, function(err, item) {
-		    res.send(item);
+		    if(item === null){
+			res.send('There is no document in the collection matching that JobID!');
+		    }
+		    else {
+			res.send(item);
+		    }
 		});
             }
             catch(err){
@@ -59,34 +53,42 @@ exports.upload = function(db, configArgs) {
     
     return function(req, res) {
 
-    // Store graphicServer details
-    var graphicServer = "http://" + configArgs.classifier_host + ":" + configArgs.classifier_port;
+	// Store graphicServer details
+	var graphicServer = "http://" + configArgs.classifier_host + ":" + configArgs.classifier_port;
 	// Make formidable the multipart form parser
-	var form = new formidable.IncomingForm()
-	form.uploadDir = path.join('./Nodejs/lib/AppServer/uploads', configArgs.db_database)
-	form.keepExtensions = true;
-    
+	var form = new formidable.IncomingForm();
+	form.uploadDir = path.join('./Nodejs/lib/AppServer/uploads', configArgs.db_database);
+	// TEST - form.uploadDir = path.join('./lib/AppServer/uploads', configArgs.db_database);
+	form.keepExtensions = true;	
 	// preset wait time at the moment
 	var waitTime = 2;
-
-	
-
-	
+		
 	/* log the body of this upload */
 	form.parse(req, function (err, fields, files) {
 
 	    console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
-	
-	    filePath = files.datafile.path;
-	
+	    	    
 	    if (files){
-	    
+		
+	    	try {
+	    		 filePath = files.datafile.path;
+	    		}
+	    	catch(err){
+	    		res.send('Nothing to add to database: there is no Datafile attached!');
+	    		return err;
+	    	}
 		/* output where we saved the file */
 		console.log("FilePath is: \n" + filePath);
-	    
+		
 		// Set our collection
-		var collection = db.collection('usercollection');
-
+		try{
+			var collection = db.collection('usercollection');
+		}
+		catch(err){
+			res.send("Error connecting to Database collection!");
+			console.log(err);
+			return err;
+		}
 		// Submit to the DB
 		collection.insert({
 		    vm_filepath : filePath,
@@ -99,32 +101,34 @@ exports.upload = function(db, configArgs) {
 		    },
 		    image_segment : fields.segment 
 		},
-                 {safe: true}, 
-                 function (db_err, docs) {
-		     if (db_err) {
-			 // If it failed, return error
-			 res.send("There was a problem adding the information to the database.");
-		     }
-		     else {
-			 // If it worked, return JSON object from collection to App//
-		         res.json( { "id" : docs[0]._id });
-		         
-			 // Send the image over to the classifier
-			 restler.post(graphicServer + "/classify", {
-			     multipart: true,
-			     data: {
-				 _id: docs[0]._id,
-				 datafile: restler.file(files.datafile.path, null, files.datafile.size, null, "image/jpeg")
-			     }
-			 }).on("complete", function(data) {
-			     console.log("GraphicServer response: \n" + util.inspect(data) );
-			 });
-			 
-		     }
-		 });
+				  {safe: true}, 
+				  function (db_err, docs) {
+		     		      if (db_err) {
+			 		  // If it failed, return error
+			 		  res.send("There was a problem adding the information to the database.");
+			 		  return db_err;
+		     		      }
+		     		      else {
+			 		  // If it worked, return JSON object from collection to App//
+		         		  res.json( { "id" : docs[0]._id });
+					  
+			 		  // Send the image over to the classifier
+			 		  restler.post(graphicServer + "/classify", {
+			     		      multipart: true,
+			     		      data: {
+				 		  _id: docs[0]._id,
+				 		  datafile: restler.file(files.datafile.path, null, files.datafile.size, null, "image/jpeg")
+			     		      }
+			 		  }).on("complete", function(data) {
+			     		      console.log("GraphicServer response: \n" + util.inspect(data) );
+			 		  });
+					  
+		     		      }
+		 		  });
 		
 		
 	    }
 	})
     };
 };
+ 
