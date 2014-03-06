@@ -12,6 +12,7 @@
 #import "BLEFCameraViewController.h"
 #import "BLEFSpecimen.h"
 #import "BLEFDatabase.h"
+#import "BLEFSpecimenTableViewCell.h"
 
 @interface BLEFSpecimenTableViewController ()
 
@@ -93,11 +94,9 @@
 
 - (void)configureCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath
 {
-    //BLEFSpecimen *specimen = [_fetchedResultsController objectAtIndexPath:indexPath];
-    cell.textLabel.text = @"Unnamed Specimen";
-    // Thumbnail
-    //[cell.imageView setImage:thumbnail];
-    //[cell.imageView setHidden:false];
+    BLEFSpecimen *specimen = (BLEFSpecimen *)[_fetchedResultsController objectAtIndexPath:indexPath];
+    BLEFSpecimenTableViewCell *customCell = (BLEFSpecimenTableViewCell*)cell;
+    [customCell styleCellWithSpecimen:specimen];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath

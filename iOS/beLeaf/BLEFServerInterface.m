@@ -20,10 +20,12 @@
 @property (strong, nonatomic) NSURLSession * uploadSession;
 @property (strong, nonatomic) NSString * boundary;
 
+// Re-Try Timer
+@property (strong, nonatomic) NSTimer *networkIntervalTimer;
+
 // Upload Flags
 @property (nonatomic) BOOL uploadQueueProcessingActive;
 @property (nonatomic) BOOL uploadQueueHalted;
-
 
 // Update Flags And Current Queue
 @property (strong, nonatomic) NSArray *specimenForUpdating;
@@ -45,7 +47,7 @@
         
         // Update Queue
         _updateQueueProcessingActive = false;
-        _updateQueueHalted = false;
+        _updateQueueHalted = true;
         
         // Database
         _database = [[BLEFDatabase alloc] init];
@@ -92,11 +94,11 @@
             _uploadQueueProcessingActive = false;
             NSLog(@"Upload Result:%hhd", success);
             if (success){
+                [_database saveChanges];
                 [self processUploads];
-                [self processUpdates];
-                } else {
-                    _uploadQueueHalted = true;
-                }
+            } else {
+                [self uploadErrorWaitAndRetry];
+            }
         }];
         if (task != nil){
             [task resume];
@@ -118,6 +120,12 @@
 {
     _uploadQueueHalted = true;
     return true;
+}
+
+- (void) uploadErrorWaitAndRetry
+{
+    _updateQueueHalted = true;
+    [self performSelector:@selector(reStartUploadProcessing) withObject:nil afterDelay:30.0];
 }
 
 #pragma mark Update Pool Methods
@@ -159,14 +167,27 @@
 
 - (BOOL) reStartUpdateProccessing
 {
-    _updateQueueHalted = false;
+    if (_updateQueueHalted){
+        _updateQueueHalted = false;
+        _networkIntervalTimer = [NSTimer timerWithTimeInterval:15.0 target:self selector:@selector(networkRetry:) userInfo:nil repeats:YES];
+        if (_networkIntervalTimer != nil){
+            [[NSRunLoop mainRunLoop] addTimer:_networkIntervalTimer forMode:NSRunLoopCommonModes];
+            return true;
+        }
+    }
+    return false;
+}
+
+- (void)networkRetry:(NSTimer*)timer
+{
     [self processUpdates];
-    return true;
 }
 
 - (BOOL)stopUpdateProcessing
 {
     _updateQueueHalted = true;
+    [_networkIntervalTimer invalidate];
+    _networkIntervalTimer = nil;
     return true;
 }
 
@@ -178,8 +199,8 @@
     if ((observation != nil) && ([observation isKindOfClass:[BLEFObservation class]])){
         NSManagedObjectID *observationID = [observation objectID];
         NSData *imageData = [observation getImageData];
-        NSDictionary *params = @{@"segment": ([observation segment] != nil ? [observation segment] : @"na"),
-                                 @"groupid": ([[observation specimen] groupid]? [[observation specimen] groupid] : @"na"),
+        NSDictionary *params = @{@"segment": ([observation segment] != nil ? [observation segment] : @"0"),
+                                 @"group_id": ([[observation specimen] groupid]? [[observation specimen] groupid] : @"0"),
                                  @"latitude": [NSNumber numberWithDouble:[[observation specimen] latitude]],
                                  @"longitude": [NSNumber numberWithDouble:[[observation specimen] longitude]]
                                  };
@@ -272,8 +293,8 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 {
     if (error == nil){
         NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
-        NSString *groupID = json[@"groupID"];
-    
+        NSString *groupID = json[@"group_id"];
+        NSLog(@"GroupID received: %@", groupID);
         if ((groupID != nil) && ([groupID length] > 2)){
             BLEFObservation *observation = (BLEFObservation *)[_database fetchObjectWithID:observationID];
             if (observation != NULL){
@@ -281,9 +302,9 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
                     [[observation specimen] setGroupid:groupID];
                 }
                 [observation setUploaded:true];
+                return true;
             }
         }
-        return true;
     }
     return false;
 }
@@ -316,7 +337,7 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 - (NSURLRequest *)createUploadRequestForObservation:(BLEFObservation *)observation
 {
     //NSURL *url = [NSURL URLWithString:@"http://plantrecogniser.no-ip.biz:55580/upload"];
-    NSURL *url = [NSURL URLWithString:@"http://129.31.238.17:5000/upload"];
+    NSURL *url = [NSURL URLWithString:@"http://192.168.1.78:5000/upload"];
     //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
     NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
     [mutableRequest setHTTPMethod:@"POST"];
@@ -326,7 +347,7 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 - (NSURLRequest *)createUpdateRequestForSpecimen:(BLEFSpecimen *)specimen
 {
     //NSString *urlAsString = [@"http://plantrecogniser.no-ip.biz:55580/job/" stringByAppendingString:[specimen groupid]];
-    NSString *urlAsString = [NSString stringWithFormat:@"http://129.31.238.17:5000/job/%@/", [specimen groupid]];
+    NSString *urlAsString = [NSString stringWithFormat:@"http://192.168.1.78:5000/job/%@/", [specimen groupid]];
     NSURL *url = [NSURL URLWithString:urlAsString];
     return [NSURLRequest requestWithURL:url];
 }

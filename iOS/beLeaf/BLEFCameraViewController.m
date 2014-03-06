@@ -105,7 +105,7 @@
 - (void)processImageData:(NSData *)imageData
 {
     UIImage *image = [UIImage imageWithData:imageData];
-    [self displayImage:image];
+    [self flashToImage:image];
     [_sessionImages insertObject:imageData atIndex:[_segmentSelection selectedSegmentIndex]];
     // TODO...?
 }
@@ -121,6 +121,23 @@
     _imageReviewView.image = image;
     _imageReviewView.hidden = NO;
     [_previewView bringSubviewToFront:_imageReviewView];
+}
+
+- (void)flashToImage:(UIImage *)image
+{
+    UIView *whiteView = [[UIView alloc] initWithFrame:[_previewView bounds]];
+    [whiteView setBackgroundColor:[UIColor colorWithWhite:1.0f alpha:1.0f]];
+    [_previewView addSubview:whiteView];
+    [_captureSession stopRunning];
+    _imageReviewView.image = image;
+    [_previewView bringSubviewToFront:_imageReviewView];
+    [_previewView bringSubviewToFront:whiteView];
+    _imageReviewView.hidden = NO;
+    [UIView animateWithDuration:0.75f animations:^{
+        whiteView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.0f];
+    } completion:^(BOOL finished) {
+        [whiteView removeFromSuperview];
+    }];
 }
 
 - (void)hideImage

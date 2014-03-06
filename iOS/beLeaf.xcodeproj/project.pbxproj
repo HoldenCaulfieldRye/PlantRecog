@@ -29,6 +29,7 @@
 		E9364FFE18C23A83000E5C75 /* BLEFServerInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */; };
 		E936500018C27372000E5C75 /* BLEFServerInterfaceTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E923896418BCDD40001066A9 /* BLEFServerInterfaceTest.m */; };
 		E94400C118B91B1500D2C3C4 /* BLEFDatabaseTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E94400C018B91B1500D2C3C4 /* BLEFDatabaseTest.m */; };
+		E947179B18C92431006C8B1D /* BLEFSpecimenTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E947179A18C92431006C8B1D /* BLEFSpecimenTableViewCell.m */; };
 		E95131B318B96AB700B2DDAD /* BLEFDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962D1897F94F0067A991 /* BLEFDatabase.m */; };
 		E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
 		E9829C6D189D7662004DD07F /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
@@ -82,6 +83,8 @@
 		5E2AD5A21863BB5A00595828 /* iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = iPhone.storyboard; sourceTree = "<group>"; };
 		E923896418BCDD40001066A9 /* BLEFServerInterfaceTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFServerInterfaceTest.m; sourceTree = "<group>"; };
 		E94400C018B91B1500D2C3C4 /* BLEFDatabaseTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFDatabaseTest.m; sourceTree = "<group>"; };
+		E947179918C92431006C8B1D /* BLEFSpecimenTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSpecimenTableViewCell.h; sourceTree = "<group>"; };
+		E947179A18C92431006C8B1D /* BLEFSpecimenTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSpecimenTableViewCell.m; sourceTree = "<group>"; };
 		E95C85391864564000CFEC40 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		E9829C6B189D7662004DD07F /* BLEFObservation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFObservation.h; sourceTree = "<group>"; };
 		E9829C6C189D7662004DD07F /* BLEFObservation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFObservation.m; sourceTree = "<group>"; };
@@ -202,6 +205,8 @@
 				E9BEE40918A68FFF00F3A648 /* BLEFResultsViewController.m */,
 				E98EF99C18C36D4D001EC74A /* BLEFCameraViewController.h */,
 				E98EF99D18C36D4D001EC74A /* BLEFCameraViewController.m */,
+				E947179918C92431006C8B1D /* BLEFSpecimenTableViewCell.h */,
+				E947179A18C92431006C8B1D /* BLEFSpecimenTableViewCell.m */,
 			);
 			path = beLeaf;
 			sourceTree = "<group>";
@@ -395,6 +400,7 @@
 			files = (
 				E98EF9A018C3D566001EC74A /* BLEFResultsViewController.m in Sources */,
 				E98EF99F18C36D4D001EC74A /* BLEFCameraViewController.m in Sources */,
+				E947179B18C92431006C8B1D /* BLEFSpecimenTableViewCell.m in Sources */,
 				E98EF97F18C3597A001EC74A /* BLEFObservation.m in Sources */,
 				E98EF98218C3597A001EC74A /* BLEFSpecimenTableViewController.m in Sources */,
 				E98EF98318C3597A001EC74A /* main.m in Sources */,
