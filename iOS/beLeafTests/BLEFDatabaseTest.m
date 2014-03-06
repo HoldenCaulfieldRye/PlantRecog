@@ -188,11 +188,12 @@ extern void __gcov_flush();
 {
     BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
     BLEFSpecimen *specimen = [database newSpecimen];
-    [database addNewObservationToSpecimen:specimen];
-    [database addNewObservationToSpecimen:specimen];
+    [[database addNewObservationToSpecimen:specimen] setFilename:@"image1.jpg"];
+    [[database addNewObservationToSpecimen:specimen] setFilename:@"image2.jpg"];
     
     BLEFSpecimen *spcimen2 = [database newSpecimen];
     [database addNewObservationToSpecimen:spcimen2];
+    [[database addNewObservationToSpecimen:spcimen2] setFilename:@"image3.jpg"];
     [[database addNewObservationToSpecimen:spcimen2] setUploaded:true];
     
     NSArray *obNeedingUploading = [database getObservationsNeedingUploading];

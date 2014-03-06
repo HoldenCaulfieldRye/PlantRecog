@@ -15,6 +15,7 @@
 NSManagedObjectContext *testingContext;
 NSPersistentStoreCoordinator *persistentStoreCoordinator;
 NSString *imagePath;
+NSManagedObjectModel *model;
 
 extern void __gcov_flush();
 
@@ -42,14 +43,7 @@ extern void __gcov_flush();
     NSBundle *bundle = [NSBundle bundleForClass:NSClassFromString(@"BLEFDatabase")];
     NSString* path = [bundle pathForResource:@"beLeaf" ofType:@"momd"];
     NSURL *modURL = [NSURL URLWithString:path];
-    NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:modURL];
-    
-    // Create Persistent Store Coordinator in memory
-    persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc]
-                                  initWithManagedObjectModel: model];
-    [persistentStoreCoordinator addPersistentStoreWithType:NSInMemoryStoreType
-                                             configuration:nil URL:nil
-                                                   options:nil error:nil];
+    model = [[NSManagedObjectModel alloc] initWithContentsOfURL:modURL];
 }
 
 + (void)tearDown
@@ -84,6 +78,14 @@ extern void __gcov_flush();
 {
     [super setUp];
     // Put setup code here. This method is called before the invocation of each test method in the class.
+    
+    // Create Persistent Store Coordinator in memory
+    persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc]
+                                  initWithManagedObjectModel: model];
+    [persistentStoreCoordinator addPersistentStoreWithType:NSInMemoryStoreType
+                                             configuration:nil URL:nil
+                                                   options:nil error:nil];
+    
     [self initContext];
     UIImage *testImage = [self generateTestImage];
     NSData *imagedata = UIImageJPEGRepresentation(testImage, 1.0);
@@ -111,6 +113,7 @@ extern void __gcov_flush();
 - (void)tearDown
 {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
+    persistentStoreCoordinator = nil;
     testingContext = nil;
     [super tearDown];
 }
@@ -145,7 +148,7 @@ extern void __gcov_flush();
 -(void)testUploadQueueInsertion
 {
     BLEFServerInterface *server = [self createServerInterface];
-    [self createTestObservation:server];
+    [[self createTestObservation:server] setFilename:@"image1.jpg"];
     BLEFObservation *nextInQueue = [server nextInUploadQueue];
     XCTAssertNotNil(nextInQueue, @"Test: Queue Inserted ID");
 }

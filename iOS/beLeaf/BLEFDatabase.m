@@ -126,7 +126,7 @@
 - (NSArray*)getObservationsNeedingUploading
 {
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Observation"];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"uploaded != TRUE"]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"(uploaded != TRUE) AND (filename != NULL)"]];
     
     
     request.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"filename" ascending:YES]];

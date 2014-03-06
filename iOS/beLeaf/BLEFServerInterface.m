@@ -54,12 +54,7 @@
         // Network Session
         _updateSession = [NSURLSession sharedSession];
 
-        NSURLSessionConfiguration *uploadConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
         _boundary = @"---------------------------14737809831466499882746641449";
-        uploadConfig.HTTPAdditionalHeaders = @{
-                                               @"Content-Type"  : [NSString stringWithFormat:@"multipart/form-data; boundary=%@", _boundary]
-                                               };
-        _uploadSession = [NSURLSession sessionWithConfiguration:uploadConfig];
         
         // Subscribe to notifications
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
@@ -95,6 +90,7 @@
     if (observation != nil){
         NSURLSessionUploadTask *task = [self createUploadTaskForObservation:observation completion:^(BOOL success) {
             _uploadQueueProcessingActive = false;
+            NSLog(@"Upload Result:%hhd", success);
             if (success){
                 [self processUploads];
                 [self processUpdates];
@@ -107,6 +103,7 @@
             return true;
         }
     }
+    _uploadQueueProcessingActive = false;
     return false;
 }
 
@@ -144,6 +141,9 @@
             BLEFSpecimen *specimen = (BLEFSpecimen *)[_specimenForUpdating objectAtIndex:index];
             if (specimen != nil){
                 NSURLSessionDataTask *task = [self createUpdateTaskForSpecimen:specimen completion:^(BOOL updated) {
+                    if (updated){
+                        [_database saveChanges];
+                    }
                     [self processUpdateIndex:index+1];
                 }];
                 if (task != nil){
@@ -186,6 +186,11 @@
         if (imageData != nil && params != nil){
             NSData *bodyData = [self createUploadBodyDataWithFields:params andFileData:imageData];
             NSURLRequest *request = [self createUploadRequestForObservation:observation];
+            NSURLSessionConfiguration *uploadConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
+            uploadConfig.HTTPAdditionalHeaders = @{
+                                                   @"Content-Type"  : [NSString stringWithFormat:@"multipart/form-data; boundary=%@", _boundary]
+                                                   };
+            _uploadSession = [NSURLSession sessionWithConfiguration:uploadConfig];
             NSURLSessionUploadTask *task = [_uploadSession uploadTaskWithRequest:request
                                                                          fromData:bodyData
                                                                 completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
@@ -256,7 +261,6 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
             if (specimen != nil){
                 BLEFResult *result = [_database addNewResultToSpecimen:specimen];
                 [result setName:classification];
-                [_database saveChanges];
                 return true;
             }
         }
@@ -348,4 +352,5 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
     }
 }
 */
+
 @end
