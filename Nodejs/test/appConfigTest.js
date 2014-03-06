@@ -12,7 +12,6 @@ var parseConfig = require('../lib/AppServer/config_parser').parseConfig;
 /******************************
 * Actual tests
 ******************************/
-
 describe('Application_server',function(){
 	
 
