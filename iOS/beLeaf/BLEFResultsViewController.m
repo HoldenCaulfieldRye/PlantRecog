@@ -52,8 +52,17 @@
             [[self resultLabel] setText:@"No classification..yet"];
         }
         */
+        
         [[self resultLabel] setText:@"No classification..yet"];
         
+        NSSet *results = [_specimen results];
+        if (results != nil){
+            BLEFResult *result = (BLEFResult *)[results anyObject];
+            if (result != nil){
+                if (result.name != nil)
+                    [[self resultLabel] setText:result.name];
+            }
+        }        
         
         // Images
         

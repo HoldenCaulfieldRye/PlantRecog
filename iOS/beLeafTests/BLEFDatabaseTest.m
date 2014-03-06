@@ -15,6 +15,7 @@
 
 NSManagedObjectContext *testingContext;
 NSPersistentStoreCoordinator *persistentStoreCoordinator;
+NSManagedObjectModel *model;
 
 extern void __gcov_flush();
 
@@ -32,6 +33,11 @@ extern void __gcov_flush();
 
 @implementation BLEFDatabaseTest
 
+- (NSURL *)applicationDocumentsDirectory
+{
+    return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+}
+
 + (void)setUp
 {
     // This is called once at the start
@@ -41,14 +47,8 @@ extern void __gcov_flush();
     NSBundle *bundle = [NSBundle bundleForClass:NSClassFromString(@"BLEFDatabase")];
     NSString* path = [bundle pathForResource:@"beLeaf" ofType:@"momd"];
     NSURL *modURL = [NSURL URLWithString:path];
-    NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:modURL];
+    model = [[NSManagedObjectModel alloc] initWithContentsOfURL:modURL];
     
-    // Create Persistent Store Coordinator in memory
-    persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc]
-                                           initWithManagedObjectModel: model];
-    [persistentStoreCoordinator addPersistentStoreWithType:NSInMemoryStoreType
-                                                configuration:nil URL:nil
-                                                options:nil error:nil];
 }
 
 + (void)tearDown
@@ -64,6 +64,17 @@ extern void __gcov_flush();
 {
     [super setUp];
     // Put setup code here. This method is called before the invocation of each test method in the class.
+    // Create Persistent Store Coordinator as a SQL file
+    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"beLeafTest.sqlite"];
+    
+    persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc]
+                                  initWithManagedObjectModel: model];
+    
+    
+    [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
+                                             configuration:nil URL:storeURL
+                                                   options:nil error:nil];
+    
     // Create Context
     [self initContext];
 }
@@ -80,6 +91,11 @@ extern void __gcov_flush();
     // Put teardown code here. This method is called after the invocation of each test method in the class.
     // Remove context
     testingContext = nil;
+    persistentStoreCoordinator = nil;
+    
+    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"beLeafTest.sqlite"];
+    [[NSFileManager defaultManager] removeItemAtURL:storeURL error:nil];
+    
     [super tearDown];
 }
 
@@ -117,29 +133,36 @@ extern void __gcov_flush();
 - (void)testSpecimenNeedingUpdating
 {
     BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
+    
+    // Still uploading
     BLEFSpecimen * specimen1 = [database newSpecimen];
     [database addNewObservationToSpecimen:specimen1];
     [[database addNewObservationToSpecimen:specimen1] setUploaded:true];
     [specimen1 setGroupid:@"GROUPID111"];
     
+    // Needs Updating
     BLEFSpecimen *specimen2 = [database newSpecimen];
     [[database addNewObservationToSpecimen:specimen2] setUploaded:true];
     [[database addNewObservationToSpecimen:specimen2] setUploaded:true];
     [specimen2 setGroupid:@"GROUPID222"];
     
+    // Needs Updating
     BLEFSpecimen *specimen3 = [database newSpecimen];
     [[database addNewObservationToSpecimen:specimen3] setUploaded:true];
     [specimen3 setGroupid:@"GROUPID333"];
     
+    // Not uploading but doesn't have a groupID
+    [database newSpecimen];
+    
+    // Already Updated
+    BLEFSpecimen *specimen4 =[database newSpecimen];
+    [specimen4 setGroupid:@"GROUPID4444"];
+    [database addNewResultToSpecimen:specimen4];
+    [[database addNewObservationToSpecimen:specimen4] setUploaded:true];
     
     NSArray *specimenNeedingUpdating = [database getSpecimenNeedingUpdate];
     XCTAssertNotNil(specimenNeedingUpdating, @"Test: Specimen needing Updating returns an object");
     XCTAssertTrue([specimenNeedingUpdating count] == 2, @"Test: Correct number of specimen needing updating returned");
-    
-    [specimen3 setUpdatePolling:true];
-    
-    specimenNeedingUpdating = [database getSpecimenNeedingUpdate];
-    XCTAssertTrue([specimenNeedingUpdating count] == 1, @"Test: Number of specimen needing updating reflects those already in the 'update pool'");
 }
 
 - (void)testFetchController

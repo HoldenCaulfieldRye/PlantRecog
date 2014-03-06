@@ -9,6 +9,11 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>whatPlant.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
@@ -18,6 +23,11 @@
 			<true/>
 		</dict>
 		<key>5E2AD5891863B6DA00595828</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>E98EF97D18C3597A001EC74A</key>
 		<dict>
 			<key>primary</key>
 			<true/>

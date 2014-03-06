@@ -25,8 +25,10 @@
 @property (nonatomic) BOOL uploadQueueHalted;
 
 
-// Update Pollers
-@property (strong, nonatomic) NSOperationQueue *pollers;
+// Update Flags And Current Queue
+@property (strong, nonatomic) NSArray *specimenForUpdating;
+@property (nonatomic) BOOL updateQueueProcessingActive;
+@property (nonatomic) BOOL updateQueueHalted;
 
 @end
 
@@ -41,9 +43,9 @@
         _uploadQueueProcessingActive = false;
         _uploadQueueHalted = false;
         
-        // Update Pollers
-        _pollers = [[NSOperationQueue alloc] init];
-        [_pollers setMaxConcurrentOperationCount:1];
+        // Update Queue
+        _updateQueueProcessingActive = false;
+        _updateQueueHalted = false;
         
         // Database
         _database = [[BLEFDatabase alloc] init];
@@ -83,27 +85,29 @@
 - (BOOL) processUploads
 {
     @synchronized(self){
-    if (!_uploadQueueHalted && !_uploadQueueProcessingActive){
-        BLEFObservation * observation = [self nextInUploadQueue];
-        if (observation != nil){
-            NSURLSessionUploadTask *task = [self createUploadTaskForObservation:observation completion:^(BOOL success) {
-                _uploadQueueProcessingActive = false;
-                if (success){
-                    [self processUploads];
-                    [self processUpdates];
+        if (!_uploadQueueHalted && !_uploadQueueProcessingActive){
+            _uploadQueueProcessingActive = true;
+        } else {
+            return false;
+        }
+    }
+    BLEFObservation * observation = [self nextInUploadQueue];
+    if (observation != nil){
+        NSURLSessionUploadTask *task = [self createUploadTaskForObservation:observation completion:^(BOOL success) {
+            _uploadQueueProcessingActive = false;
+            if (success){
+                [self processUploads];
+                [self processUpdates];
                 } else {
                     _uploadQueueHalted = true;
                 }
-            }];
-            if (task != nil){
-                [task resume];
-                _uploadQueueProcessingActive = true;
-            }
+        }];
+        if (task != nil){
+            [task resume];
             return true;
         }
     }
     return false;
-    }
 }
 
 - (BOOL) reStartUploadProcessing
@@ -123,56 +127,47 @@
 
 - (BOOL) processUpdates
 {
-    NSArray *specimenForUpdating = [_database getSpecimenNeedingUpdate];
-    if (specimenForUpdating != nil){
-        for (BLEFSpecimen * specimen in specimenForUpdating) {
-            [self addSpecimenToUpdatePool:specimen];
+    @synchronized(self){
+        if (!_updateQueueHalted && !_updateQueueProcessingActive){
+            _updateQueueProcessingActive = true;
+        } else {
+            return false;
         }
     }
+    _specimenForUpdating = [_database getSpecimenNeedingUpdate];
+    return [self processUpdateIndex:0];
+}
+
+- (BOOL) processUpdateIndex:(NSInteger)index {
+    if (_specimenForUpdating != nil && !_updateQueueHalted){
+        if (index < [_specimenForUpdating count]){
+            BLEFSpecimen *specimen = (BLEFSpecimen *)[_specimenForUpdating objectAtIndex:index];
+            if (specimen != nil){
+                NSURLSessionDataTask *task = [self createUpdateTaskForSpecimen:specimen completion:^(BOOL updated) {
+                    [self processUpdateIndex:index+1];
+                }];
+                if (task != nil){
+                    [task resume];
+                    return true;
+                }
+            }
+        }
+    }
+    _updateQueueProcessingActive = false;
     return false;
 }
 
-- (BOOL) addSpecimenToUpdatePool:(BLEFSpecimen *)specimen;
+- (BOOL) reStartUpdateProccessing
 {
-    @synchronized(self){
-        if (!specimen || [specimen updatePolling]){
-            return false;
-        }
-        [specimen setUpdatePolling:true];
-    }
-    NSManagedObjectID *specimenID = [specimen objectID];
-    [_pollers addOperationWithBlock:^{
-        __block BOOL fin = false;
-        while (!fin){
-            sleep(1000);
-            dispatch_async(dispatch_get_main_queue(), ^{
-                BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
-                if (specimen != nil){
-                    NSURLSessionDataTask* task = [self createUpdateTaskForSpecimen:specimen completion:^(BOOL updated) {
-                        if (updated){
-                            fin = true;
-                        }
-                    }];
-                    if (task != nil){
-                        [task resume];
-                    } else {
-                        fin = true;
-                    }
-                }
-            });
-        }
-    }];
+    _updateQueueHalted = false;
+    [self processUpdates];
     return true;
 }
 
-- (void) startPollers;
+- (BOOL)stopUpdateProcessing
 {
-    return;
-}
-
-- (void) stopPollers
-{
-    [_pollers cancelAllOperations];
+    _updateQueueHalted = true;
+    return true;
 }
 
 
@@ -259,7 +254,9 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
         if ((classification != nil) && ([classification length] > 2)){
             BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
             if (specimen != nil){
-                #warning TODO: create result and add to specimen
+                BLEFResult *result = [_database addNewResultToSpecimen:specimen];
+                [result setName:classification];
+                [_database saveChanges];
                 return true;
             }
         }
@@ -315,7 +312,7 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 - (NSURLRequest *)createUploadRequestForObservation:(BLEFObservation *)observation
 {
     //NSURL *url = [NSURL URLWithString:@"http://plantrecogniser.no-ip.biz:55580/upload"];
-    NSURL *url = [NSURL URLWithString:@"http://192.168.1.78:5000/upload"];
+    NSURL *url = [NSURL URLWithString:@"http://129.31.238.17:5000/upload"];
     //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
     NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
     [mutableRequest setHTTPMethod:@"POST"];
@@ -325,7 +322,7 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 - (NSURLRequest *)createUpdateRequestForSpecimen:(BLEFSpecimen *)specimen
 {
     //NSString *urlAsString = [@"http://plantrecogniser.no-ip.biz:55580/job/" stringByAppendingString:[specimen groupid]];
-    NSString *urlAsString = [@"http://192.168.1.78:5000/job/" stringByAppendingString:[specimen groupid]];
+    NSString *urlAsString = [NSString stringWithFormat:@"http://129.31.238.17:5000/job/%@/", [specimen groupid]];
     NSURL *url = [NSURL URLWithString:urlAsString];
     return [NSURLRequest requestWithURL:url];
 }

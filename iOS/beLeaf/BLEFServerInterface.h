@@ -28,9 +28,8 @@ extern NSString * const BLEFNetworkRetryNotification;
 
 // Update
 - (BOOL) processUpdates;
-- (BOOL) addSpecimenToUpdatePool:(BLEFSpecimen *)specimen;
-- (void) startPollers;
-- (void) stopPollers;
+- (BOOL) reStartUpdateProccessing;
+- (BOOL) stopUpdateProcessing;
 
 // Server Interface
 - (NSURLSessionDataTask *)createUpdateTaskForSpecimen:(BLEFSpecimen *)specimen completion:(void (^)(BOOL updated))handler;

@@ -197,8 +197,56 @@ extern void __gcov_flush();
     bool returned = [server updateSpecimen:[specimen objectID] usingData:dataFromServer andError:nil];
     
     XCTAssertTrue(returned, @"Test: Method returned true");
-    
 }
 
+- (void)testProcessZeroUpdates
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    BOOL update = [server processUpdates];
+    XCTAssertFalse(update, @"Test processing updates returns false when nothing to update");
+}
+
+- (void)testProcessZeroUploads
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    BOOL uploads = [server processUploads];
+    XCTAssertFalse(uploads, @"Test processing updates returns false if nothing to upload");
+}
+
+- (void)testStartAndStopQueues
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    [server stopUpdateProcessing];
+    [server stopUploadProcessing];
+    [server reStartUpdateProccessing];
+    [server reStartUploadProcessing];
+}
+
+- (void)testProcessUploads
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    BLEFObservation *observation = [self createTestObservation:server];
+    [observation setSegment:@"Branch"];
+    [observation setFilename:imagePath];
+    BOOL uploads = [server processUploads];
+    XCTAssertTrue(uploads, @"Test processing an upload returns true");
+}
+
+- (void)testProcessingUploadOfEmptyObservation
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    [self createTestObservation:server];
+    BOOL uploads = [server processUploads];
+    XCTAssertFalse(uploads, @"Test processing an upload with no attributes returns false");
+}
+
+- (void)testUpdatingSpecimen
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    BLEFObservation *observation = [self createTestObservation:server];
+    [observation setUploaded:true];
+    [[observation specimen] setGroupid:@"ABC123"];
+    [server processUpdates];
+}
 
 @end

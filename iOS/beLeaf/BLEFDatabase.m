@@ -85,7 +85,7 @@
 - (NSArray*)getSpecimenNeedingUpdate
 {
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Specimen"];
-    [request setPredicate:[NSPredicate predicateWithFormat: @"updatePolling != TRUE"]];
+    [request setPredicate:[NSPredicate predicateWithFormat: @"(NONE observations.uploaded == FALSE) AND (groupid != NULL)"]];
     
     [request setSortDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO]]];
 
@@ -93,7 +93,7 @@
     NSError *error = nil;
     NSArray *array = [context executeFetchRequest:request error:&error];
     if (!error){
-        return array;
+        return [array filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"results.@count == 0"]];
     }
     return nil;
 }
