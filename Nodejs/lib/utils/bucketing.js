@@ -109,7 +109,7 @@ Date.prototype.timeNow = function () {
 
 var TAG = TAG || null;
 var PROB = parseFloat(PROB) || 0.0;
-//bucketing(THRES, TAG, PROB);
+bucketing(THRES, TAG, PROB);
 
 
 
