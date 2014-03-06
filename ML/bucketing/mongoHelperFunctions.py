@@ -30,7 +30,7 @@ def bucketing(threshold, component=None, componentProb=0.0):
 
     b = os.system(bucket_cmd)
     if b:
-         print "ERROR: Bucketing Script returned error code: " + b
+         print "ERROR: Bucketing Script returned error code: " + str(b)
          return -2
 
     buckets = get_buckets(threshold, component, componentProb)
@@ -56,7 +56,7 @@ def get_buckets(threshold, component, componentProb):
     if component is None:
         pipe = [{'$match':{'Component_Tag_Prob':{'$gte':componentProb}, 'Exclude':False, 'Bucket':{'$nin':exclude_buckets}}}, {'$group':{'_id':"$Bucket", 'count':{'$sum':1}}}]
     else:
-        pipe = [{'$match':{'Component_Tag':tag, 'Component_Tag_Prob':{'$gte':componentProb}, 'Exclude':False, 'Bucket':{'$nin':exclude_buckets}}}, {'$group':{'_id':"$Bucket", 'count':{'$sum':1}}}]
+        pipe = [{'$match':{'Component_Tag':component, 'Component_Tag_Prob':{'$gte':componentProb}, 'Exclude':False, 'Bucket':{'$nin':exclude_buckets}}}, {'$group':{'_id':"$Bucket", 'count':{'$sum':1}}}]
 
     res = db.plants.aggregate(pipeline=pipe)
     r_res = res['result']
