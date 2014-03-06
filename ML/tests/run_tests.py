@@ -7,6 +7,7 @@ import time
 default_directories = [
 '../noccn/noccn/*',
 '../cuda_convnet/*',
+'../bucketing/*',
 ]
 
 if __name__ == '__main__':
