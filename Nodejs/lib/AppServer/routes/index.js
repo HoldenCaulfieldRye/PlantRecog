@@ -24,7 +24,7 @@ var BSON = mongo.BSONPure;
         if(req.params.job_id){
             console.log('Retrieving job: ' + job_id);
             try{
-                collection.findOne({'_id':new BSON.ObjectID(job_id)}, function(err, item) {
+                collection.findOne({'group_id':new BSON.ObjectID(job_id)}, function(err, item) {
                     if(item === null){
                         res.send('There is no document in the collection matching that JobID!');
                     }
@@ -95,19 +95,42 @@ exports.upload = function(db, configArgs) {
                 return err;
             }
 
+            var segment_document = {};
+            
+            if (fields.group_id === '0'){
+
+                segment_document = {
+                    vm_filepath : filePath,
+                    group_id : new BSON.ObjectID(),
+                    submission_state : "File Submitted from App",
+                    submission_time : Math.round(new Date().getTime() / 1000),
+                    image_metadata : {
+                        date : fields.date,
+                        latitude : fields.latitude,
+                        longitude : fields.longitude
+                    },
+                    image_segment : fields.segment 
+                }
+            }
+            else {
+                
+                segment_document = {
+                    vm_filepath : filePath,
+                    group_id : fields.group_id,
+                    submission_state : "File Submitted from App",
+                    submission_time : Math.round(new Date().getTime() / 1000),
+                    image_metadata : {
+                        date : fields.date,
+                        latitude : fields.latitude,
+                        longitude : fields.longitude
+                    },
+                    image_segment : fields.segment 
+                }
+            }
+
             // Submit to the DB
             collection.insert(
-            {
-                vm_filepath : filePath,
-                submission_state : "File Submitted from App",
-                submission_time : Math.round(new Date().getTime() / 1000),
-                image_metadata : {
-                    date : fields.date,
-                    latitude : fields.latitude,
-                    longitude : fields.longitude
-                },
-                image_segment : fields.segment 
-            },
+            segment_document,
             {safe: true}, 
             function (db_err, docs) {
                 if (db_err) {
@@ -117,7 +140,8 @@ exports.upload = function(db, configArgs) {
                 }
                 else {
                     // If it worked, return JSON object from collection to App//
-                    res.json( { "id" : docs[0]._id });
+                    res.json( { id : docs[0]._id, group_id : docs[0].group_id });
+                    console.log({ id : docs[0]._id, group_id : docs[0].group_id });
                     // Send the image over to the classifier
                     restler.post(graphicServer + "/classify", {
                         multipart: true,
