@@ -182,6 +182,7 @@ describe('Application_server',function(){
 			.field("date", null)
 			.field("latitude", null)
 			.field("longitude", null)
+			.field("group_id", 0)
 			.attach('datafile','./test/fixtures/sample.jpg')
 			.expect(200)
 			.end(function(err,res){
