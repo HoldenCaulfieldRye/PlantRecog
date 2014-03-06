@@ -31,11 +31,11 @@ SIZE = (256,256)
 
 def _process_tag_item(size,channels,name):
     try:
-	im = Image.open(name)
-	im = ImageOps.fit(im, size, Image.ANTIALIAS)
-	im_data = np.array(im)
-	im_data = im_data.T.reshape(channels, -1).reshape(-1)
-	im_data = im_data.astype(np.single)
+        im = Image.open(name)
+        im = ImageOps.fit(im, size, Image.ANTIALIAS)
+        im_data = np.array(im)
+        im_data = im_data.T.reshape(channels, -1).reshape(-1)
+        im_data = im_data.astype(np.single)
         return im_data
     except:
         return None
@@ -72,37 +72,30 @@ class ImageRecogniser(object):
         start_time = time.clock()
         for filenames,next_filenames in get_next(list(chunks(filenames,self.batch_size))):
             if batch_num == 1:
-		rows = Parallel(n_jobs=self.n_jobs)(
-		    delayed(_process_tag_item)(self.size,self.channels,filename)
-		    for filename in filenames)
-	    data = np.vstack([r for r in rows if r is not None]).T
+                rows = Parallel(n_jobs=self.n_jobs)(
+                                delayed(_process_tag_item)(self.size,self.channels,filename)
+                                for filename in filenames)
+            data = np.vstack([r for r in rows if r is not None]).T
             if data.shape[1] > 5:
-#            print 'Over 20'
-		mean = data.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
-#            print mean
-#            print mean.shape
-		data = data - mean
-#           else:
-#               print 'Less than 20'
-#		mean = self.model.train_data_provider.data_mean
-#               print mean
-#               print mean.shape
-#		data = data - mean
+                mean = data.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
+                data = data - mean
+            #else:
+		    #   mean = self.model.train_data_provider.data_mean
+            #   data = data - mean
             self.model.start_predictions(data)
             if next_filenames is not None:
-		rows = Parallel(n_jobs=self.n_jobs)(
-		    delayed(_process_tag_item)(self.size,self.channels,filename)
+                rows = Parallel(n_jobs=self.n_jobs)(
+                    delayed(_process_tag_item)(self.size,self.channels,filename)
 		    for filename in next_filenames)
-	    names = [name for (r,name) in zip(rows,filenames) if r is not None];
+                names = [name for (r,name) in zip(rows,filenames) if r is not None];
             self.model.finish_predictions(names,self.num_results,self.threshold)
             batch_num += 1
-#        print "Tagging complete. Tagged %d images in %.02f seconds" % (len(filenames),time.clock()-start_time)
         
 
 class PlantConvNet(convnet.ConvNet):
     def __init__(self, op, load_dic, dp_params={}):
         convnet.ConvNet.__init__(self,op,load_dic,dp_params)
-	self.softmax_idx = self.get_layer_idx('probs', check_type='softmax')
+        self.softmax_idx = self.get_layer_idx('probs', check_type='softmax')
         self.tag_names = list(self.test_data_provider.batch_meta['label_names'])
         self.b_data = None
         self.b_labels = None
@@ -111,37 +104,37 @@ class PlantConvNet(convnet.ConvNet):
     def import_model(self):
         self.libmodel = __import__("_ConvNet") 
 
-    def start_predictions(self, data):
-	# Run the batch through the model
-	self.b_data = np.require(data, requirements='C')
-	self.b_labels = np.zeros((1, data.shape[1]), dtype=np.single)
-	self.b_preds = np.zeros((data.shape[1], len(self.tag_names)), dtype=np.single)
-	self.libmodel.startFeatureWriter([self.b_data, self.b_labels, self.b_preds], self.softmax_idx)
 
-    def finish_predictions(self, filenames, num_results, threshold):
+    def start_predictions(self, data):
+        # Run the batch through the model
+        self.b_data = np.require(data, requirements='C')
+        self.b_labels = np.zeros((1, data.shape[1]), dtype=np.single)
+        self.b_preds = np.zeros((data.shape[1], len(self.tag_names)), dtype=np.single)
+        self.libmodel.startFeatureWriter([self.b_data, self.b_labels, self.b_preds], self.softmax_idx)
+
+
+    def finish_predictions(self, filenames, threshold):
         # Finish the batch
-	self.finish_batch()
+	    self.finish_batch()
+        for i,(filename,row) in enumerate(zip(filenames,rows)):
+            if self.b_preds[i,row.T[0]]:
+                print filename + '[',
+                for value in row.T:
+                    print "[%.06f]"%(self.b_preds[i,value]),
+                print "]"
+
+
+    def finish_predictions_top_num(self, filenames, num_results, threshold):
+        # Finish the batch
+	    self.finish_batch()
         rows = np.argsort(self.b_preds,axis=1)[:,::-1][:,:num_results] # positions
         for i,(filename,row) in enumerate(zip(filenames,rows)):
             if self.b_preds[i,row.T[0]] >= threshold:
 	        print filename + '{',
 	        for value in row.T:
 	            print "%s:%.03f;"%(self.tag_names[value],self.b_preds[i,value]),
-		#actual_type, actual_name = self.get_xml_data(filename)
-		print "}"# => Actually " + actual_type + " picture of a " + actual_name
-            else:
-                print filename + "{ Unclassified: prob < threshold (%.02f); }"%(threshold)
+            print "}"# => Actually " + actual_type + " picture of a " + actual_name
 
-    def get_xml_data(self,filename):
-        try:
-            xml_file = os.path.splitext(filename)[0]+'.xml'
-            tree = ET.parse(xml_file)
-            root = tree.getroot()
-            actual_type = root.find('Content').text
-            actual_name = root.find('Species').text
-            return (actual_type, actual_name)
-        except:
-            return ('Unknown','Unknown')
 
     def write_predictions(self):
         pass
