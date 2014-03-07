@@ -72,10 +72,19 @@ class Combiner(object):
                 combined_prob = np.vstack((combined_prob,np_array))
         # Print out the top results
         combined_prob = np.sum(combined_prob,axis=0)/np.sum(combined_prob)
-        top_results = np.argsort(combined_prob,axis=0)[::-1][:self.num_results]
+        self.output_results(combined_prob)
+
+
+    # Print out the highest given number of results and corresponding labels  
+    # from an unsorted probability vector.  Also shortening names to pre-comma
+    def output_results(self, probability, short_names = True):
+        top_results = np.argsort(probability,axis=0)[::-1][:self.num_results]
         print '{'
         for result in top_results:
-            print '"%s":%.03f,'%(self.labels_list[result],combined_prob[result])
+            label = self.labels_list[result]
+            if short_names:
+                label = label.split(',')[0]
+            print '"%s":%.03f,'%(label,combined_prob[result])
         print '}'
 
 
