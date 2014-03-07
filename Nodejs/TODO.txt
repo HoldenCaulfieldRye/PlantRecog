@@ -1,10 +1,10 @@
 TODO.txt
 
 Change collections:
-usercollection -> segment_images
+'usercollection' -> 'segment_images'
 *NEW* -> groups
 
-Image Document looks like:
+--- Image Document looks like:
 
 { _id: '5319fe05a06dabf44ec94fe6',
   filename: 'f6c9f58b1936493f08b85147676840d6.jpg',
@@ -18,7 +18,7 @@ Image Document looks like:
   submission_time: 1394212358,
 }
 
-Group Document looks like:
+--- Group Document looks like:
 
 { _id: '5319fe05a06dabf44ec94fe5',
   group_status: 'in progress', /* {uploaded, classified} */
@@ -33,5 +33,10 @@ Group Document looks like:
   fruit_id: '5319fe05a06dabf44ec94fe3',
   whole_id: '5319fe05a06dabf44ec94fe4',
 
-  classification: { Rose:0.143, Ash:0.143, Oak:0.127, Lemon tree:0.127, Bonsai:0.111 }
+  classification: { Rose:0.143, 
+  					Ash:0.143, 
+  					Oak:0.127, 
+  					Lemon tree:0.127, 
+  					Bonsai:0.111 
+  				  }
 }
