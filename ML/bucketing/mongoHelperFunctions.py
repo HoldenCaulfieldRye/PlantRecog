@@ -71,10 +71,11 @@ def get_buckets(threshold, component, componentProb):
 ///////////////////////////////////////////////////////////////
 '''
 def exclude_synset(name):
+    synset = None
     data = db.wordnet.find({'name': name},{'wnid':True, '_id':False})
     for i in data:
         synset = i['wnid']
         print "excluding synset: " + synset
         db.plants.update({'Synset_ID' : synset}, {'$set' : {'Exclude': True}}, multi=True)
-
+    return synset  
 
