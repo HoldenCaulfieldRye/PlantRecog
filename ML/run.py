@@ -1,4 +1,4 @@
-import cPickle
+import cPickle as pickle
 from fnmatch import fnmatch
 import operator
 import os
@@ -22,12 +22,26 @@ import convnet
 import options
 from noccn.noccn.script import *
 
-# This is used to parse the xml files
+# This is used to parse xml files
 import xml.etree.ElementTree as ET # can be speeded up using lxml possibly
 import xml.dom.minidom as minidom
 
+# Exit errors
+NO_ERROR = 0
+COULD_NOT_OPEN_IMAGE_FILE = 1
+COULD_NOT_START_CONVNET = 2
+COULD_NOT_SAVE_OUTPUT_FILE = 3
+
+
+# Error variables
+all_images_successfully_processed = True
+failed_images = []
+
+
+# Constants
 N_JOBS = -1
 SIZE = (256,256) 
+
 
 def _process_tag_item(size,channels,name):
     try:
@@ -38,6 +52,8 @@ def _process_tag_item(size,channels,name):
         im_data = im_data.astype(np.single)
         return im_data
     except:
+        all_images_successfully_processed = False
+        failed_images.append(name)
         return None
 
 
@@ -55,8 +71,8 @@ def get_next(some_iterable):
 
 
 class ImageRecogniser(object):
-    def __init__(self, batch_size=128,num_results=5, channels=3, threshold=0,
-                 size=SIZE, model=None, n_jobs=N_JOBS, **kwargs):
+    def __init__(self,batch_size=128,num_results=5,channels=3,threshold=0,
+                 size=SIZE,model=None,n_jobs=N_JOBS,**kwargs):
         self.batch_size = batch_size
         self.num_results = num_results
         self.channels = channels
@@ -75,6 +91,10 @@ class ImageRecogniser(object):
                 rows = Parallel(n_jobs=self.n_jobs)(
                                 delayed(_process_tag_item)(self.size,self.channels,filename)
                                 for filename in filenames)
+            if not all_images_successfully_processed:    
+                for each_filename in failed_images:
+                    print each_filename
+                sys.exit(COULD_NOT_OPEN_IMAGE_FILE)
             data = np.vstack([r for r in rows if r is not None]).T
             if data.shape[1] > 5:
                 mean = data.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
@@ -88,7 +108,10 @@ class ImageRecogniser(object):
                     delayed(_process_tag_item)(self.size,self.channels,filename)
 		    for filename in next_filenames)
                 names = [name for (r,name) in zip(rows,filenames) if r is not None];
-            self.model.finish_predictions(names,self.num_results,self.threshold)
+            try:    
+                self.model.finish_predictions(names,self.num_results,self.threshold)
+            except:
+                sys.exit(COULD_NOT_SAVE_OUTPUT_FILE)
             batch_num += 1
         
 
@@ -100,6 +123,7 @@ class PlantConvNet(convnet.ConvNet):
         self.b_data = None
         self.b_labels = None
         self.b_preds = None
+
 
     def import_model(self):
         self.libmodel = __import__("_ConvNet") 
@@ -116,12 +140,10 @@ class PlantConvNet(convnet.ConvNet):
     def finish_predictions(self, filenames, threshold):
         # Finish the batch
 	    self.finish_batch()
-        for i,(filename,row) in enumerate(zip(filenames,rows)):
-            if self.b_preds[i,row.T[0]]:
-                print filename + '[',
-                for value in row.T:
-                    print "[%.06f]"%(self.b_preds[i,value]),
-                print "]"
+        for filename,row in zip(filenames,rows):
+            file_storage = open(os.path.splitext(filename)[0] + '.pickle','wb')
+            pickle.dump(np.array(row),file_storage)
+            file_storage.close()
 
 
     def finish_predictions_top_num(self, filenames, num_results, threshold):
@@ -139,8 +161,10 @@ class PlantConvNet(convnet.ConvNet):
     def write_predictions(self):
         pass
 
+
     def report(self):
         pass
+
 
     @classmethod
     def get_options_parser(cls):
@@ -156,12 +180,16 @@ def console():
     cfg_options_file = cfg.get(sys.argv[1],'Type classification not found')
     cfg_data_options = get_options(cfg_options_file, 'dataset')
     creator = resolve(cfg.get('creator', 'run.ImageRecogniser'))
+    try:
+        conv_model = make_model(PlantConvNet,'run',cfg_options_file)
+    except:
+        sys.exit(COULD_NOT_START_CONVNET)
     create = creator(
         batch_size=int(cfg.get('batch-size', 128)),
         num_results=int(cfg.get('number-of-results',5)),
         channels=int(cfg_data_options.get('channels', 3)),
         size=eval(cfg_data_options.get('size', '(256, 256)')),
-        model=make_model(PlantConvNet,'run',cfg_options_file),
+        model=conv_model
         threshold=float(cfg.get('threshold',0.0)),
         )
     create(sys.argv[2:])
