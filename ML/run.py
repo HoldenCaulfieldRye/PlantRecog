@@ -31,6 +31,7 @@ NO_ERROR = 0
 COULD_NOT_OPEN_IMAGE_FILE = 1
 COULD_NOT_START_CONVNET = 2
 COULD_NOT_SAVE_OUTPUT_FILE = 3
+INVALID_COMMAND_ARGS = 4
 
 
 # Error variables
@@ -58,8 +59,6 @@ def _process_tag_item(size,channels,name):
 
 
 def chunks(l, n):
-    """ Yield successive n-sized chunks from l.
-    """
     for i in xrange(0, len(l), n):
             yield l[i:i+n]
 
@@ -71,10 +70,9 @@ def get_next(some_iterable):
 
 
 class ImageRecogniser(object):
-    def __init__(self,batch_size=128,num_results=5,channels=3,threshold=0,
+    def __init__(self,batch_size=128,channels=3,threshold=0,
                  size=SIZE,model=None,n_jobs=N_JOBS,**kwargs):
         self.batch_size = batch_size
-        self.num_results = num_results
         self.channels = channels
         self.size = size
         self.n_jobs = n_jobs
@@ -89,8 +87,8 @@ class ImageRecogniser(object):
         for filenames,next_filenames in get_next(list(chunks(filenames,self.batch_size))):
             if batch_num == 1:
                 rows = Parallel(n_jobs=self.n_jobs)(
-                                delayed(_process_tag_item)(self.size,self.channels,filename)
-                                for filename in filenames)
+                       delayed(_process_tag_item)(self.size,self.channels,filename)
+                       for filename in filenames)
             if not all_images_successfully_processed:    
                 for each_filename in failed_images:
                     print each_filename
@@ -176,6 +174,16 @@ class PlantConvNet(convnet.ConvNet):
 
 
 def console():
+    if len(sys.argv) < 3:
+        print 'Must give a component type and valid image file as arguments'
+        sys.exit(INVALID_COMMAND_ARGS)
+    valid_args = ['entire','stem','branch','leaf','fruit','flower']
+    if sys.argv[1] not in valid_args:
+        print 'First argument must be:',
+        for arg in valid_args:
+            print '[' + arg + '] ',
+        print ''
+        sys.exit(INVALID_COMMAND_ARGS)
     cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
     cfg_options_file = cfg.get(sys.argv[1],'Type classification not found')
     cfg_data_options = get_options(cfg_options_file, 'dataset')
@@ -186,7 +194,6 @@ def console():
         sys.exit(COULD_NOT_START_CONVNET)
     create = creator(
         batch_size=int(cfg.get('batch-size', 128)),
-        num_results=int(cfg.get('number-of-results',5)),
         channels=int(cfg_data_options.get('channels', 3)),
         size=eval(cfg_data_options.get('size', '(256, 256)')),
         model=conv_model
