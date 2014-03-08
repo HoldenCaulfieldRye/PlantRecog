@@ -2,7 +2,7 @@
 S'labels'
 p2
 (dp3
-S'Flower'
+S'flower'
 p4
 (lp5
 cnumpy.core.multiarray
@@ -87,7 +87,7 @@ I1
 I0
 tbS'ROSACEAE'
 tRp19
-asS'Leaf'
+asS'leaf'
 p20
 (lp21
 g6

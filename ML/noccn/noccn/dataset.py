@@ -19,6 +19,8 @@ from ccn import mongoHelperFunctions
 # This is used to parse the xml files
 import xml.etree.ElementTree as ET # can be speeded up using lxml possibly
 
+N_JOBS = -1
+
 
 # Wrapper function which runs the process_item from
 # a given instance of the BatchCreator class on an item.
@@ -43,7 +45,7 @@ def chunks(l, n):
 # for combining disparate classes at a later stage.
 class BatchCreator(object):
     def __init__(self, batch_size=1000, channels=3, size=(256,256), output_path=None, 
-                  n_jobs=-1, super_batch_meta=None, component=None, **kwargs):
+                  n_jobs=N_JOBS, super_batch_meta=None, component=None, **kwargs):
         if output_path is None:
             print 'A valid output-path is required in the options file'
             sys.exit(1)
@@ -126,11 +128,9 @@ class BatchCreator(object):
 
 
     # Creates the metadata file, with everything except a batch mean
-    def setup_batch_meta(self, labels_sorted, ids_and_info):
+    def setup_batch_meta(self, labels_sorted):
         self.batches_meta = {}
         self.batches_meta['label_names'] = labels_sorted
-        self.batches_meta['metadata'] = dict((a_id, {'name': name}) 
-                                              for (a_id, name, label) in ids_and_info)
 
 
     # Writes the current meta file to disk, taking a current estimate
@@ -147,28 +147,24 @@ class BatchCreator(object):
     # while keeping track of the meta-data and super-meta data file
     # as specified in the configuration file.
     def __call__(self, all_names_and_labels, total_means = 200):
-        # Sort all the labels, and assign an ID
-        all_ids_and_info = []
-        for id, (name, label) in enumerate(all_names_and_labels):
-            all_ids_and_info.append((id, name, label))
-        labels_sorted = sorted(set(p[1] for p in all_names_and_labels))
         # Setup super_meta data, and batch meta files including mean taking
+        labels_sorted = sorted(set(p[1] for p in all_names_and_labels))
         self.update_super_meta(labels_sorted)
-        self.setup_batch_meta(labels_sorted,all_ids_and_info)
-        self.setup_batch_means(all_ids_and_info[-1][0])
+        self.setup_batch_meta(labels_sorted)
+        self.setup_batch_means(len(all_names_and_labels))
         # Setup loop variables
         batch_num = 1
-        for ids_and_info in list(chunks(all_ids_and_info,self.batch_size)):
+        for names_and_labels in list(chunks(all_names_and_labels,self.batch_size)):
             print 'Generating data_batch_%i'%(batch_num)
             rows = Parallel(n_jobs=self.n_jobs)(
                             delayed(_process_item)(self, name)
-                            for a_id, name, label in ids_and_info)
+                            for name, label in names_and_labels)
             data = np.vstack([r for r in rows if r is not None])
             if data.shape[0] < self.batch_size:
                 print 'Batch size too small, continuing to next batch'
                 continue
-            labels = np.array([labels_sorted.index(label) for ((a_id, name, label), row) 
-                          in zip(ids_and_info, rows) if row is not None]).reshape((1,-1))
+            labels = np.array([labels_sorted.index(label) for ((name, label), row) 
+                          in zip(names_and_labels, rows) if row is not None]).reshape((1,-1))
             batch = {'data': data.T, 'labels':labels, 'metadata': []}
             self.take_batch_mean(batch_num,batch['data'])
             with open(os.path.join(self.output_path,'data_batch_%s'%batch_num),'wb') as f:
@@ -285,7 +281,7 @@ def console():
     random_seed(int(cfg.get('seed', '42')))
     if int(cfg.get('xml_query',1)) != 0:
         collector = _collect_filenames_and_labels
-        filter_component=cfg.get('limit_to_tag',None)
+        filter_component=str(cfg.get('limit_to_tag',None)).lower()
         filenames_and_labels = collector(cfg)
     else:
         images, labels = mongoHelperFunctions.bucketing(
@@ -294,7 +290,7 @@ def console():
                              componentProb=cfg.get('component_prob_thres',0.0),
                              )
         output_path=cfg.get('output-path', '/tmp/noccn-dataset')
-        filter_component=cfg.get('limit_by_component',None)
+        filter_component=str(cfg.get('limit_by_component',None)).lower()
         write_stats_to_file(output_path,labels)
         filenames_and_labels = zip(images,labels)
         random.shuffle(filenames_and_labels)

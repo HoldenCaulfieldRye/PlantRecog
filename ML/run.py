@@ -69,14 +69,13 @@ def get_next(some_iterable):
 # Class which runs through for a given batch of a single type
 # the network defined in the run.cfg file.
 class ImageRecogniser(object):
-    def __init__(self,batch_size=128,channels=3,threshold=0,
-                 size=(256,256),model=None,n_jobs=-1,**kwargs):
+    def __init__(self,batch_size=128,channels=3,size=(256,256),
+                  model=None,n_jobs=-1,**kwargs):
         self.batch_size = batch_size
         self.channels = channels
         self.size = size
         self.n_jobs = n_jobs
         self.model = model
-        self.threshold = threshold
         vars(self).update(**kwargs) 
 
     # Main processing function. It works from the list of filenames
@@ -91,27 +90,21 @@ class ImageRecogniser(object):
                 rows = Parallel(n_jobs=self.n_jobs)(
                        delayed(_process_tag_item)(self.size,self.channels,filename)
                        for filename in filenames)
-            if not all_images_successfully_processed:    
-                for each_filename in failed_images:
-                    print each_filename
-                sys.exit(COULD_NOT_OPEN_IMAGE_FILE)
             data = np.vstack([r for r in rows if r is not None]).T
+            if data.shape[0] < len(filenames):    
+                sys.exit(COULD_NOT_OPEN_IMAGE_FILE)
             if data.shape[1] > 5:
                 mean = data.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
                 data = data - mean
-            #else:
-		    #   mean = self.model.train_data_provider.data_mean
-            #   data = data - mean
             if self.model is not None:
                 self.model.start_predictions(data)
             if next_filenames is not None:
                 rows = Parallel(n_jobs=self.n_jobs)(
                     delayed(_process_tag_item)(self.size,self.channels,filename)
-		    for filename in next_filenames)
-                names = [name for (r,name) in zip(rows,filenames) if r is not None];
+                    for filename in next_filenames)
             try:    
                 if self.model is not None:
-                    self.model.finish_predictions(names,self.num_results,self.threshold)
+                    self.model.finish_predictions(filenames)
                 else:
                     pass
             except:
@@ -148,10 +141,10 @@ class PlantConvNet(convnet.ConvNet):
         self.libmodel.startFeatureWriter([self.b_data, self.b_labels, self.b_preds], self.softmax_idx)
 
 
-    def finish_predictions(self, filenames, threshold):
+    def finish_predictions(self, filenames):
         # Finish the batch
         self.finish_batch()
-        for filename,row in zip(filenames,rows):
+        for filename,row in zip(filenames,self.b_preds):
             file_storage = open(os.path.splitext(filename)[0] + '.pickle','wb')
             pickle.dump(np.array(row),file_storage)
             file_storage.close()
@@ -168,11 +161,14 @@ class PlantConvNet(convnet.ConvNet):
 
 # The console interpreter.  It checks whether the arguments
 # are valid, and also parses the configuration files.
-def console(config_file = '/run.cfg'):
+def console(config_file = None):
     if len(sys.argv) < 3:
         print 'Must give a component type and valid image file as arguments'
         sys.exit(INVALID_COMMAND_ARGS)
-    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+config_file, 'run')
+    if config_file is None:    
+        cfg = get_options(os.path.dirname(os.path.abspath(__file__))+config_file, 'run')
+    else:
+        cfg = get_options(config_file, 'run')
     valid_args = cfg.get('valid_args','entire,stem,branch,leaf,fruit,flower').split(',')
     if sys.argv[1] not in valid_args:
         print 'First argument must be one of: [',
