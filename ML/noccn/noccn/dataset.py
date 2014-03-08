@@ -1,4 +1,4 @@
-import cPickle
+import cPickle as pickle
 from fnmatch import fnmatch
 import operator
 import os
@@ -7,168 +7,206 @@ import sys
 import traceback
 import math
 import collections
-
 import numpy as np
 from PIL import Image
 from PIL import ImageOps
 from joblib import Parallel
 from joblib import delayed
-
 from script import get_options
 from script import random_seed
 from script import resolve
 from ccn import mongoHelperFunctions
-
 # This is used to parse the xml files
 import xml.etree.ElementTree as ET # can be speeded up using lxml possibly
 
 
-N_JOBS = -1
-SIZE = (64, 64)
-
-
+# Wrapper function which runs the process_item from
+# a given instance of the BatchCreator class on an item.
+# This is used for parallelizing the data.
 def _process_item(creator, name):
     return creator.process_item(name)
 
+
+# Yields chunks of a specified size n of a list until it
+# is empty.  Chunks are not guaranteed to be of size n
+# if the list is not a multiple of the chunk size
 def chunks(l, n):
-    """ Yield successive n-sized chunks from l.
-    """
     for i in xrange(0, len(l), n):
         return_list = l[i:i+n]
         if len(return_list) == n:
             yield return_list
 
+
+# The batch creator takes a list of files, and labels
+# to produces numpy arrays based on their image data. 
+# It also takes care of super set meta data, to allow
+# for combining disparate classes at a later stage.
 class BatchCreator(object):
-    def __init__(self, batch_size=1000, channels=3, size=SIZE,
-                 output_path='/tmp', n_jobs=N_JOBS, more_meta=None, **kwargs):
+    def __init__(self, batch_size=1000, channels=3, size=(256,256), output_path=None, 
+                  n_jobs=-1, super_batch_meta=None, component=None, **kwargs):
+        if output_path is None:
+            print 'A valid output-path is required in the options file'
+            sys.exit(1)
+        self.setup_output_path(output_path)
+        self.setup_super_meta(super_batch_meta)
         self.batch_size = batch_size
         self.channels = channels
         self.size = size
-        self.output_path = output_path
         self.n_jobs = n_jobs
-        self.backup_image = None
+        self.component = component
+        vars(self).update(**kwargs)
 
+
+    # Creates the output folder if it does not 
+    # already exist, sets output path state
+    def setup_output_path(self, output_path):    
         if not os.path.exists(output_path):
             os.mkdir(output_path)
+        self.output_path = output_path
 
-        self.more_meta = more_meta or {}
-        vars(self).update(**kwargs)  # O_o
 
-    def counter(count):
-        print '{0}                                   \r'.format(count),
+    # Creates super meta file if it does not exist
+    def setup_super_meta(self, super_batch_meta):    
+        self.super_meta_filename = super_batch_meta
+        if os.path.isfile(super_batch_meta):
+            super_meta_file = open(self.super_meta_filename,'rb')
+            self.super_meta = pickle.load(super_meta_file)
+            super_meta_file.close()
+        else:
+            self.super_meta = { 'insert_list':{}, 'labels':{'super_labels':[]} }
+    
 
-    def __call__(self, all_names_and_labels, shuffle=False):
+    # Updates the super meta file with the label and insertion
+    # information required for the combine step.  The insertion
+    # algorithm creates a list of indices which need to have blanks
+    # inserted, in order for each sub label probability array to be 
+    # combined into a single super array.
+    def update_super_meta(self, sorted_labels):
+        self.super_meta['labels']['super_labels' ] += sorted_labels
+        self.super_meta['labels']['super_labels' ].sort()
+        self.super_meta['labels'][self.component] = sorted_labels
+        for key in self.super_meta['labels']:
+            if key is not 'super_labels':
+                index = 0
+                insert_list = []
+                for label in self.super_meta['labels']['super_labels' ]:
+                    if label in self.super_meta['labels'][key]:
+                        index += 1
+                        continue
+                    else:
+                        insert_list.append(index)
+                self.super_meta['insert_list'][key] = insert_list        
+        super_meta_file = open(self.super_meta_filename,'wb')
+        self.super_meta = pickle.dump(self.super_meta,super_meta_file)
+        super_meta_file.close()
+                
+
+    # Takes a certain number of sample means from the batch
+    def setup_batch_means(self, num_images, total_means = 200):    
+        self.batches_per_mean = int((all_ids_and_info[-1][0]/total_means)/self.batch_size)
+        print 'Taking mean every %i batches'%(batches_per_mean)
+        self.batch_means = None
+
+
+    # Updates the mean batch and then stores the updated
+    # information in the meta file
+    def take_batch_mean(self, batch_num,  batch_data):
+        if self.batches_per_mean <= 1 or batch_num % self.batches_per_mean == 0:
+            print 'Taking mean of batch %i'%(batch_num)
+            if self.batch_means is None:
+                self.batch_means = batch_data.mean(axis=1).reshape(-1,1)
+            else:    
+                self.batch_means = np.hstack((batch_means,
+                                            batch_data.mean(axis=1).reshape(-1,1)))
+            # Save the new mean    
+            self.save_batch_meta()
+
+
+    # Creates the metadata file, with everything except a batch mean
+    def setup_batch_meta(self, sorted_labels, ids_and_info):
+        self.batches_meta = {}
+        self.batches_meta['label_names'] = labels_sorted
+        self.batches_meta['metadata'] = dict((a_id, {'name': name}) 
+                                              for (a_id, name, label) in ids_and_info)
+
+
+    # Writes the current meta file to disk, taking a current estimate
+    # of the mean from the mean sampling system
+    def save_batch_meta(self):
+        self.batches_meta['data_mean'] = self.batch_means.mean(axis=1).reshape(-1,1)
+        with open(os.path.join(self.output_path, 'batches.meta'), 'wb') as f:
+            pickle.dump(self.batches_meta, f, -1)
+            print 'Batch file backed_up'
+            f.close()
+
+
+    # The main method, goes through all the files, and batches it
+    # while keeping track of the meta-data and super-meta data file
+    # as specified in the configuration file.
+    def __call__(self, all_names_and_labels, total_means = 200):
+        # Sort all the labels, and assign an ID
         all_ids_and_info = []
         for id, (name, label) in enumerate(all_names_and_labels):
             all_ids_and_info.append((id, name, label))
         labels_sorted = sorted(set(p[1] for p in all_names_and_labels))
-
-        # Making backup
-        batches_meta = {}
-        batches_meta['label_names'] = labels_sorted
-        batches_meta['metadata'] = dict( (a_id, {'name': name}) for (a_id, name, label) in all_ids_and_info)
-
-        # Starting loop
+        # Setup super_meta data, and batch meta files including mean taking
+        self.update_super_meta(labels_sorted)
+        self.batches_meta(labels_sorted,all_ids_and_info)
+        self.setup_batch_means(all_ids_and_info[-1][0])
+        # Setup loop variables
         batch_num = 1
-        number_of_means_to_take = 500
-        batches_per_mean_sample = (all_ids_and_info[-1][0]/500)/self.batch_size
-        print 'Taking mean every %i batches'%(int(batches_per_mean_sample))
-        number_of_means_taken = 0
-        batch_means = np.zeros(((self.size[0]**2)*self.channels,1))
         for ids_and_info in list(chunks(all_ids_and_info,self.batch_size)):
-            print "Generating data_batch_" + `batch_num`
+            print 'Generating data_batch_%i'%(batch_num)
             rows = Parallel(n_jobs=self.n_jobs)(
                             delayed(_process_item)(self, name)
                             for a_id, name, label in ids_and_info)
-            if self.backup_image is None:
-                print 'Saving backup image'
-                self.backup_image = np.array(rows[0])
             data = np.vstack([r for r in rows if r is not None])
-            data = self.preprocess_data(data)
-            batch = {'data': None, 'labels': [], 'metadata': []}
-            batch['data'] = data.T
-            batch['labels'] = np.array([labels_sorted.index(label) for ((a_id, name, label), row) 
-                                    in zip(ids_and_info, rows) if row is not None]).reshape((1,self.batch_size))
-            if batch_num > (number_of_means_taken*batches_per_mean_sample):
-                print 'Taking mean of batch'
-                batch_means = np.hstack((batch_means,batch['data'].mean(axis=1).reshape(-1,1)))
-                number_of_means_taken += 1
-                # Storing backup
-                if number_of_means_taken == 50:
-                    batches_meta['data_mean'] = batch_means.mean(axis=1).reshape(-1,1)
-                    batches_meta.update(self.more_meta)
-                    with open(os.path.join(self.output_path, 'batches_bckup.meta'), 'wb') as f:
-                        cPickle.dump(batches_meta, f, -1)
-                        print 'Batch file backed_up'
-                        f.close()
-            path = os.path.join(self.output_path, 'data_batch_%s' % batch_num)
-            with open(path, 'wb') as f:
-                cPickle.dump(batch, f, -1)
+            if data.shape[0] < self.batch_size:
+                print 'Batch size too small, continuing to next batch'
+                continue
+            labels = np.array([labels_sorted.index(label) for ((a_id, name, label), row) 
+                          in zip(ids_and_info, rows) if row is not None]).reshape((1,-1))
+            batch = {'data': data.T, 'labels':labels 'metadata': []}
+            self.take_batch_mean(batch_num,batch['data'])
+            with open(os.path.join(self.output_path,'data_batch_%s'%batch_num),'wb') as f:
+                pickle.dump(batch, f, -1)
                 batch_num += 1
                 f.close()
+        print 'Batch processing complete'
 
-        batches_meta = {}
-        batches_meta['label_names'] = labels_sorted
-        batches_meta['metadata'] = dict(
-            (a_id, {'name': name}) for (a_id, name, label) in all_ids_and_info)
-        batch_means = np.delete(batch_means,(0),axis=1)
-        batches_meta['data_mean'] = batch_means.mean(axis=1).reshape(-1,1)
-        batches_meta.update(self.more_meta)
-        with open(os.path.join(self.output_path, 'batches.meta'), 'wb') as f:
-            cPickle.dump(batches_meta, f, -1)
-            print 'Batch processing complete'
-            f.close()
 
+    # Loads an image, and converts it to RGB format
     def load(self, name):
         return Image.open(name).convert("RGB")
 
+
+    # Preserves aspect ratio, scales and crops an image to
+    # size, converts it to a numpy array with 1D.  In row
+    # major order, with [R G B] in that order.
     def preprocess(self, im):
-        """Takes an instance of what self.load returned and returns an
-        array.
-        """
         im = ImageOps.fit(im, self.size, Image.ANTIALIAS)
         im_data = np.array(im)
         im_data = im_data.T.reshape(self.channels, -1).reshape(-1)
         im_data = im_data.astype(np.single)
         return im_data
 
+
+    # Try to process each image.  If it fails return None.
     def process_item(self, name):
         try:
             data = self.load(name)
             data = self.preprocess(data)
             return data
         except:
-            print "Error processing %s using backup filler" % name
-            return np.array(self.backup_image)
+            print "Error processing batch, could not parse %s" % (name)
+            return None
 
-    def preprocess_data(self, data):
-        return data
 
-    def transform_image_into_many_of_size(im, size):
-        ims = []
-        # Get current and desired ratio for the images
-        im_ratio = im.size[0] / float(im.size[1])
-        ratio = size[0] / float(size[1])
-        # The image is scaled/cropped vertically or horizontally depending on the ratio
-        if ratio > im_ratio:
-            im = im.resize((size[0], size[0] * im.size[1] / im.size[0]), Image.ANTIALIAS)
-            sub_crops = math.ceil(im.size[1]/im.size[0])
-            # And divide it into its subgroups
-            for base in xrange(0,im.size[1]-size[1]+1,int((im.size[1]-size[1]+1)/sub_crops)):
-                box = (0,base,size[0],base+size[1])
-                ims.append(im.crop(box))
-        elif ratio < im_ratio:
-            im = im.resize((size[1] * im.size[0] / im.size[1], size[1]), Image.ANTIALIAS)
-            sub_crops = math.ceil(im.size[0]/im.size[1])
-            # And divide it into its subgroups
-            for base in xrange(0,im.size[0]-size[0]+1,int((im.size[0]-size[0]+1)/sub_crops)):
-                box = (base,0,base+size[0],size[1])
-                ims.append(im.crop(box))
-        else:
-            im = im.resize((size[0], size[1]), Image.ANTIALIAS)
-            ims.append(im)
-        return ims 
-
+################################################################################
+# XML Parsing Specific Functions
+################################################################################
+# Searches through a given directory for files matching the pattern,
+# and returns those files
 def find(root, pattern):
     for path, folders, files in os.walk(root, followlinks=True):
         for fname in files:
@@ -176,6 +214,8 @@ def find(root, pattern):
                 yield os.path.join(path, fname)
 
 
+# Parses a given .xml file, searching for the fields given by the list
+# returns a dictionary of those fields, and their values in the file
 def get_info(fname,label_data_fields,metadata_file_ext):
     fname = os.path.splitext(fname)[0] + metadata_file_ext
     tree = ET.parse(fname)
@@ -183,13 +223,12 @@ def get_info(fname,label_data_fields,metadata_file_ext):
     return_dict = {}
     for label_data_field in label_data_fields:
         return_dict[label_data_field] = root.find(label_data_field).text
-    # note, much more information exists here and it should be be used, 
-    # e.g.multiple shots of the same leaf, type of shot, content of shot
-    # as well as the location and the date of the shot
-    # this info is accessedd via root.find('Content').text for example
     return return_dict
 
 
+# Searches through a given directory for all of the .jpg and .xml
+# files within it.  Parsing the contents according to the options.cfg
+# The options.cfg is located in /models/XYZ/options.cfg
 def _collect_filenames_and_labels(cfg):
     path = cfg['input-path']
     pattern = cfg.get('pattern', '*.jpg')
@@ -212,7 +251,9 @@ def _collect_filenames_and_labels(cfg):
         for fname in find(path, pattern):
             info_dict = get_info(fname,[limit_by_tag,label_data_field],metadata_file_ext)
             # This is to check whether it has an exclude set
-            if (limit_to_tag!='None' and info_dict[limit_by_tag]==limit_to_tag) or (exclude!='None' and info_dict[limit_by_tag]!=exclude) or (limit_to_tag == 'None' and exclude == 'None'):
+            if (limit_to_tag!='None' and info_dict[limit_by_tag]==limit_to_tag) or 
+                   (exclude!='None' and info_dict[limit_by_tag]!=exclude) or 
+                   (limit_to_tag == 'None' and exclude == 'None'):
                 label = info_dict[label_data_field]
                 filenames_and_labels.append((fname, label))
                 counter += 1
@@ -224,35 +265,47 @@ def _collect_filenames_and_labels(cfg):
     return np.array(filenames_and_labels)
 
 
+################################################################################
+# Console interpreter
+################################################################################
+def write_stats_to_file(path,labels):
+    counter = collections.Counter(labels)
+    stats_file = open(os.path.join(path, 'batch_stats.txt'), 'wb')
+    stats_file.write('Number of label classes: %i \n'%(len(set(labels))))
+    stats_file.write('Number of images: %i\n'%(len(labels)))
+    stats_file.write(str(counter))
+    stats_file.close()
+
+
 def console():
     cfg = get_options(sys.argv[1], 'dataset')
+    random_seed(int(cfg.get('seed', '42')))
     if int(cfg.get('xml_query',1)) is not 0:
-        random_seed(int(cfg.get('seed', '42')))
-        collector = resolve(
-            cfg.get('collector', 'noccn.dataset._collect_filenames_and_labels'))
+        collector = resolve(cfg.get('collector', 'noccn.dataset._collect_filenames_and_labels'))
         filenames_and_labels = collector(cfg)
     else:
         images, labels = mongoHelperFunctions.bucketing(
-                        threshold=int(cfg.get('class_image_thres',1000)),
-                        component=cfg.get('limit_by_component',None),
-                        componentProb=cfg.get('component_prob_thres',0.0),
-                        )
+                             threshold=int(cfg.get('class_image_thres',1000)),
+                             component=cfg.get('limit_by_component',None),
+                             componentProb=cfg.get('component_prob_thres',0.0),
+                             )
         output_path=cfg.get('output-path', '/tmp/noccn-dataset')
-        c = collections.Counter(labels)
-        stats_file = open(os.path.join(output_path, 'batch_stats.txt'), 'wb')
-        stats_file.write(str(c))
-        stats_file.write('\n')
-        stats_file.write('Number of label classes: %i \n'%(len(set(labels))))
-        stats_file.write('Number of images: %i \n'%(len(images)))
-        stats_file.write('Number of labels: %i'%(len(labels)))
-        stats_file.close()
+        write_stats_to_file(output_path,labels)
         filenames_and_labels = zip(images,labels)
         random.shuffle(filenames_and_labels)
     creator = resolve(cfg.get('creator', 'noccn.dataset.BatchCreator'))
     create = creator(
-        batch_size=int(cfg.get('batch-size', 1000)),
-        channels=int(cfg.get('channels', 3)),
-        size=eval(cfg.get('size', '(64, 64)')),
-        output_path=cfg.get('output-path', '/tmp/noccn-dataset'),
-        )
+                 batch_size=int(cfg.get('batch-size', 1000)),
+                 channels=int(cfg.get('channels', 3)),
+                 size=eval(cfg.get('size', '(256, 256)')),
+                 output_path=cfg.get('output-path', None),
+                 super_batch_meta=cfg.get('super-meta-path', None),
+                 component=cfg.get('limit_by_component',None),
+                 )
     create(filenames_and_labels)
+
+
+# Boilerplate for running the appropriate function.
+if __name__ == "__main__":
+    console()
+

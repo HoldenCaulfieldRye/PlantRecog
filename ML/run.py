@@ -10,23 +10,23 @@ from multiprocessing import Process
 from itertools import tee, izip_longest
 import sys
 import time
-
 import numpy as np
 from PIL import Image
 from PIL import ImageOps
 from joblib import Parallel
 from joblib import delayed
-
+# This import path ensures the appropriate modules are available
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), "cuda_convnet"))
 import convnet
 import options
 from noccn.noccn.script import *
-
 # This is used to parse xml files
 import xml.etree.ElementTree as ET # can be speeded up using lxml possibly
 import xml.dom.minidom as minidom
 
-# Exit errors
+
+# Exit errors to be returned via sys.exit when the
+# program does not successfully complete all jobs
 NO_ERROR = 0
 COULD_NOT_OPEN_IMAGE_FILE = 1
 COULD_NOT_START_CONVNET = 2
@@ -34,16 +34,9 @@ COULD_NOT_SAVE_OUTPUT_FILE = 3
 INVALID_COMMAND_ARGS = 4
 
 
-# Error variables
-all_images_successfully_processed = True
-failed_images = []
-
-
-# Constants
-N_JOBS = -1
-SIZE = (256,256) 
-
-
+# Accepts an image filename, and number of channels,
+# processes the image into a 1D numpy array, of the
+# form [R G B] with each colour collapsed into row major order
 def _process_tag_item(size,channels,name):
     try:
         im = Image.open(name)
@@ -53,25 +46,30 @@ def _process_tag_item(size,channels,name):
         im_data = im_data.astype(np.single)
         return im_data
     except:
-        all_images_successfully_processed = False
-        failed_images.append(name)
-        return None
+        sys.exit(COULD_NOT_OPEN_IMAGE_FILE)
 
 
+# Yields chunks of a specified size n of a list until it
+# is empty.  Chunks are not guaranteed to be of size n
+# if the list is not a multiple of the chunk size
 def chunks(l, n):
     for i in xrange(0, len(l), n):
             yield l[i:i+n]
 
 
+# Returns the next item in a list, at the same time as
+# the first item.  If there is no next, it returns None
 def get_next(some_iterable):
     it1, it2 = tee(iter(some_iterable))
     next(it2)
     return izip_longest(it1, it2)
 
 
+# Class which runs through for a given batch of a single type
+# the network defined in the run.cfg file.
 class ImageRecogniser(object):
     def __init__(self,batch_size=128,channels=3,threshold=0,
-                 size=SIZE,model=None,n_jobs=N_JOBS,**kwargs):
+                 size=(256,256),model=None,n_jobs=-1,**kwargs):
         self.batch_size = batch_size
         self.channels = channels
         self.size = size
@@ -80,6 +78,9 @@ class ImageRecogniser(object):
         self.threshold = threshold
         vars(self).update(**kwargs) 
 
+    # Main processing function. It works from the list of filenames
+    # passed in, in 128 chunks, processing into numpy arrays and 
+    # classifying with the classifier
     def __call__(self, filenames):
         batch_num = 1
         batch_means = np.zeros(((self.size[0]**2)*self.channels,1))
@@ -113,6 +114,13 @@ class ImageRecogniser(object):
             batch_num += 1
         
 
+# The wrapper class for the convnet which has already been
+# trained.  Which convnet gets loaded is determined by the
+# run.cfg file.  It will finish a batch by pickle dumping
+# each of the image files results to a *.pickle equivilent
+# to the *.jpg that was given. The set size that will be in
+# that result will vary between convulutional nets.  The 
+# combine script takes care of reizing with appropriate spaces.
 class PlantConvNet(convnet.ConvNet):
     def __init__(self, op, load_dic, dp_params={}):
         convnet.ConvNet.__init__(self,op,load_dic,dp_params)
@@ -144,26 +152,6 @@ class PlantConvNet(convnet.ConvNet):
             file_storage.close()
 
 
-    def finish_predictions_top_num(self, filenames, num_results, threshold):
-        # Finish the batch
-	    self.finish_batch()
-        rows = np.argsort(self.b_preds,axis=1)[:,::-1][:,:num_results] # positions
-        for i,(filename,row) in enumerate(zip(filenames,rows)):
-            if self.b_preds[i,row.T[0]] >= threshold:
-	        print filename + '{',
-	        for value in row.T:
-	            print "%s:%.03f;"%(self.tag_names[value],self.b_preds[i,value]),
-            print "}"# => Actually " + actual_type + " picture of a " + actual_name
-
-
-    def write_predictions(self):
-        pass
-
-
-    def report(self):
-        pass
-
-
     @classmethod
     def get_options_parser(cls):
         op = convnet.ConvNet.get_options_parser()
@@ -173,16 +161,18 @@ class PlantConvNet(convnet.ConvNet):
         return op
 
 
+# The console interpreter.  It checks whether the arguments
+# are valid, and also parses the configuration files.
 def console():
     if len(sys.argv) < 3:
         print 'Must give a component type and valid image file as arguments'
         sys.exit(INVALID_COMMAND_ARGS)
     valid_args = ['entire','stem','branch','leaf','fruit','flower']
     if sys.argv[1] not in valid_args:
-        print 'First argument must be:',
+        print 'First argument must be one of: [',
         for arg in valid_args:
-            print '[' + arg + '] ',
-        print ''
+            print arg + ' ',
+        print ']'
         sys.exit(INVALID_COMMAND_ARGS)
     cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
     cfg_options_file = cfg.get(sys.argv[1],'Type classification not found')
@@ -202,5 +192,6 @@ def console():
     create(sys.argv[2:])
 
 
+# Boilerplate for running the appropriate function.
 if __name__ == "__main__":
     console()

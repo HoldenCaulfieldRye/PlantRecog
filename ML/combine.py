@@ -7,8 +7,6 @@ import ast
 from joblib import Parallel
 from joblib import delayed
 
-N_JOBS = -1
-
 # Error values returned by the system should something
 # go wrong when combining the information
 NO_ERROR = 0
@@ -32,16 +30,17 @@ def chunks(l, n):
 # is determined in the run.cfg file. See the file for
 # a full list of parameters.
 class Combiner(object):
-    def __init__(self, num_results=5, error_rates = None, 
-                   super_set_file = None, n_jobs=N_JOBS):
+    def __init__(self, num_results = 5, error_rates = None, 
+                     super_set_file = None, delete_after_combine = False):
         self.num_results = num_results
         self.n_jobs = n_jobs
         self.error_rates = error_rates
+        self.delete_file = delete_after_combine
         if super_set_file is not None:
             super_meta = open(super_set_file,'rb')
             super_dict = pickle.load(super_meta)
             self.insert_list = super_dict['insert_list']
-            self.labels_list = super_dict['super_labels']
+            self.labels_list = super_dict['labels']['super_labels']
             super_meta.close
         else:
             self.insert_list = None
@@ -50,7 +49,7 @@ class Combiner(object):
     # Works on the baysian equation argmax(sum(P(c|h)*P(D|h)*P(h)))
     # Where P(h) is assumed to be equal for all plant classes and
     # P(D|h) is approximated to the error rate of a given classifier
-    def __call__(self, results_dict, delete_file = False):
+    def __call__(self, results_dict):
         combined_prob = None
         for key in results_dict:
             try:
@@ -59,8 +58,7 @@ class Combiner(object):
                 np_file.close()
             except:
                 sys.exit(FILE_DOES_NOT_EXIST)
-
-            if delete_file:
+            if self.delete_file:
                 try:
                     os.remove(results_dict[key])
                 except:
@@ -70,7 +68,6 @@ class Combiner(object):
                 combined_prob = np_array
             else:
                 combined_prob = np.vstack((combined_prob,np_array))
-        # Print out the top results
         combined_prob = np.sum(combined_prob,axis=0)/np.sum(combined_prob)
         self.output_results(combined_prob)
 
@@ -109,7 +106,8 @@ def console():
     combine = combiner(
             num_results=int(cfg.get('number-of-results',5)),
             error_rates=ast.literal_eval(cfg.get('error_rates','None'))
-            super_set_file=(cfg.get('super-meta-data',None)),
+            super_set_file=cfg.get('super-meta-data',None),
+            delete_after_combine=bool(cfg.get('delete-after-combine',0)),
             )
     combine(classifier_dict)
     sys.exit(NO_ERROR)
