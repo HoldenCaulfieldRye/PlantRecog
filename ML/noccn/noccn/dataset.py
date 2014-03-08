@@ -68,12 +68,13 @@ class BatchCreator(object):
     # Creates super meta file if it does not exist
     def setup_super_meta(self, super_batch_meta):    
         self.super_meta_filename = super_batch_meta
-        if os.path.isfile(super_batch_meta):
-            super_meta_file = open(self.super_meta_filename,'rb')
-            self.super_meta = pickle.load(super_meta_file)
-            super_meta_file.close()
-        else:
-            self.super_meta = { 'insert_list':{}, 'labels':{'super_labels':[]} }
+        if self.super_meta_filename is not None:
+            if os.path.isfile(super_batch_meta):
+                super_meta_file = open(self.super_meta_filename,'rb')
+                self.super_meta = pickle.load(super_meta_file)
+                super_meta_file.close()
+            else:
+                self.super_meta = { 'insert_list':{}, 'labels':{'super_labels':[]} }
     
 
     # Updates the super meta file with the label and insertion
@@ -82,29 +83,31 @@ class BatchCreator(object):
     # inserted, in order for each sub label probability array to be 
     # combined into a single super array.
     def update_super_meta(self, sorted_labels):
-        self.super_meta['labels']['super_labels' ] += sorted_labels
-        self.super_meta['labels']['super_labels' ].sort()
-        self.super_meta['labels'][self.component] = sorted_labels
-        for key in self.super_meta['labels']:
-            if key is not 'super_labels':
-                index = 0
-                insert_list = []
-                for label in self.super_meta['labels']['super_labels' ]:
-                    if label in self.super_meta['labels'][key]:
-                        index += 1
-                        continue
-                    else:
-                        insert_list.append(index)
-                self.super_meta['insert_list'][key] = insert_list        
-        super_meta_file = open(self.super_meta_filename,'wb')
-        self.super_meta = pickle.dump(self.super_meta,super_meta_file)
-        super_meta_file.close()
+        if self.super_meta_filename is not None:
+            self.super_meta['labels']['super_labels' ] += sorted_labels
+            new_super = sorted(set(p for p in self.super_meta['labels']['super_labels' ]))
+            self.super_meta['labels']['super_labels' ] = new_super
+            self.super_meta['labels'][self.component] = sorted_labels
+            for key in self.super_meta['labels']:
+                if key != 'super_labels':
+                    index = 0
+                    insert_list = []
+                    for label in self.super_meta['labels']['super_labels' ]:
+                        if label in self.super_meta['labels'][key]:
+                            index += 1
+                            continue
+                        else:
+                            insert_list.append(index)
+                    self.super_meta['insert_list'][key] = insert_list        
+            super_meta_file = open(self.super_meta_filename,'wb')
+            self.super_meta = pickle.dump(self.super_meta,super_meta_file)
+            super_meta_file.close()
                 
 
     # Takes a certain number of sample means from the batch
-    def setup_batch_means(self, num_images, total_means = 200):    
-        self.batches_per_mean = int((all_ids_and_info[-1][0]/total_means)/self.batch_size)
-        print 'Taking mean every %i batches'%(batches_per_mean)
+    def setup_batch_means(self, num_images, total_means = 20):    
+        self.batches_per_mean = int((num_images/total_means)/self.batch_size)
+        print 'Taking mean every %i batches'%(self.batches_per_mean)
         self.batch_means = None
 
 
@@ -116,14 +119,14 @@ class BatchCreator(object):
             if self.batch_means is None:
                 self.batch_means = batch_data.mean(axis=1).reshape(-1,1)
             else:    
-                self.batch_means = np.hstack((batch_means,
+                self.batch_means = np.hstack((self.batch_means,
                                             batch_data.mean(axis=1).reshape(-1,1)))
             # Save the new mean    
             self.save_batch_meta()
 
 
     # Creates the metadata file, with everything except a batch mean
-    def setup_batch_meta(self, sorted_labels, ids_and_info):
+    def setup_batch_meta(self, labels_sorted, ids_and_info):
         self.batches_meta = {}
         self.batches_meta['label_names'] = labels_sorted
         self.batches_meta['metadata'] = dict((a_id, {'name': name}) 
@@ -151,7 +154,7 @@ class BatchCreator(object):
         labels_sorted = sorted(set(p[1] for p in all_names_and_labels))
         # Setup super_meta data, and batch meta files including mean taking
         self.update_super_meta(labels_sorted)
-        self.batches_meta(labels_sorted,all_ids_and_info)
+        self.setup_batch_meta(labels_sorted,all_ids_and_info)
         self.setup_batch_means(all_ids_and_info[-1][0])
         # Setup loop variables
         batch_num = 1
@@ -280,8 +283,9 @@ def write_stats_to_file(path,labels):
 def console():
     cfg = get_options(sys.argv[1], 'dataset')
     random_seed(int(cfg.get('seed', '42')))
-    if int(cfg.get('xml_query',1)) is not 0:
-        collector = resolve(cfg.get('collector', 'noccn.dataset._collect_filenames_and_labels'))
+    if int(cfg.get('xml_query',1)) != 0:
+        collector = _collect_filenames_and_labels
+        filter_component=cfg.get('limit_to_tag',None)
         filenames_and_labels = collector(cfg)
     else:
         images, labels = mongoHelperFunctions.bucketing(
@@ -290,17 +294,18 @@ def console():
                              componentProb=cfg.get('component_prob_thres',0.0),
                              )
         output_path=cfg.get('output-path', '/tmp/noccn-dataset')
+        filter_component=cfg.get('limit_by_component',None)
         write_stats_to_file(output_path,labels)
         filenames_and_labels = zip(images,labels)
         random.shuffle(filenames_and_labels)
-    creator = resolve(cfg.get('creator', 'noccn.dataset.BatchCreator'))
+    creator = BatchCreator
     create = creator(
                  batch_size=int(cfg.get('batch-size', 1000)),
                  channels=int(cfg.get('channels', 3)),
                  size=eval(cfg.get('size', '(256, 256)')),
                  output_path=cfg.get('output-path', None),
                  super_batch_meta=cfg.get('super-meta-path', None),
-                 component=cfg.get('limit_by_component',None),
+                 component=filter_component,
                  )
     create(filenames_and_labels)
 

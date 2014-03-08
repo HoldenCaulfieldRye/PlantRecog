@@ -11,11 +11,14 @@ default_directories = [
 '../run.py',
 '../combine.py',
 '../bucketing/mongoHelperFunctions.py',
-'../cuda_convnet/*', # Needs to include our data provider file as separate file
+#'../cuda_convnet/*', # Needs to include our data provider file as separate file
 ]
 
+
 if __name__ == '__main__':
+    store_coverage = False
     if len(sys.argv) > 1 and sys.argv[1] == '-coverage':
+        store_coverage = True
         if len(sys.argv) > 2:
             cov = coverage.coverage(include=sys.argv[2], branch=True)
         else:
@@ -23,7 +26,7 @@ if __name__ == '__main__':
         cov.start()
     testsuite = unittest.TestLoader().discover('.')
     unittest.TextTestRunner(verbosity=1).run(testsuite)
-    if len(sys.argv) > 1 and sys.argv[1] == '-coverage':
+    if store_coverage:
         cov.stop()
         cov.save()
         timestr = time.strftime("%d-%m-%Y|%H-%M")

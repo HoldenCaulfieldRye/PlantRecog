@@ -102,14 +102,18 @@ class ImageRecogniser(object):
             #else:
 		    #   mean = self.model.train_data_provider.data_mean
             #   data = data - mean
-            self.model.start_predictions(data)
+            if self.model is not None:
+                self.model.start_predictions(data)
             if next_filenames is not None:
                 rows = Parallel(n_jobs=self.n_jobs)(
                     delayed(_process_tag_item)(self.size,self.channels,filename)
 		    for filename in next_filenames)
                 names = [name for (r,name) in zip(rows,filenames) if r is not None];
             try:    
-                self.model.finish_predictions(names,self.num_results,self.threshold)
+                if self.model is not None:
+                    self.model.finish_predictions(names,self.num_results,self.threshold)
+                else:
+                    pass
             except:
                 sys.exit(COULD_NOT_SAVE_OUTPUT_FILE)
             batch_num += 1
@@ -168,29 +172,28 @@ def console(config_file = '/run.cfg'):
     if len(sys.argv) < 3:
         print 'Must give a component type and valid image file as arguments'
         sys.exit(INVALID_COMMAND_ARGS)
-    valid_args = ['entire','stem','branch','leaf','fruit','flower']
+    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+config_file, 'run')
+    valid_args = cfg.get('valid_args','entire,stem,branch,leaf,fruit,flower').split(',')
     if sys.argv[1] not in valid_args:
         print 'First argument must be one of: [',
         for arg in valid_args:
             print arg + ' ',
         print ']'
         sys.exit(INVALID_COMMAND_ARGS)
-    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+config_file, 'run')
     cfg_options_file = cfg.get(sys.argv[1],'Type classification not found')
     cfg_data_options = get_options(cfg_options_file, 'dataset')
-    creator = resolve(cfg.get('creator', 'run.ImageRecogniser'))
     try:
         conv_model = make_model(PlantConvNet,'run',cfg_options_file)
     except:
         sys.exit(COULD_NOT_START_CONVNET)
-    create = creator(
+    run = ImageRecogniser(
         batch_size=int(cfg.get('batch-size', 128)),
         channels=int(cfg_data_options.get('channels', 3)),
         size=eval(cfg_data_options.get('size', '(256, 256)')),
         model=conv_model,
         threshold=float(cfg.get('threshold',0.0)),
         )
-    create(sys.argv[2:])
+    run(sys.argv[2:])
 
 
 # Boilerplate for running the appropriate function.

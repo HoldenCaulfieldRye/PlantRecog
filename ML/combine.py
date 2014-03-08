@@ -104,8 +104,7 @@ def console(config_file = '/run.cfg'):
             print ']'
             sys.exit(INVALID_COMMAND_ARGS)
         classifier_dict[type_and_file[0]] = type_and_file[1]
-    combiner = resolve(cfg.get('creator', 'combine.Combiner'))
-    combine = combiner(
+    combine = Combiner(
             num_results=int(cfg.get('number-of-results',5)),
             error_rates=ast.literal_eval(cfg.get('error_rates','None')),
             super_set_file=cfg.get('super-meta-data',None),
