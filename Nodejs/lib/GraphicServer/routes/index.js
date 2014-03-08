@@ -19,8 +19,9 @@ exports.index = function(req, res){
 exports.classify = function(db,configArgs) {
 	
 	var form = new formidable.IncomingForm();
-//        form.UploadDir = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database);
-//       form.keepExtensions = true;
+        //form.uploadDir = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database);
+        //form.keepExtensions = true;
+
 	return function(req, res) {
 				
 			form.parse(req, function(err, fields, files){
@@ -29,20 +30,20 @@ exports.classify = function(db,configArgs) {
 				fileLocation = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database, fields.group_id)
              			console.log("fileLocation: " + fileLocation);
 				// Create the folder in which to save the file
-				mkdirp(fileLocation,function(err){
+				mkdirp.sync(fileLocation,function(err){
 				    if(err) console.error("Error creating group directory: " + err)
 				    else console.log("Successfully created folder: " + fileLocation)
 				})
 
 				// Save the file
-        			form.uploadDir = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database)
+       	    		        form.uploadDir = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database, fields.group_id)
 				form.keepExtensions = true;	
 
 				console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
 
 	   			filePath = files.datafile.path;	
 	   			fileName = files.datafile.name;
-
+			        //id = files.datafile
 			        console.log('Filename: ' + fileName);
 			
 	        	if(files){
@@ -52,10 +53,9 @@ exports.classify = function(db,configArgs) {
 	    
 					// Set our collection
 					var collection = db.collection('segment_images');
-					    
+			    
 					collection.findAndModify(	        	
-				    	{ 'filename': fileName }, 
-				            [],
+				    	    { '_id': new BSON.ObjectID(fields.segment_id) },	                                              [], 
 				            { $set : { "submission_state" : "File received by graphic" }
 		                },
 			    	 
@@ -64,14 +64,14 @@ exports.classify = function(db,configArgs) {
 				        function (err,doc) {
 				        	if (err) {
 				                //If it failed, return error
-						  		console.log("Error adding information to db"); 
+						console.log("Error adding information to db"); 
 				                console.log(err);
 				                res.send("There was a problem adding the information to the database.");
 				            }
 				            else {
 				            	// If it worked, return JSON object from collection to App//
-								console.log("db updated: file received by graphic");
-				            	// Reply to app server
+						console.log("db updated: file received by graphic");                                              
+					        // Reply to app server
 				            	res.json("File received by graphic");
 				            }
 					});

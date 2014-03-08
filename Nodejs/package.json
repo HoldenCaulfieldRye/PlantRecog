@@ -11,7 +11,8 @@
     "form-data": "*",
     "async": "*",
     "formidable": "*",
-    "util": "*"
+    "util": "*",
+    "mkdirp": "*"
   },
   "devDependencies": {
     "mocha": "*",
