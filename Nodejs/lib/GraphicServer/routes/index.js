@@ -19,26 +19,31 @@ exports.index = function(req, res){
 exports.classify = function(db,configArgs) {
 	
 	var form = new formidable.IncomingForm();
-
+//        form.UploadDir = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database);
+//       form.keepExtensions = true;
 	return function(req, res) {
 				
 			form.parse(req, function(err, fields, files){
 				
 				// Determine where to save the file
-				fileLocation = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database, files.group_id)
+				fileLocation = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database, fields.group_id)
+             			console.log("fileLocation: " + fileLocation);
 				// Create the folder in which to save the file
-				mkdirp(path.join(fileLocation,function(err){
-					if(err) console.error(err)
-				});
+				mkdirp(fileLocation,function(err){
+				    if(err) console.error("Error creating group directory: " + err)
+				    else console.log("Successfully created folder: " + fileLocation)
+				})
 
 				// Save the file
-				form.uploadDir = fileLocation;
+        			form.uploadDir = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database)
 				form.keepExtensions = true;	
 
 				console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
 
 	   			filePath = files.datafile.path;	
 	   			fileName = files.datafile.name;
+
+			        console.log('Filename: ' + fileName);
 			
 	        	if(files){
 
@@ -49,7 +54,7 @@ exports.classify = function(db,configArgs) {
 					var collection = db.collection('segment_images');
 					    
 					collection.findAndModify(	        	
-				    	{ 'filename': fileName }, /* example BSON: '52ff886b27d625b55344093f' */
+				    	{ 'filename': fileName }, 
 				            [],
 				            { $set : { "submission_state" : "File received by graphic" }
 		                },
