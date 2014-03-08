@@ -30,11 +30,12 @@ var restler = require('restler');
 
 
 fs.stat("sample.jpg", function(err, stats) {
-    restler.post("http://plantrecogniser.no-ip.biz:55580/upload", {
+    restler.post("http://localhost:55580/upload", {
         multipart: true,
         data: {
             "folder_id": "0",
-            "group_id": "0",
+            "group_id": "531b3edfaacaf02122c9f382",
+            "segment": "x",
             "datafile": restler.file("sample.jpg", null, stats.size, null, "application/octet-stream")
         }
     }).on("complete", function(data) {

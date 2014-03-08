@@ -1,0 +1,42 @@
+TODO.txt
+
+Change collections:
+'usercollection' -> 'segment_images'
+*NEW* -> groups
+
+--- Image Document looks like:
+
+{ _id: '5319fe05a06dabf44ec94fe6',
+  filename: 'f6c9f58b1936493f08b85147676840d6.jpg',
+  group_id: '5319fe05a06dabf44ec94fe5',
+  metadata: { date: null, 
+  			  latitude: null, 
+  			  longitude: null 
+  			},
+  segment: leaf,
+  submission_state: 'Image classified',
+  submission_time: 1394212358,
+}
+
+--- Group Document looks like:
+
+{ _id: '5319fe05a06dabf44ec94fe5',
+  group_status: 'in progress', /* {uploaded, classified} */
+  
+  /* are these ids in the segment_images collection necessary
+   * if you can search segment_images by group_id is X and
+   * segment is y? Seems redundant.
+   */
+
+  leaf_id: '5319fe05a06dabf44ec94fe1',
+  flower_id: '5319fe05a06dabf44ec94fe2',
+  fruit_id: '5319fe05a06dabf44ec94fe3',
+  whole_id: '5319fe05a06dabf44ec94fe4',
+
+  classification: { Rose:0.143, 
+  					Ash:0.143, 
+  					Oak:0.127, 
+  					Lemon tree:0.127, 
+  					Bonsai:0.111 
+  				  }
+}

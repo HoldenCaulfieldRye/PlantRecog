@@ -96,7 +96,7 @@ else{
   /* Routes to follow on URL */
 
   /* Retrieve JSON for jobID and handle bad request */
-  app.get('/job/:job_id', routes.getJob(db));
+  app.get('/job/:group_id', routes.getJob(db));
   app.get('/job', routes.getJob(db));
 
 
