@@ -25,11 +25,11 @@ exports.classify = function(db,configArgs) {
 			form.parse(req, function(err, fields, files){
 				
 				// Determine where to save the file
-				fileLocation = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database, files.group_id)
+				fileLocation = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database, fields.group_id)
 				// Create the folder in which to save the file
-				mkdirp(path.join(fileLocation,function(err){
+				mkdirp(fileLocation,function(err){
 					if(err) console.error(err)
-				});
+				})
 
 				// Save the file
 				form.uploadDir = fileLocation;
@@ -51,8 +51,7 @@ exports.classify = function(db,configArgs) {
 					collection.findAndModify(	        	
 				    	{ 'filename': fileName }, /* example BSON: '52ff886b27d625b55344093f' */
 				            [],
-				            { $set : { "submission_state" : "File received by graphic" }
-		                },
+				        { $set : { "submission_state" : "File received by graphic" } },
 			    	 
 			    	    {'new': true}, 
 		              
@@ -67,7 +66,7 @@ exports.classify = function(db,configArgs) {
 				            	// If it worked, return JSON object from collection to App//
 								console.log("db updated: file received by graphic");
 				            	// Reply to app server
-				            	res.json("File received by graphic");
+				            	res.json(fields.segment_id);
 				            }
 					});
 				}
