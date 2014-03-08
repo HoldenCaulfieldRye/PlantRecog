@@ -25,7 +25,7 @@ function insert_segment(collection, segment_document){
 	
         console.log('GET request parameters are: ' + util.inspect(req.params) );
 	
-        if(req.params.job_id){
+        if(req.params.group_id){
             console.log('Retrieving job: ' + group_id);
             try{
                 groups_col.findOne({'_id':new BSON.ObjectID(group_id)}, function(err, item) {
