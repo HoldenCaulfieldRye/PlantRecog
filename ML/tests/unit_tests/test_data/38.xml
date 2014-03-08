@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>9960</ObservationId>
+  <FileName>38.jpg</FileName>
+  <MediaId>38</MediaId>
+  <Vote>4</Vote>
+  <Content>LeafScan</Content>
+  <ClassId>1973</ClassId>
+  <Family>ADOXACEAE</Family>
+  <Species>Viburnum tinus L.</Species>
+  <Genus>Viburnum</Genus>
+  <Author>pierre bonnet</Author>
+  <Date>18/10/10</Date>
+  <Location>Montpellier (34)</Location>
+  <Latitude>43.6</Latitude>
+  <Longitude>3.883333</Longitude>
+  <YearInCLEF>ImageCLEF2011</YearInCLEF>
+  <IndividualPlantId2013>1086</IndividualPlantId2013>
+  <ImageID2013>18865</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>

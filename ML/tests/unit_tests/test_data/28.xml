@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>554</ObservationId>
+  <FileName>28.jpg</FileName>
+  <MediaId>28</MediaId>
+  <Vote>3</Vote>
+  <Content>Leaf</Content>
+  <ClassId>3283</ClassId>
+  <Family>FAGACEAE</Family>
+  <Species>Quercus coccifera L.</Species>
+  <Genus>Quercus</Genus>
+  <Author>chloe fillinger</Author>
+  <Date>07/01/12</Date>
+  <Location>Prades-le-Lez (34)</Location>
+  <Latitude>43.7</Latitude>
+  <Longitude>3.866667</Longitude>
+  <YearInCLEF>ImageCLEF2013</YearInCLEF>
+  <IndividualPlantId2013>77</IndividualPlantId2013>
+  <ImageID2013>11208</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>

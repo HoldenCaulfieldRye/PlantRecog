@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>13035</ObservationId>
+  <FileName>29.jpg</FileName>
+  <MediaId>29</MediaId>
+  <Vote>4</Vote>
+  <Content>LeafScan</Content>
+  <ClassId>4379</ClassId>
+  <Family>LYTHRACEAE</Family>
+  <Species>Punica granatum L.</Species>
+  <Genus>Punica</Genus>
+  <Author>pierre bonnet</Author>
+  <Date>03/11/10</Date>
+  <Location>Montpellier (34)</Location>
+  <Latitude>43.6</Latitude>
+  <Longitude>3.883333</Longitude>
+  <YearInCLEF>ImageCLEF2011</YearInCLEF>
+  <IndividualPlantId2013>714</IndividualPlantId2013>
+  <ImageID2013>9869</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>12208</ObservationId>
+  <FileName>13.jpg</FileName>
+  <MediaId>13</MediaId>
+  <Vote>4</Vote>
+  <Content>Leaf</Content>
+  <ClassId>5522</ClassId>
+  <Family>ASTERACEAE</Family>
+  <Species>Veronica persica Poir.</Species>
+  <Genus>Veronica</Genus>
+  <Author>herve goeau</Author>
+  <Date>04/05/13</Date>
+  <Location>Maincy (77)</Location>
+  <Latitude>48.55</Latitude>
+  <Longitude>2.7</Longitude>
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>

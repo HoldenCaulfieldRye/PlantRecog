@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>13877</ObservationId>
+  <FileName>24.jpg</FileName>
+  <MediaId>24</MediaId>
+  <Vote>3</Vote>
+  <Content>Flower</Content>
+  <ClassId>30016</ClassId>
+  <Family>ASTERACEAE</Family>
+  <Species>Carduus defloratus L.</Species>
+  <Genus>Carduus</Genus>
+  <Author>alain bigou</Author>
+  <Date>01/08/13</Date>
+  <Location>Gavarnie (65)</Location>
+  <Latitude>42.733333</Latitude>
+  <Longitude>-0.008333</Longitude>
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>

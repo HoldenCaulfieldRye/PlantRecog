@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>4655</ObservationId>
+  <FileName>17.jpg</FileName>
+  <MediaId>17</MediaId>
+  <Vote>4</Vote>
+  <Content>Fruit</Content>
+  <ClassId>4736</ClassId>
+  <Family>ROSACEAE</Family>
+  <Species>Cydonia oblonga Mill.</Species>
+  <Genus>Cydonia</Genus>
+  <Author>herve goeau</Author>
+  <Date>26/09/13</Date>
+  <Location />
+  <Latitude />
+  <Longitude />
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>

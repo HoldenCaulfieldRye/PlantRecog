@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>12380</ObservationId>
+  <FileName>12.jpg</FileName>
+  <MediaId>12</MediaId>
+  <Vote>5</Vote>
+  <Content>Stem</Content>
+  <ClassId>7315</ClassId>
+  <Family>GINKGOACEAE</Family>
+  <Species>Ginkgo biloba L.</Species>
+  <Genus>Ginkgo</Genus>
+  <Author>herve goeau</Author>
+  <Date>24/05/12</Date>
+  <Location>Vincennes (94)</Location>
+  <Latitude>48.85</Latitude>
+  <Longitude>2.433333</Longitude>
+  <YearInCLEF>ImageCLEF2013</YearInCLEF>
+  <IndividualPlantId2013>3158</IndividualPlantId2013>
+  <ImageID2013>11789</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>

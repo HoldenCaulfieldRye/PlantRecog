@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>9491</ObservationId>
+  <FileName>33.jpg</FileName>
+  <MediaId>33</MediaId>
+  <Vote>3</Vote>
+  <Content>Flower</Content>
+  <ClassId>6425</ClassId>
+  <Family>ORCHIDACEAE</Family>
+  <Species>Cypripedium calceolus L.</Species>
+  <Genus>Cypripedium</Genus>
+  <Author>thierry pernot</Author>
+  <Date />
+  <Location />
+  <Latitude />
+  <Longitude />
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>18535</ObservationId>
+  <FileName>18.jpg</FileName>
+  <MediaId>18</MediaId>
+  <Vote>3</Vote>
+  <Content>Leaf</Content>
+  <ClassId>14832</ClassId>
+  <Family>FABACEAE</Family>
+  <Species>Trifolium pratense L.</Species>
+  <Genus>Trifolium</Genus>
+  <Author>emmanuel stratmains</Author>
+  <Date>06/06/12</Date>
+  <Location>Yvré-l'Évêque (72)</Location>
+  <Latitude>48.016667</Latitude>
+  <Longitude>0.266667</Longitude>
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>
