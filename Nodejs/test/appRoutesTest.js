@@ -57,7 +57,7 @@ describe('Application_server',function(){
 	    	});
 
 	    	// Set up the middleware for testing
-	    	app.get('/job/:job_id', routes.getJob(testDB));
+	    	app.get('/job/:group_id', routes.getJob(testDB));
 	    	app.get('/job', routes.getJob(testDB));
 	    	app.post('/upload', routes.upload(testDB,configArgs));
 	    	app.post('/upload_no_db', routes.upload(null,configArgs));
@@ -83,7 +83,7 @@ describe('Application_server',function(){
 	it('should error with invalid jobID', function(done){
 	    jobID = '';
 	    request(app)
-		.get('/job/xx')
+		.get('/job/zzzz')
 		.expect(200,'You did not submit a valid JobID!')
 		.end(function(err,res){
 		    if(err){
@@ -127,22 +127,14 @@ describe('Application_server',function(){
 
 	    // Actual document in Database.
 	    var returnedObject = {
-		"_id": "5308b98ba073dc607f240ac1",
-		"classification": "{ \"Lemon tree\":0.217, \"Pine\":0.174, \"Maple\":0.152 }",
-		"graphic_filepath": "Nodejs/lib/GraphicServer/uploads/development/12319-twlq79.jpg",
-		"image_metadata": {
-		    "date": null,
-		    "latitude": null,
-		    "longitude": null
-		},
-		"image_segment": "flower",
-		"submission_state": "Image classified",
-		"submission_time": 1393080715,
-		"vm_filepath": "Nodejs/lib/AppServer/uploads/development/641d11ec6af0d44d2009f7baa68a729e.jpg"
+	    	"group_status" : "uploading",
+	    	"image_count" : 1,
+	    	"classified_count" : 0,
+	    	"_id" : "531b2f165fa89cca1be0cd0b"
 	    }
 
 	    request(app)
-		.get('/job/5308b98ba073dc607f240ac1')
+		.get('/job/531b2f165fa89cca1be0cd0b')
 		.expect(200, returnedObject)
 		.end(function(err,res){
 		    if(err){
@@ -175,7 +167,7 @@ describe('Application_server',function(){
 
     describe('routes.upload', function(){
 
-		it('should accept an image upload and respond with valid objectID', function(done){
+		it('should accept an image upload and respond with a new valid objectID', function(done){
 			this.timeout(4000);
 		    request(app)
 			.post('/upload')
@@ -183,6 +175,7 @@ describe('Application_server',function(){
 			.field("latitude", null)
 			.field("longitude", null)
 			.field("group_id", 0)
+			.field("segment", "flower")
 			.attach('datafile','./test/fixtures/sample.jpg')
 			.expect(200)
 			.end(function(err,res){
@@ -191,6 +184,32 @@ describe('Application_server',function(){
 			    }
 			    else {
 			    assert(checkForHexRegExp.test(res.body.id));
+			    assert(checkForHexRegExp.test(res.body.group_id));
+			    setTimeout(done, 3000);
+			    };
+			});
+
+		});
+
+		it('should accept an image upload and respond with the same objectID', function(done){
+			this.timeout(4000);
+			g_id = "531b4461aa4b00752588b5d7";
+		    request(app)
+			.post('/upload')
+			.field("date", null)
+			.field("latitude", null)
+			.field("longitude", null)
+			.field("group_id", g_id)
+			.field("segment", "flower")
+			.attach('datafile','./test/fixtures/sample.jpg')
+			.expect(200)
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+			    assert(checkForHexRegExp.test(res.body.id));
+			    assert(res.body.group_id === g_id );
 			    setTimeout(done, 3000);
 			    };
 			});
@@ -204,7 +223,30 @@ describe('Application_server',function(){
 			.field("date", null)
 			.field("latitude", null)
 			.field("longitude", null)
+			.field("group_id", 0)
+			.field("segment", "flower")
 			.expect(200, 'Nothing to add to database: there is no Datafile attached!')
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+				done();
+			    };
+			});
+
+		});
+
+		it('should gracefully say no segment information', function(done){
+
+		    request(app)
+			.post('/upload')
+			.field("date", null)
+			.field("latitude", null)
+			.field("longitude", null)
+			.field("group_id", 0)
+			.attach('datafile','./test/fixtures/sample.jpg')
+			.expect(200, 'You did not supply a segment type, I cannot continue')
 			.end(function(err,res){
 			    if(err){
 				done(err);
@@ -223,8 +265,10 @@ describe('Application_server',function(){
 			.field("date", null)
 			.field("latitude", null)
 			.field("longitude", null)
+			.field("group_id", 0)
+			.field("segment", "flower")
 			.attach('datafile','./test/fixtures/sample.jpg')
-			.expect(200, 'Error connecting to Database collection!')
+			.expect(200, 'Error connecting to the Database collections!')
 			.end(function(err,res){
 			    if(err){
 				done(err);
