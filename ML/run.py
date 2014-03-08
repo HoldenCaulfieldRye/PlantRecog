@@ -19,7 +19,8 @@ from joblib import delayed
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), "cuda_convnet"))
 import convnet
 import options
-from noccn.noccn.script import *
+sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), "noccn/noccn"))
+from script import *
 # This is used to parse xml files
 import xml.etree.ElementTree as ET # can be speeded up using lxml possibly
 import xml.dom.minidom as minidom
@@ -145,7 +146,7 @@ class PlantConvNet(convnet.ConvNet):
 
     def finish_predictions(self, filenames, threshold):
         # Finish the batch
-	    self.finish_batch()
+        self.finish_batch()
         for filename,row in zip(filenames,rows):
             file_storage = open(os.path.splitext(filename)[0] + '.pickle','wb')
             pickle.dump(np.array(row),file_storage)
@@ -163,7 +164,7 @@ class PlantConvNet(convnet.ConvNet):
 
 # The console interpreter.  It checks whether the arguments
 # are valid, and also parses the configuration files.
-def console():
+def console(config_file = '/run.cfg'):
     if len(sys.argv) < 3:
         print 'Must give a component type and valid image file as arguments'
         sys.exit(INVALID_COMMAND_ARGS)
@@ -174,7 +175,7 @@ def console():
             print arg + ' ',
         print ']'
         sys.exit(INVALID_COMMAND_ARGS)
-    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
+    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+config_file, 'run')
     cfg_options_file = cfg.get(sys.argv[1],'Type classification not found')
     cfg_data_options = get_options(cfg_options_file, 'dataset')
     creator = resolve(cfg.get('creator', 'run.ImageRecogniser'))
@@ -186,7 +187,7 @@ def console():
         batch_size=int(cfg.get('batch-size', 128)),
         channels=int(cfg_data_options.get('channels', 3)),
         size=eval(cfg_data_options.get('size', '(256, 256)')),
-        model=conv_model
+        model=conv_model,
         threshold=float(cfg.get('threshold',0.0)),
         )
     create(sys.argv[2:])

@@ -4,10 +4,14 @@ import unittest
 import coverage
 import time
 
+# Only include files we have made, not third party software
 default_directories = [
-'../noccn/noccn/*',
-'../cuda_convnet/*',
-'../bucketing/*',
+'../noccn/noccn/dataset.py',
+'../noccn/noccn/tag.py',
+'../run.py',
+'../combine.py',
+'../bucketing/mongoHelperFunctions.py',
+'../cuda_convnet/*', # Needs to include our data provider file as separate file
 ]
 
 if __name__ == '__main__':

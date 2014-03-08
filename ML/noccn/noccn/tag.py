@@ -33,11 +33,11 @@ SIZE = (64, 64)
 
 def _process_tag_item(size,channels,name):
     try:
-	im = Image.open(name)
-	im = ImageOps.fit(im, size, Image.ANTIALIAS)
-	im_data = np.array(im)
-	im_data = im_data.T.reshape(channels, -1).reshape(-1)
-	im_data = im_data.astype(np.single)
+        im = Image.open(name)
+        im = ImageOps.fit(im, size, Image.ANTIALIAS)
+        im_data = np.array(im)
+        im_data = im_data.T.reshape(channels, -1).reshape(-1)
+        im_data = im_data.astype(np.single)
         return im_data
     except:
         return None
@@ -83,12 +83,16 @@ class Tagger(object):
             if len(names_and_labels) > 20:
                 mean = data.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
 	        data = data - mean
-            self.model.start_predictions(data)
+            if self.model is not None:
+                self.model.start_predictions(data)
             if n_l_next is not None:
 	        rows = Parallel(n_jobs=self.n_jobs)(
-		    delayed(_process_tag_item)(self.size,self.channels,name)
-		    for name, label in n_l_next)
-            tags = self.model.finish_predictions()
+                delayed(_process_tag_item)(self.size,self.channels,name)
+                for name, label in n_l_next)
+            if self.model is not None:
+                tags = self.model.finish_predictions()
+            else:
+                tags = [('No model',0.0) for name in names_and_labels]
             self.write_to_xml(zip(tags,names_and_labels))
             batch_num += 1
 	    print "Tagged %d images in %.02f seconds" % (len(names_and_labels),time.clock()-loop_time)
@@ -113,21 +117,21 @@ class Tagger(object):
 class TagConvNet(convnet.ConvNet):
     def __init__(self, op, load_dic, dp_params={}):
         convnet.ConvNet.__init__(self,op,load_dic,dp_params)
-	self.softmax_idx = self.get_layer_idx('probs', check_type='softmax')
+        self.softmax_idx = self.get_layer_idx('probs', check_type='softmax')
         self.tag_names = list(self.test_data_provider.batch_meta['label_names'])
         self.b_data = None
         self.b_labels = None
         self.b_preds = None
 
     def start_predictions(self, data):
-	# Run the batch through the model
-	self.b_data = np.require(data, requirements='C')
-	self.b_labels = np.zeros((1, data.shape[1]), dtype=np.single)
-	self.b_preds = np.zeros((data.shape[1], len(self.tag_names)), dtype=np.single)
-	self.libmodel.startFeatureWriter([self.b_data, self.b_labels, self.b_preds], self.softmax_idx)
+        # Run the batch through the model
+        self.b_data = np.require(data, requirements='C')
+        self.b_labels = np.zeros((1, data.shape[1]), dtype=np.single)
+        self.b_preds = np.zeros((data.shape[1], len(self.tag_names)), dtype=np.single)
+        self.libmodel.startFeatureWriter([self.b_data, self.b_labels, self.b_preds], self.softmax_idx)
 
     def finish_predictions(self):
-	self.finish_batch()
+        self.finish_batch()
         return [(self.tag_names[i],float(j)) for i,j in np.nditer([self.b_preds.argmax(axis=1),self.b_preds.max(axis=1)])]
 
     def write_predictions(self):
@@ -152,10 +156,7 @@ def find(root, pattern):
                 yield os.path.join(path, fname)
 
 
-def _collect_filenames_and_labels(cfg):
-    path = cfg['input-path']
-    pattern = cfg.get('pattern', '*.JPEG')
-    metadata_file_ext = cfg.get('meta_data_file_ext', '.xml')
+def _collect_filenames_and_labels(path,pattern,metadata_file_ext):
     filenames_and_labels = []
     counter = 0
     for fname in find(path, pattern):
@@ -163,7 +164,7 @@ def _collect_filenames_and_labels(cfg):
         filenames_and_labels.append((fname, label))
         counter += 1
     print 'Images found: ' + `counter`
-    return np.array(filenames_and_labels)
+    return filenames_and_labels
 
 
 def console():
@@ -172,7 +173,10 @@ def console():
     random_seed(int(cfg.get('seed', '42')))
     collector = resolve(
         cfg.get('collector', 'noccn.tag._collect_filenames_and_labels'))
-    filenames_and_labels = collector(cfg)
+    filenames_and_labels = collector(cfg['input-path'],
+                                     cfg.get('pattern', '*.JPEG'),
+                                     cfg.get('meta_data_file_ext', '.xml')
+                                    )
     creator = resolve(cfg.get('creator', 'noccn.tag.Tagger'))
     create = creator(
         batch_size=int(cfg.get('batch-size', 1000)),

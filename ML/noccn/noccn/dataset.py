@@ -166,7 +166,7 @@ class BatchCreator(object):
                 continue
             labels = np.array([labels_sorted.index(label) for ((a_id, name, label), row) 
                           in zip(ids_and_info, rows) if row is not None]).reshape((1,-1))
-            batch = {'data': data.T, 'labels':labels 'metadata': []}
+            batch = {'data': data.T, 'labels':labels, 'metadata': []}
             self.take_batch_mean(batch_num,batch['data'])
             with open(os.path.join(self.output_path,'data_batch_%s'%batch_num),'wb') as f:
                 pickle.dump(batch, f, -1)
@@ -251,9 +251,9 @@ def _collect_filenames_and_labels(cfg):
         for fname in find(path, pattern):
             info_dict = get_info(fname,[limit_by_tag,label_data_field],metadata_file_ext)
             # This is to check whether it has an exclude set
-            if (limit_to_tag!='None' and info_dict[limit_by_tag]==limit_to_tag) or 
+            if ((limit_to_tag!='None' and info_dict[limit_by_tag]==limit_to_tag) or 
                    (exclude!='None' and info_dict[limit_by_tag]!=exclude) or 
-                   (limit_to_tag == 'None' and exclude == 'None'):
+                   (limit_to_tag == 'None' and exclude == 'None')):
                 label = info_dict[label_data_field]
                 filenames_and_labels.append((fname, label))
                 counter += 1

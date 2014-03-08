@@ -63,7 +63,9 @@ class Combiner(object):
                     os.remove(results_dict[key])
                 except:
                     sys.exit(ERROR_DELETING_FILES)
-            np_array = np.insert(np_array,self.insert_list[key],0) * self.error_rates[key]
+            np_array *=  self.error_rates[key]
+            if self.insert_list is not None:        
+                np_array = np.insert(np_array,self.insert_list[key],0)
             if combined_prob is None:
                 combined_prob = np_array
             else:
@@ -87,8 +89,8 @@ class Combiner(object):
 
 # The console interpreter.  It checks whether the arguments
 # are valid, and also parses the configuration files.
-def console():
-    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'combine')
+def console(config_file = '/run.cfg'):
+    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+config_file, 'combine')
     valid_args = cfg.get('valid_args','entire,stem,branch,leaf,fruit,flower').split(',')
     if len(sys.argv) < 3:
         print 'Must give at least one type and image file as arguments'
@@ -105,7 +107,7 @@ def console():
     combiner = resolve(cfg.get('creator', 'combine.Combiner'))
     combine = combiner(
             num_results=int(cfg.get('number-of-results',5)),
-            error_rates=ast.literal_eval(cfg.get('error_rates','None'))
+            error_rates=ast.literal_eval(cfg.get('error_rates','None')),
             super_set_file=cfg.get('super-meta-data',None),
             delete_after_combine=bool(cfg.get('delete-after-combine',0)),
             )
