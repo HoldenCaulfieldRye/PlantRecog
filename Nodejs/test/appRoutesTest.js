@@ -167,7 +167,7 @@ describe('Application_server',function(){
 
     describe('routes.upload', function(){
 
-		it('should accept an image upload and respond with valid objectID', function(done){
+		it('should accept an image upload and respond with a new valid objectID', function(done){
 			this.timeout(4000);
 		    request(app)
 			.post('/upload')
@@ -184,6 +184,32 @@ describe('Application_server',function(){
 			    }
 			    else {
 			    assert(checkForHexRegExp.test(res.body.id));
+			    assert(checkForHexRegExp.test(res.body.group_id));
+			    setTimeout(done, 3000);
+			    };
+			});
+
+		});
+
+		it('should accept an image upload and respond with the same objectID', function(done){
+			this.timeout(4000);
+			g_id = "531b4461aa4b00752588b5d7";
+		    request(app)
+			.post('/upload')
+			.field("date", null)
+			.field("latitude", null)
+			.field("longitude", null)
+			.field("group_id", g_id)
+			.field("segment", "flower")
+			.attach('datafile','./test/fixtures/sample.jpg')
+			.expect(200)
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+			    assert(checkForHexRegExp.test(res.body.id));
+			    assert(res.body.group_id === g_id );
 			    setTimeout(done, 3000);
 			    };
 			});
@@ -200,6 +226,27 @@ describe('Application_server',function(){
 			.field("group_id", 0)
 			.field("segment", "flower")
 			.expect(200, 'Nothing to add to database: there is no Datafile attached!')
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+				done();
+			    };
+			});
+
+		});
+
+		it('should gracefully say no segment information', function(done){
+
+		    request(app)
+			.post('/upload')
+			.field("date", null)
+			.field("latitude", null)
+			.field("longitude", null)
+			.field("group_id", 0)
+			.attach('datafile','./test/fixtures/sample.jpg')
+			.expect(200, 'You did not supply a segment type, I cannot continue')
 			.end(function(err,res){
 			    if(err){
 				done(err);
