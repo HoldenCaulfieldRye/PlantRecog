@@ -12,7 +12,7 @@ class TagTests(unittest.TestCase):
         files = tag._collect_filenames_and_labels(HERE+'test_data/','*.jpg','.xml2')
         model = script.make_model(tag.TagConvNet,'tag',
                                    HERE+'../../models/component_network/options.cfg')
-        tagger = tag.Tagger(batch_size = 10,model=model,size=(10,10))
+        tagger = tag.Tagger(batch_size = 128,model=model,size=(256,256))
         tagger(files)
         found_xml = tag._collect_filenames_and_labels(HERE+'test_data/','*.xml2','.xml2')
         self.assertEqual(len(files),len(found_xml))

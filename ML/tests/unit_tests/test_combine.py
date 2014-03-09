@@ -60,8 +60,8 @@ class CombineTests(unittest.TestCase):
                    'ConvNet2':HERE+'test_data/conv2.pickle', 
                    'ConvNet3':HERE+'test_data/conv3.pickle'})
         self.assertEqual(result.shape[0],6)
-        self.assertEqual(np.max(result),0.342)
-        self.assertEqual(np.min(result),0.025)
+        self.assertAlmostEqual(np.max(result),0.3416666666666)
+        self.assertAlmostEqual(np.min(result),0.0249999999999)
 
 
 # ------------------------------------------------

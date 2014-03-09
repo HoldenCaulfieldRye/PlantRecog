@@ -122,6 +122,7 @@ class DataProvider:
     @classmethod
     def register_data_provider(cls, name, desc, _class):
         if name in dp_types:
+            return
             raise DataProviderException("Data provider %s already registered" % name)
         dp_types[name] = desc
         dp_classes[name] = _class
