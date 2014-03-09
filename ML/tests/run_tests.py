@@ -17,13 +17,17 @@ default_directories = [
 
 if __name__ == '__main__':
     store_coverage = False
-    if len(sys.argv) > 1 and sys.argv[1] == '-coverage':
-        store_coverage = True
-        if len(sys.argv) > 2:
-            cov = coverage.coverage(include=sys.argv[2], branch=True)
-        else:
+    verbose = False
+    for arg in sys.argv:
+        if arg == '-coverage':
+            store_coverage = True
             cov = coverage.coverage(include=default_directories, branch=True)
-        cov.start()
+            cov.start()
+        if arg == '-verbose':
+            verbose = True
+    if not verbose:
+        f = open(os.devnull, 'w')
+        sys.stdout = f
     testsuite = unittest.TestLoader().discover('.')
     unittest.TextTestRunner(verbosity=1).run(testsuite)
     if store_coverage:

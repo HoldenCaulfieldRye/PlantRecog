@@ -3,12 +3,14 @@ import os, sys
 import cPickle as pickle
 import libs 
 import numpy as np
+import time
 
 
 HERE = os.path.abspath(os.path.dirname(__file__))+'/'
 
 
 class RunTests(unittest.TestCase):
+
 
 
     def test_without_params(self):
@@ -31,6 +33,7 @@ class RunTests(unittest.TestCase):
             self.assertIn(items[1],a_list)
 
 
+    # Note this test requires the GPU to be unoccupied
     def test_with_correct_via_console(self):    
         if os.path.exists(HERE+'test_data/11.pickle'):
             os.remove(HERE+'test_data/11.pickle')
@@ -46,7 +49,6 @@ class RunTests(unittest.TestCase):
         self.assertTrue(os.path.exists(HERE+'test_data/12.pickle'))
         self.assertTrue(os.path.exists(HERE+'test_data/13.pickle'))
         self.assertTrue(os.path.exists(HERE+'test_data/14.pickle'))
-
         f = open(HERE+'test_data/11.pickle','rb')
         prb_matrix = pickle.load(f)
         self.assertGreater(np.sum(prb_matrix),0.98)

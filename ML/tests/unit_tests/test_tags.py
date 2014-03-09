@@ -7,17 +7,6 @@ HERE = os.path.abspath(os.path.dirname(__file__))+'/'
 
 class TagTests(unittest.TestCase):
 
-    # Note this test requires the GPU to be unoccupied
-    def test_model(self):    
-        files = tag._collect_filenames_and_labels(HERE+'test_data/','*.jpg','.xml2')
-        model = script.make_model(tag.TagConvNet,'tag',
-                                   HERE+'../../models/component_network/options.cfg')
-        tagger = tag.Tagger(batch_size = 128,model=model,size=(256,256))
-        tagger(files)
-        found_xml = tag._collect_filenames_and_labels(HERE+'test_data/','*.xml2','.xml2')
-        self.assertEqual(len(files),len(found_xml))
-        for (xml,other) in found_xml:
-            os.remove(xml)
 
 
     def test_collect_filenames(self):                             

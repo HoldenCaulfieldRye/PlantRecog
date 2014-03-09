@@ -171,13 +171,12 @@ def console():
     cfg = get_options(sys.argv[1], 'tag')
     cfg_dataset = get_options(sys.argv[1], 'dataset')
     random_seed(int(cfg.get('seed', '42')))
-    collector = resolve(
-        cfg.get('collector', 'noccn.tag._collect_filenames_and_labels'))
+    collector = _collect_filenames_and_labels
     filenames_and_labels = collector(cfg['input-path'],
                                      cfg.get('pattern', '*.JPEG'),
                                      cfg.get('meta_data_file_ext', '.xml')
                                     )
-    creator = resolve(cfg.get('creator', 'noccn.tag.Tagger'))
+    creator = Tagger
     create = creator(
         batch_size=int(cfg.get('batch-size', 1000)),
         channels=int(cfg_dataset.get('channels', 3)),

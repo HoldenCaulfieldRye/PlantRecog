@@ -18,3 +18,7 @@ Then to run the tests, and get a coverage reading (both statement and branch met
 To run the coverage metrics only for specific directories run e.g. to run for all of the noccn scripts use:
 
     python run_tests.py -coverage ../noccn/noccn/*
+
+To run while outputting the results:
+    
+    python run_tests.py -coverage -verbose    
