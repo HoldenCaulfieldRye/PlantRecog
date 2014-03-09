@@ -1,3 +1,0 @@
-Number of label classes: 2 
-Number of images: 2
-Counter({'TestTwo': 1, 'TestOne': 1})
