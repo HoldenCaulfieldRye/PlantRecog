@@ -76,7 +76,10 @@ class Combiner(object):
                 combined_prob = np_array
             else:
                 combined_prob = np.vstack((combined_prob,np_array))
-        combined_prob = np.sum(combined_prob,axis=0)/np.sum(combined_prob)
+        if combined_prob.ndim > 1:
+            combined_prob = np.sum(combined_prob,axis=0)/np.sum(combined_prob)
+        else:
+            combined_prob = combined_prob/np.sum(combined_prob)
         self.output_results(combined_prob)
         return combined_prob
 
