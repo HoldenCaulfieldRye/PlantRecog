@@ -24,6 +24,11 @@ class CombineTests(unittest.TestCase):
             your_method()
 
 
+    def no_sysexit_test_via_console(self):    
+        sys.argv = ['combine.py','leaf',HERE+'test_data/11.jpg','flower',HERE+'test_data/12.jpg']
+        libs.combine.console(HERE+'test_data/run.cfg')
+
+
     def test_with_super(self):
         super_set_file = {'labels':{'super_labels':['apple','banana','carrot','grape','kra','zea'],
                                     'ConvNet1':['banana','grape','zea'],
@@ -55,15 +60,8 @@ class CombineTests(unittest.TestCase):
                    'ConvNet2':HERE+'test_data/conv2.pickle', 
                    'ConvNet3':HERE+'test_data/conv3.pickle'})
         self.assertEqual(result.shape[0],6)
-
-
-
-
-    def test_without_via_console(self):    
-        sys.argv = ['combine.py','leaf',HERE+'test_data/11.jpg','flower',HERE+'test_data/12.jpg']
-        libs.combine.console(HERE+'test_data/run.cfg')
-
-
+        self.assertEqual(np.max(result),0.342)
+        self.assertEqual(np.min(result),0.025)
 
 
 # ------------------------------------------------
