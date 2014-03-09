@@ -166,7 +166,7 @@ def console(config_file = None):
         print 'Must give a component type and valid image file as arguments'
         sys.exit(INVALID_COMMAND_ARGS)
     if config_file is None:    
-        cfg = get_options(os.path.dirname(os.path.abspath(__file__))+config_file, 'run')
+        cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
     else:
         cfg = get_options(config_file, 'run')
     valid_args = cfg.get('valid_args','entire,stem,branch,leaf,fruit,flower').split(',')
