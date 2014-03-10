@@ -7,7 +7,7 @@ sys.path.append(os.getcwd()+'/../../cuda_convnet/')
 import convdata
 
 # parameterise number of batches and number of images per batch?
-def set_up_dummy_batches(batch_dir='../tests/'):
+def set_up_dummy_batches(batch_dir='../tests/unit_tests/'):
     os.chdir(batch_dir)
     try:
         os.mkdir('DataTest')
@@ -23,9 +23,7 @@ def set_up_dummy_batches(batch_dir='../tests/'):
     # create dummy images         
     filename = ''
     # create 6 different images
-    testImgs, control = create_images_to_test_patching(6, 256, 224)
-    # for img_np in testImgs:
-    #     print 'image received:', img_np
+    testImgs = create_images_to_test_patching(6, 256, 224)
     
     # create 10 batches
     for i in range(10): 
@@ -38,12 +36,16 @@ def set_up_dummy_batches(batch_dir='../tests/'):
             img_file = Image.fromarray(img_np)
             img_file.save('img_'+`j`+'.jpg')
         os.chdir('../')
+        
+    # create dummy batch metadata
+    shutil.copyfile('../test_data/example_ensemble/One/batches.meta', 'batches.meta')
+
+    
     return return_dir
 
 
 def create_images_to_test_patching(amount, img_size=256, patch_size=224, path_to_save_dir=''):
     imgArray = []
-    control = []
     num_cases = amount / 3
     whiteImg = np.zeros((img_size, img_size, 3), dtype=np.uint8)
     whiteImg[:,:,:] = 255
@@ -70,7 +72,7 @@ def create_images_to_test_patching(amount, img_size=256, patch_size=224, path_to
             img_jpg = Image.fromarray(img)
             img_jpg.save('patch_test_'+`i`+'.jpg')
 
-    return imgArray, control
+    return imgArray
 
 
 if __name__ == "__main__":
@@ -78,7 +80,7 @@ if __name__ == "__main__":
 
     testdir = set_up_dummy_batches()
 
-    D = convdata.AugmentLeafDataProvider(testdir)
+    D = convdata.AugmentLeafDataProvider('/home/alex/Git/group-project-master/ML/tests/unit_tests/test_data/example_ensemble/One')
     # sort out data_dic['labels']!!
     epoch, batchnum, [cropped, self.data_dic['labels']] = D.get_next_batch() 
     

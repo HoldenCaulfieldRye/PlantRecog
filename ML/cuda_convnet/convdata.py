@@ -22,14 +22,16 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-############################## DIMENSIONS INFO #################################################
-# data_dic is entire dataset: a list of [datadic['data'], datadic['labels']] elements          #
-# datadic['data'] is a num_colors x batchSize x img_size x img_size nparray                    #
-# datadic['labels'] is a batchSize x img_size x img_size nparray?                              #
-# AugmentLeaf.cropped_data is a (img_size*img_size*3)x(batchSize*datamult) nparray             #
-# CroppedCIFAR.cropped_data is a list of 2 (img_size*img_size*3)x(batchSize*datamult) nparrays #
-# CroppedCIFAR.cropped is a (img_size*img_size*3)x(batchSize*datamult) nparray                 #
-################################################################################################
+############################## DIMENSIONS INFO #########################################
+# data_dic is entire dataset: a list of [datadic['data'], datadic['labels']] elements. #        
+#          LabeledMem only.                                                            #
+# datadic['data'] is a num_colors x batchSize x img_size x img_size nparray.           #
+# datadic['labels'] is a batchSize x img_size x img_size nparray?                      #
+# AugmentLeaf.cropped_data is a (img_size*img_size*3)x(batchSize*datamult) nparray.    #
+# CroppedCIFAR.cropped_data is a list of 2 (img_size*img_size*3)x(batchSize*datamult)  #
+#                           nparrays.                                                  #
+# CroppedCIFAR.cropped is a (img_size*img_size*3)x(batchSize*datamult) nparray.        #
+########################################################################################
 
 from data import *
 import numpy.random as nr
@@ -43,7 +45,7 @@ import random as r
 # (image resizing (eg to get all 256x256) is done in nocnn/dataset.py)
 
 class AugmentLeafDataProvider(LabeledDataProvider):
-    def __init__(self, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, dp_params={}, test=False):
+    def __init__(self, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, dp_params={'crop_border': 16, 'multiview_test': False}, test=False):
         LabeledDataProvider.__init__(self, data_dir, batch_range, init_epoch, init_batchnum, dp_params, test)
         if batch_range == None:
             batch_range = DataProvider.get_batch_nums(data_dir)
@@ -69,7 +71,7 @@ class AugmentLeafDataProvider(LabeledDataProvider):
         cropped = n.zeros((self.get_data_dims(), 
                            self.data_dic['data'].shape[1]*self.data_mult), # data_dic['data'].shape[1] == batchSize
                           dtype=n.single)
-        self.__select_patch(datadic['data'], self.inner_size, cropped) 
+        self.__select_patch(self.data_dic['data'], self.inner_size, cropped) 
         cropped = n.require((cropped - self.data_mean), dtype=n.single, requirements='C') # demean, convert to single precision float
         # convert to single precision, make sure C-ordered
         self.data_dic['labels'] = n.require(self.data_dic['labels'].reshape((1,cropped.shape[1])), dtype=n.single, requirements='C')
@@ -103,10 +105,13 @@ class AugmentLeafDataProvider(LabeledDataProvider):
             # compute error by averaging over top left, bottom left, central, top right, bottom right patches
                 start_positions = [(0,0),  (0, self.border_size*2),
                                    (self.border_size, self.border_size),
-                                  (self.border_size*2, 0), (self.border_size*2, self.border_size*2)]
-                end_positions = [(sy+self.inner_size, sx+self.inner_size) for (sy,sx) in start_positions]
+                                   (self.border_size*2, 0),
+                                   (self.border_size*2, self.border_size*2)]
+                end_positions = [(sy+self.inner_size, sx+self.inner_size)
+                                 for (sy,sx) in start_positions]
                 for i in xrange(self.num_views/2):
-                    pic = y[:,start_positions[i][0]:end_positions[i][0],start_positions[i][1]:end_positions[i][1],:]
+                    pic = y[:,start_positions[i][0]:end_positions[i][0],
+                            start_positions[i][1]:end_positions[i][1],:]
                     target[:,i * x.shape[1]:(i+1)* x.shape[1]] = pic.reshape((self.get_data_dims(),x.shape[1]))
                     target[:,(self.num_views/2 + i) * x.shape[1]:(self.num_views/2 +i+1)* x.shape[1]] = pic[:,:,::-1,:].reshape((self.get_data_dims(),x.shape[1]))
             else:
