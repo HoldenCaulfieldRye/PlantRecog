@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>15611</ObservationId>
+  <FileName>26.jpg</FileName>
+  <MediaId>26</MediaId>
+  <Vote>3</Vote>
+  <Content>Flower</Content>
+  <ClassId>30394</ClassId>
+  <Family>BORAGINACEAE</Family>
+  <Species>Symphytum officinale L.</Species>
+  <Genus>Symphytum</Genus>
+  <Author>thierry pernot</Author>
+  <Date />
+  <Location />
+  <Latitude />
+  <Longitude />
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>

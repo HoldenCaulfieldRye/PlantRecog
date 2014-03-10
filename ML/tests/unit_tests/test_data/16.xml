@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>9351</ObservationId>
+  <FileName>16.jpg</FileName>
+  <MediaId>16</MediaId>
+  <Vote>4</Vote>
+  <Content>Flower</Content>
+  <ClassId>4838</ClassId>
+  <Family>ROSACEAE</Family>
+  <Species>Prunus dulcis (Mill.) D.A.Webb</Species>
+  <Genus>Prunus</Genus>
+  <Author>paul fabre</Author>
+  <Date>09/03/11</Date>
+  <Location>Clapiers (34)</Location>
+  <Latitude>43.65</Latitude>
+  <Longitude>3.883333</Longitude>
+  <YearInCLEF>ImageCLEF2013</YearInCLEF>
+  <IndividualPlantId2013>4270</IndividualPlantId2013>
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>

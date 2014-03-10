@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>19493</ObservationId>
+  <FileName>19.jpg</FileName>
+  <MediaId>19</MediaId>
+  <Vote>4</Vote>
+  <Content>LeafScan</Content>
+  <ClassId>5124</ClassId>
+  <Family>SALICACEAE</Family>
+  <Species>Populus alba L.</Species>
+  <Genus>Populus</Genus>
+  <Author>daniel barthelemy</Author>
+  <Date>12/10/11</Date>
+  <Location />
+  <Latitude />
+  <Longitude />
+  <YearInCLEF>ImageCLEF2012</YearInCLEF>
+  <IndividualPlantId2013>1552</IndividualPlantId2013>
+  <ImageID2013>35428</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>

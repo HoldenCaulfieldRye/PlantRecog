@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>2832</ObservationId>
+  <FileName>32.jpg</FileName>
+  <MediaId>32</MediaId>
+  <Vote>4</Vote>
+  <Content>Leaf</Content>
+  <ClassId>14524</ClassId>
+  <Family>CARYOPHYLLACEAE</Family>
+  <Species>Silene latifolia Poir.</Species>
+  <Genus>Silene</Genus>
+  <Author>pierre bonnet</Author>
+  <Date>02/05/13</Date>
+  <Location>Villeneuve-lès-Maguelone (34)</Location>
+  <Latitude />
+  <Longitude />
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>

@@ -4,6 +4,7 @@ var ObjectId = require('mongodb').ObjectID;
 var exec = require('child_process').exec;
 var formidable = require ('formidable');
 var path = require ('path');
+var util = require ('util');
 
 
 exports.index = function(req, res){
@@ -57,7 +58,7 @@ exports.classify = function(db,configArgs) {
 					    console.log('json_obj: ' + json_obj);
 					    
 					    collection.findAndModify(	        	
-				              { '_id': new BSON.ObjectID(req.body._id)}, /* new BSON.  '52ff886b27d625b55344093f' */
+				              { '_id': new BSON.ObjectID(fields._id)}, /* new BSON.  '52ff886b27d625b55344093f' */
 				              [],
 				              { $set : { 
 				                  "submission_state" : "Image classified",

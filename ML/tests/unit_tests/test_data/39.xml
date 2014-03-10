@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>18272</ObservationId>
+  <FileName>39.jpg</FileName>
+  <MediaId>39</MediaId>
+  <Vote>4</Vote>
+  <Content>LeafScan</Content>
+  <ClassId>30283</ClassId>
+  <Family>ANACARDIACEAE</Family>
+  <Species>Pistacia terebinthus L.</Species>
+  <Genus>Pistacia</Genus>
+  <Author>daniel barthelemy</Author>
+  <Date>07/07/10</Date>
+  <Location>Pézènes-les-Mines (34)</Location>
+  <Latitude>43.583333</Latitude>
+  <Longitude>3.25</Longitude>
+  <YearInCLEF>ImageCLEF2011</YearInCLEF>
+  <IndividualPlantId2013>1528</IndividualPlantId2013>
+  <ImageID2013>8967</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>

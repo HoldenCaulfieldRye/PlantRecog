@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>6249</ObservationId>
+  <FileName>14.jpg</FileName>
+  <MediaId>14</MediaId>
+  <Vote>4</Vote>
+  <Content>LeafScan</Content>
+  <ClassId>8522</ClassId>
+  <Family>SAPINDACEAE</Family>
+  <Species>Acer campestre L.</Species>
+  <Genus>Acer</Genus>
+  <Author>pierre bonnet</Author>
+  <Date>17/04/12</Date>
+  <Location>Montpellier (34)</Location>
+  <Latitude>43.6</Latitude>
+  <Longitude>3.883333</Longitude>
+  <YearInCLEF>ImageCLEF2013</YearInCLEF>
+  <IndividualPlantId2013>3358</IndividualPlantId2013>
+  <ImageID2013>21310</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>

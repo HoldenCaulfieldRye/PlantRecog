@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>6605</ObservationId>
+  <FileName>23.jpg</FileName>
+  <MediaId>23</MediaId>
+  <Vote>4</Vote>
+  <Content>LeafScan</Content>
+  <ClassId>4109</ClassId>
+  <Family>PLATANACEAE</Family>
+  <Species>Platanus x hispanica Mill. ex Münchh.</Species>
+  <Genus>Platanus</Genus>
+  <Author>pierre bonnet</Author>
+  <Date>18/02/11</Date>
+  <Location>Montpellier (34)</Location>
+  <Latitude>43.6</Latitude>
+  <Longitude>3.883333</Longitude>
+  <YearInCLEF>ImageCLEF2011</YearInCLEF>
+  <IndividualPlantId2013>4353</IndividualPlantId2013>
+  <ImageID2013>26183</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>

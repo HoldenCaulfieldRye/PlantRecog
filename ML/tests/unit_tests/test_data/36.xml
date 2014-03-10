@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>4335</ObservationId>
+  <FileName>36.jpg</FileName>
+  <MediaId>36</MediaId>
+  <Vote>4</Vote>
+  <Content>Fruit</Content>
+  <ClassId>4761</ClassId>
+  <Family>ROSACEAE</Family>
+  <Species>Malus pumila Mill.</Species>
+  <Genus>Malus</Genus>
+  <Author>herve goeau</Author>
+  <Date>04/09/13</Date>
+  <Location>Torfou (91)</Location>
+  <Latitude>48.533333</Latitude>
+  <Longitude>2.233333</Longitude>
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>
