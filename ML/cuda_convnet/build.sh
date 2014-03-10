@@ -1,6 +1,7 @@
 
-# SOLUTIONS
+# ISSUES
 # - once modify .bashrc, need to exit shell and restart shell!
+# - script only works on lab machine - need path to gpu_sdk as command line argument! 
 
 # Copy CUDA SDK to home directory
 if [ -d ~/CUDA_SDK ]; then

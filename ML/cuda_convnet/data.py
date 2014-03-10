@@ -30,7 +30,7 @@ from util import *
 BATCH_META_FILE = "batches.meta"
 
 class DataProvider:
-    BATCH_REGEX = re.compile('^data_batch_(\d+)(\.\d+)?$')
+    BATCH_REGEX = re.compile('^data_batch_(\d+)(\.\d+)?$') # to make sure filenames in data_dir are of a certain form
     def __init__(self, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, dp_params={}, test=False):
         if batch_range == None:
             batch_range = DataProvider.get_batch_nums(data_dir)
@@ -100,11 +100,15 @@ class DataProvider:
         if batchnum is None:
             batchnum = self.curr_batchnum
         return os.path.join(self.data_dir, 'data_batch_%d' % batchnum)
+
     
+    # This method is used to instantiate a DataProvider derived class!
+    # it is useful when which derived class to use is only known at runtime
     @classmethod
     def get_instance(cls, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, type="default", dp_params={}, test=False):
-        # why the fuck can't i reference DataProvider in the original definition?
-        #cls.dp_classes['default'] = DataProvider
+        # krizhevsky: why the fuck can't i reference DataProvider in the original definition?
+        # krizhevsky: cls.dp_classes['default'] = DataProvider
+        # adalyac: seems this 'or' trick will modify type if DataProvider.get_batch_meta(data_dir)['dp_type'] is nonzero or nonempty or smth
         type = type or DataProvider.get_batch_meta(data_dir)['dp_type'] # allow data to decide data provider
         if type.startswith("dummy-"):
             name = "-".join(type.split('-')[:-1]) + "-n"
@@ -132,6 +136,7 @@ class DataProvider:
     
     @staticmethod
     def get_batch_filenames(srcdir):
+        # return only the ones which have a filename otf given by BATCH_REGEX 
         return sorted([f for f in os.listdir(srcdir) if DataProvider.BATCH_REGEX.match(f)], key=alphanum_key)
     
     @staticmethod

@@ -37,13 +37,16 @@ import numpy as n
 import random as r
 
 
-# MODIFY NOCCN:
+# MODIFY NOCCN?
 # Note command line crop_border arg expected! (and if --test-only provided, --multiview-test is optional)
-# Would be better to have inner_size as command line arg in case 224x224 patches are too low def for fine grained classification
+# Might be better to have inner_size as command line arg in case 224x224 patches are too low def for fine grained classification
 # (image resizing (eg to get all 256x256) is done in nocnn/dataset.py)
+
 class AugmentLeafDataProvider(LabeledDataProvider):
-    def __init__(self, data_dir, batch_range, init_epoch=1, init_batchnum=None, dp_params={}, test=False):
+    def __init__(self, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, dp_params={}, test=False):
         LabeledDataProvider.__init__(self, data_dir, batch_range, init_epoch, init_batchnum, dp_params, test)
+        if batch_range == None:
+            batch_range = DataProvider.get_batch_nums(data_dir)
         self.data_mean = self.batch_meta['data_mean']
         self.num_colors = 3
         # patch_idx: x coordinate of patch, y coordinate of patch, flip image no/yes
