@@ -35,7 +35,10 @@ def bucketing(threshold, component=None, componentProb=0.0):
 
     buckets = get_buckets(threshold, component, componentProb)
 
-    res = db.plants.find({'Bucket':{'$in':buckets}, 'Exclude':False}, {'Image':True, 'BucketSpecies':True , '_id':False})
+    if component is None:
+        res = db.plants.find({'Bucket':{'$in':buckets}, 'Exclude':False, 'Component_Tag_Prob':{'$gte':componentProb}}, {'Image':True, 'BucketSpecies':True , '_id':False})
+    else:
+        res = db.plants.find({'Bucket':{'$in':buckets}, 'Exclude':False, 'Component_Tag':component, 'Component_Tag_Prob':{'$gte':componentProb}}, {'Image':True, 'BucketSpecies':True , '_id':False})
     print 'number of images returned: ' + str(res.count())
     for i in res:
         images.append(i['Image'])
