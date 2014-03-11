@@ -16,6 +16,7 @@
 NSManagedObjectContext *testingContext;
 NSPersistentStoreCoordinator *persistentStoreCoordinator;
 NSManagedObjectModel *model;
+NSManagedObjectContext *retainContext;
 
 extern void __gcov_flush();
 
@@ -56,7 +57,7 @@ extern void __gcov_flush();
     // This is called once at the end
     NSArray *stores = [persistentStoreCoordinator persistentStores];
     [[testingContext persistentStoreCoordinator] removePersistentStore:[stores firstObject] error:nil];
-    __gcov_flush(); // Flush coverage files
+    __gcov_flush();
     [super tearDown];
 }
 
@@ -145,11 +146,13 @@ extern void __gcov_flush();
     [[database addNewObservationToSpecimen:specimen2] setUploaded:true];
     [[database addNewObservationToSpecimen:specimen2] setUploaded:true];
     [specimen2 setGroupid:@"GROUPID222"];
+    [specimen2 setComplete:true];
     
     // Needs Updating
     BLEFSpecimen *specimen3 = [database newSpecimen];
     [[database addNewObservationToSpecimen:specimen3] setUploaded:true];
     [specimen3 setGroupid:@"GROUPID333"];
+    [specimen3 setComplete:true];
     
     // Not uploading but doesn't have a groupID
     [database newSpecimen];
@@ -324,7 +327,7 @@ extern void __gcov_flush();
 {
     BLEFDatabase * database = [self createDatabaseWithContext:testingContext];
     [database saveChanges];
-}
+}   
 
 
 @end

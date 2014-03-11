@@ -34,6 +34,8 @@ extern void __gcov_flush();
 - (BOOL) updateObservation:(NSManagedObjectID *)observationID usingData:(NSData *)data andError:(NSError *)error;
 - (BOOL) updateSpecimen:(NSManagedObjectID *)specimenID usingData:(NSData *)data andError:(NSError *)error;
 - (void) uploadErrorWaitAndRetry;
+- (void) uploadCompletion:(BOOL) success;
+- (void)networkRetry:(NSTimer*)timer;
 
 @end
 
@@ -61,7 +63,7 @@ extern void __gcov_flush();
     [[NSFileManager defaultManager] removeItemAtPath:imagePath error:nil];
     NSArray *stores = [persistentStoreCoordinator persistentStores];
     [[testingContext persistentStoreCoordinator] removePersistentStore:[stores firstObject] error:nil];
-    __gcov_flush(); // Flush coverage files
+    __gcov_flush();
     [super tearDown];
     [OHHTTPStubs removeAllStubs];
 }
@@ -285,6 +287,7 @@ extern void __gcov_flush();
     BLEFObservation *observation = [self createTestObservation:server];
     [observation setUploaded:true];
     [[observation specimen] setGroupid:@"ABC123"];
+    [[observation specimen] setComplete:true];
     [server processUpdates];
 }
 
@@ -294,10 +297,12 @@ extern void __gcov_flush();
     BLEFObservation *observation = [self createTestObservation:server];
     [observation setUploaded:true];
     [[observation specimen] setGroupid:@"ABC123"];
+    [[observation specimen] setComplete:true];
     
     BLEFObservation *observation2 = [self createTestObservation:server];
     [observation2 setUploaded:true];
     [[observation2 specimen] setGroupid:@"ABC321"];
+    [[observation2 specimen] setComplete:true];
     [server reStartUpdateProccessing];
     [server processUpdates];
 }
@@ -306,6 +311,19 @@ extern void __gcov_flush();
 {
     BLEFServerInterface *server = [self createServerInterface];
     [server uploadErrorWaitAndRetry];
+    [server networkRetry:nil];
+}
+
+- (void) test_uploadComplete
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    [server uploadCompletion:true];
+}
+
+- (void) test_uploadComplete2
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    [server uploadCompletion:false];
 }
 
 @end

@@ -13,6 +13,7 @@
 
 @implementation BLEFSpecimen
 
+@dynamic complete;
 @dynamic created;
 @dynamic groupid;
 @dynamic latitude;

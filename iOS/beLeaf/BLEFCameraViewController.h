@@ -13,7 +13,7 @@
 @interface BLEFCameraViewController : UIViewController
     <AVCaptureVideoDataOutputSampleBufferDelegate>
 
-@property (strong, nonatomic) BLEFDatabase * database;
+@property (strong, nonatomic) NSManagedObjectContext *context;
 
 @property (weak, nonatomic) IBOutlet UIView *previewView;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentSelection;

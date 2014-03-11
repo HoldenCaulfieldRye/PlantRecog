@@ -7,11 +7,14 @@
 //
 
 #import "BLEFCameraViewController.h"
+#import "BLEFCaptureBuffer.h"
 
 @interface BLEFCameraViewController ()
 
 @property (strong, nonatomic) UIImageView * imageReviewView;
-@property (strong, nonatomic) NSMutableArray * sessionImages;
+@property (strong, nonatomic) BLEFCaptureBuffer *captureBuffer;
+@property (strong, nonatomic) NSArray *segments;
+@property (nonatomic) NSInteger selectionIndexBuffer;
 
 @end
 
@@ -31,20 +34,16 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    // Database
-    // Setup UI Database
-    if (_database == nil){
-    _database = [[BLEFDatabase alloc] init];
-    }
-    
-    // Camera Images
-    _sessionImages = [NSMutableArray arrayWithObjects:[NSNull null], [NSNull null], [NSNull null], [NSNull null], nil];
+    // Setup Buffer
+    _segments = @[@"entire", @"leaf" , @"flower", @"fruit"];
+    _captureBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:_segments usingContext:_context];
     
     // UI
     _imageReviewView = [[UIImageView alloc] init];
     _imageReviewView.frame = _previewView.bounds;
     [_previewView addSubview:_imageReviewView];
     [_segmentSelection addTarget:self action:@selector(segmentSelectionChanged:) forControlEvents:UIControlEventValueChanged];
+    _selectionIndexBuffer = 0;
     
     // AV
     [self setupCaptureSession];
@@ -64,55 +63,43 @@
 
 #pragma mark - UI Methods
 
+- (NSString *)currentSegmentSelection
+{
+    return [_segments objectAtIndex:[_segmentSelection selectedSegmentIndex]];
+}
+
 - (IBAction)takePhotoButtonPressed:(id)sender
 {
     if ([_captureSession isRunning]){
         [self captureImageWithHandler:^(NSData *imageData) {
             [self processImageData:imageData];
         }];
-    } else {
+    } else if (![_captureBuffer slotComplete:[self currentSegmentSelection]]){
         [self hideImage];
-        [self deleteImageData:[_segmentSelection selectedSegmentIndex]];
+        [_captureBuffer removeDataForSlot:[self currentSegmentSelection]];
         [self startCaptureSession];
     }
 }
 
 - (IBAction)finishedSessionButtonPressed:(id)sender
 {
-    // Create Specimen
-    BLEFSpecimen *newSpecimen = [_database newSpecimen];
+    // Disable Button
+    UIButton *button = (UIButton *)sender;
+    button.enabled = false;
     
-    // For each segment with data - create observation
-    
-    for (id dataObject in _sessionImages) {
-        if ([dataObject isKindOfClass:[NSData class]]){
-            
-            BLEFObservation *newObservation = [_database addNewObservationToSpecimen:newSpecimen];
-
-            [newObservation generateThumbnailFromImage:[UIImage imageWithData:(NSData *)dataObject]];
-            
-            [newObservation saveImage:(NSData *)dataObject completion:^(BOOL success) {
-                [_database saveChanges];
-            }];
-        }
-    }
-
-    // Dismiss view
-
-    [self dismissViewControllerAnimated:YES completion:nil];
+    // Save current segment
+    [_captureBuffer completeSlotNamed:[self currentSegmentSelection] completion:^(BOOL success) {
+        [_captureBuffer completeCapture];
+        [[_captureBuffer database] saveChanges];
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }];
 }
 
 - (void)processImageData:(NSData *)imageData
 {
     UIImage *image = [UIImage imageWithData:imageData];
     [self flashToImage:image];
-    [_sessionImages insertObject:imageData atIndex:[_segmentSelection selectedSegmentIndex]];
-    // TODO...?
-}
-
-- (void)deleteImageData:(NSInteger)segmentNumber
-{
-    [_sessionImages replaceObjectAtIndex:segmentNumber withObject:[NSNull null]];
+    [_captureBuffer addData:imageData toSlot:[self currentSegmentSelection]];
 }
 
 - (void)displayImage:(UIImage *)image
@@ -151,10 +138,14 @@
 
 - (void)segmentSelectionChanged:(id)sender
 {
-    id objectAtIndex = [_sessionImages objectAtIndex:[_segmentSelection selectedSegmentIndex]];
+    [_captureBuffer completeSlotNamed:[_segments objectAtIndex:_selectionIndexBuffer] completion:^(BOOL success){
+        [[_captureBuffer database] saveChanges];
+    }];
+    _selectionIndexBuffer = [_segmentSelection selectedSegmentIndex];
     
-    if ([objectAtIndex isKindOfClass:[NSData class]]){
-        UIImage *imageForSegment = [UIImage imageWithData:(NSData *)objectAtIndex];
+    id objectForSegment = [_captureBuffer imageForSlotNamed:[self currentSegmentSelection]];
+    if (objectForSegment != nil){
+        UIImage *imageForSegment = [UIImage imageWithData:(NSData *)objectForSegment];
         [self displayImage:imageForSegment];
     } else {
         [self hideImage];

@@ -24,7 +24,6 @@
 		5E2AD58F1863B6DA00595828 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E2AD5731863B6D900595828 /* CoreData.framework */; };
 		5E2AD5971863B6DA00595828 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5951863B6DA00595828 /* InfoPlist.strings */; };
 		5E2AD5A31863BB5A00595828 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
-		5E4F48EE18CA0B480087ACF9 /* BLEFUIElementTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E4F48ED18CA0B480087ACF9 /* BLEFUIElementTest.m */; };
 		5E9729D1953B46A8958CBB08 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A64737D915944062A1EA1E51 /* libPods.a */; };
 		E9100F6B18BA437800006AF0 /* beLeaf.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5811863B6DA00595828 /* beLeaf.xcdatamodeld */; };
 		E9100F6D18BA439800006AF0 /* BLEFSpecimen.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396271897F8830067A991 /* BLEFSpecimen.m */; };
@@ -35,6 +34,12 @@
 		E94400C118B91B1500D2C3C4 /* BLEFDatabaseTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E94400C018B91B1500D2C3C4 /* BLEFDatabaseTest.m */; };
 		E95131B318B96AB700B2DDAD /* BLEFDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962D1897F94F0067A991 /* BLEFDatabase.m */; };
 		E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
+		E9772F6318CF35DC00D15247 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
+		E9772F6618CF49EE00D15247 /* BLEFCaptureBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = E9772F6518CF49EE00D15247 /* BLEFCaptureBuffer.m */; };
+		E9772F6718CF49EE00D15247 /* BLEFCaptureBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = E9772F6518CF49EE00D15247 /* BLEFCaptureBuffer.m */; };
+		E9772F6918CF4A0900D15247 /* BLEFCaptureBufferTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E9772F6818CF4A0900D15247 /* BLEFCaptureBufferTest.m */; };
+		E9772F6B18CF5DA800D15247 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9772F6A18CF5DA800D15247 /* CoreLocation.framework */; };
+		E9772F6C18CF5DBC00D15247 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9772F6A18CF5DA800D15247 /* CoreLocation.framework */; };
 		E9829C6D189D7662004DD07F /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
 		E98EF99E18C36D4D001EC74A /* BLEFCameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E98EF99D18C36D4D001EC74A /* BLEFCameraViewController.m */; };
 		E9A5C87618C20EC000F9F6CF /* BLEFResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E9A5C87518C20EC000F9F6CF /* BLEFResult.m */; };
@@ -77,7 +82,6 @@
 		5E2AD5941863B6DA00595828 /* beLeafTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "beLeafTests-Info.plist"; sourceTree = "<group>"; };
 		5E2AD5961863B6DA00595828 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5E2AD5A21863BB5A00595828 /* iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = iPhone.storyboard; sourceTree = "<group>"; };
-		5E4F48ED18CA0B480087ACF9 /* BLEFUIElementTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFUIElementTest.m; sourceTree = "<group>"; };
 		9B5FD93065DA4C2E89495E05 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
 		A64737D915944062A1EA1E51 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E923896418BCDD40001066A9 /* BLEFServerInterfaceTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFServerInterfaceTest.m; sourceTree = "<group>"; };
@@ -85,6 +89,10 @@
 		E947179918C92431006C8B1D /* BLEFSpecimenTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFSpecimenTableViewCell.h; sourceTree = "<group>"; };
 		E947179A18C92431006C8B1D /* BLEFSpecimenTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSpecimenTableViewCell.m; sourceTree = "<group>"; };
 		E95C85391864564000CFEC40 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		E9772F6418CF49EE00D15247 /* BLEFCaptureBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFCaptureBuffer.h; sourceTree = "<group>"; };
+		E9772F6518CF49EE00D15247 /* BLEFCaptureBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFCaptureBuffer.m; sourceTree = "<group>"; };
+		E9772F6818CF4A0900D15247 /* BLEFCaptureBufferTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFCaptureBufferTest.m; sourceTree = "<group>"; };
+		E9772F6A18CF5DA800D15247 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		E9829C6B189D7662004DD07F /* BLEFObservation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFObservation.h; sourceTree = "<group>"; };
 		E9829C6C189D7662004DD07F /* BLEFObservation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFObservation.m; sourceTree = "<group>"; };
 		E98EF99B18C3597A001EC74A /* beLeaf copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "beLeaf copy-Info.plist"; path = "/Users/ashleycutmore/Documents/MCS_GROUP_MASTER/group-project-master/iOS/beLeaf copy-Info.plist"; sourceTree = "<absolute>"; };
@@ -109,6 +117,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9772F6B18CF5DA800D15247 /* CoreLocation.framework in Frameworks */,
 				E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */,
 				5E2AD5701863B6D900595828 /* CoreGraphics.framework in Frameworks */,
 				5E2AD5741863B6D900595828 /* CoreData.framework in Frameworks */,
@@ -122,6 +131,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9772F6C18CF5DBC00D15247 /* CoreLocation.framework in Frameworks */,
 				E9364FFD18C23895000E5C75 /* CoreGraphics.framework in Frameworks */,
 				5E2AD58C1863B6DA00595828 /* XCTest.framework in Frameworks */,
 				5E2AD58F1863B6DA00595828 /* CoreData.framework in Frameworks */,
@@ -158,6 +168,7 @@
 		5E2AD56C1863B6D900595828 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E9772F6A18CF5DA800D15247 /* CoreLocation.framework */,
 				5E0F64F418CA176400A04542 /* libPods-OHHTTPStubs.a */,
 				5E0F64F218CA174A00A04542 /* libPods-OHHTTPStubs.a */,
 				E95C85391864564000CFEC40 /* AVFoundation.framework */,
@@ -198,6 +209,8 @@
 				E98EF99D18C36D4D001EC74A /* BLEFCameraViewController.m */,
 				E947179918C92431006C8B1D /* BLEFSpecimenTableViewCell.h */,
 				E947179A18C92431006C8B1D /* BLEFSpecimenTableViewCell.m */,
+				E9772F6418CF49EE00D15247 /* BLEFCaptureBuffer.h */,
+				E9772F6518CF49EE00D15247 /* BLEFCaptureBuffer.m */,
 			);
 			path = beLeaf;
 			sourceTree = "<group>";
@@ -219,7 +232,7 @@
 				5E2AD5931863B6DA00595828 /* Supporting Files */,
 				E94400C018B91B1500D2C3C4 /* BLEFDatabaseTest.m */,
 				E923896418BCDD40001066A9 /* BLEFServerInterfaceTest.m */,
-				5E4F48ED18CA0B480087ACF9 /* BLEFUIElementTest.m */,
+				E9772F6818CF4A0900D15247 /* BLEFCaptureBufferTest.m */,
 			);
 			path = beLeafTests;
 			sourceTree = "<group>";
@@ -321,6 +334,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9772F6318CF35DC00D15247 /* iPhone.storyboard in Resources */,
 				5E2AD5971863B6DA00595828 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -370,6 +384,7 @@
 				E9E396281897F8830067A991 /* BLEFSpecimen.m in Sources */,
 				E9829C6D189D7662004DD07F /* BLEFObservation.m in Sources */,
 				E9A5C87618C20EC000F9F6CF /* BLEFResult.m in Sources */,
+				E9772F6618CF49EE00D15247 /* BLEFCaptureBuffer.m in Sources */,
 				E9BD3A471898399E001B8570 /* BLEFSpecimenTableViewController.m in Sources */,
 				E98EF99E18C36D4D001EC74A /* BLEFCameraViewController.m in Sources */,
 				E9BEE40A18A68FFF00F3A648 /* BLEFResultsViewController.m in Sources */,
@@ -384,7 +399,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5E4F48EE18CA0B480087ACF9 /* BLEFUIElementTest.m in Sources */,
 				E936500018C27372000E5C75 /* BLEFServerInterfaceTest.m in Sources */,
 				E9364FFE18C23A83000E5C75 /* BLEFServerInterface.m in Sources */,
 				E9100F6D18BA439800006AF0 /* BLEFSpecimen.m in Sources */,
@@ -392,7 +406,9 @@
 				E9A5C87718C212BD00F9F6CF /* BLEFResult.m in Sources */,
 				E94400C118B91B1500D2C3C4 /* BLEFDatabaseTest.m in Sources */,
 				E9100F6B18BA437800006AF0 /* beLeaf.xcdatamodeld in Sources */,
+				E9772F6718CF49EE00D15247 /* BLEFCaptureBuffer.m in Sources */,
 				E95131B318B96AB700B2DDAD /* BLEFDatabase.m in Sources */,
+				E9772F6918CF4A0900D15247 /* BLEFCaptureBufferTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -529,6 +545,8 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "beLeaf/beLeaf-Prefix.pch";
 				INFOPLIST_FILE = "beLeaf/beLeaf-Info.plist";
@@ -549,6 +567,8 @@
 					"$(inherited)",
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 				);
+				GCC_GENERATE_TEST_COVERAGE_FILES = YES;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "beLeaf/beLeaf-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -570,6 +590,7 @@
 					"$(inherited)",
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 				);
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "beLeaf/beLeaf-Prefix.pch";
 				INFOPLIST_FILE = "beLeafTests/beLeafTests-Info.plist";

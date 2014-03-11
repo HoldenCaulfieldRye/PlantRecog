@@ -82,7 +82,7 @@
 - (BOOL) processUploads
 {
     @synchronized(self){
-        if (!_uploadQueueHalted && !_uploadQueueProcessingActive){
+        if (![self uploadQueueHalted] && ![self uploadQueueProcessingActive]){
             _uploadQueueProcessingActive = true;
         } else {
             return false;
@@ -137,7 +137,7 @@
 - (BOOL) processUpdates
 {
     @synchronized(self){
-        if (!_updateQueueHalted && !_updateQueueProcessingActive){
+        if (![self updateQueueHalted] && ![self updateQueueProcessingActive]){
             _updateQueueProcessingActive = true;
         } else {
             return false;
@@ -149,7 +149,7 @@
 
 - (BOOL) processUpdateIndex:(NSInteger)index {
     if (_specimenForUpdating != nil && !_updateQueueHalted){
-        if (index < [_specimenForUpdating count]){
+        if (index < [[self specimenForUpdating] count]){
             BLEFSpecimen *specimen = (BLEFSpecimen *)[_specimenForUpdating objectAtIndex:index];
             if (specimen != nil){
                 NSURLSessionDataTask *task = [self createUpdateTaskForSpecimen:specimen completion:^(BOOL updated) {
@@ -173,8 +173,8 @@
 {
     if (_updateQueueHalted){
         _updateQueueHalted = false;
-        _networkIntervalTimer = [NSTimer timerWithTimeInterval:15.0 target:self selector:@selector(networkRetry:) userInfo:nil repeats:YES];
-        if (_networkIntervalTimer != nil){
+        [self setNetworkIntervalTimer:[NSTimer timerWithTimeInterval:15.0 target:self selector:@selector(networkRetry:) userInfo:nil repeats:YES]];
+        if ([self networkIntervalTimer] != nil){
             [[NSRunLoop mainRunLoop] addTimer:_networkIntervalTimer forMode:NSRunLoopCommonModes];
             return true;
         }
@@ -190,8 +190,8 @@
 - (BOOL)stopUpdateProcessing
 {
     _updateQueueHalted = true;
-    [_networkIntervalTimer invalidate];
-    _networkIntervalTimer = nil;
+    [[self networkIntervalTimer] invalidate];
+    [self setNetworkIntervalTimer: nil];
     return true;
 }
 
@@ -213,16 +213,14 @@
             NSURLRequest *request = [self createUploadRequestForObservation:observation];
             NSURLSessionConfiguration *uploadConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
             uploadConfig.HTTPAdditionalHeaders = @{
-                                                   @"Content-Type"  : [NSString stringWithFormat:@"multipart/form-data; boundary=%@", _boundary]
+                                                   @"Content-Type"  : [NSString stringWithFormat:@"multipart/form-data; boundary=%@", [self boundary]]
                                                    };
-            _uploadSession = [NSURLSession sessionWithConfiguration:uploadConfig];
-            NSURLSessionUploadTask *task = [_uploadSession uploadTaskWithRequest:request
+            [self setUploadSession:[NSURLSession sessionWithConfiguration:uploadConfig]];
+            NSURLSessionUploadTask *task = [[self uploadSession] uploadTaskWithRequest:request
                                                                          fromData:bodyData
                                                                 completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                                                                     BOOL _success = [self updateObservation:observationID usingData:data andError:error];
-                                                                    if (handler){
-                                                                        handler(_success);
-                                                                    }
+                                                                    if (handler){handler(_success);}
                                                                 }];
             return task;
         }
@@ -244,7 +242,7 @@
                 }
             };
         
-        NSURLSessionDataTask *task = [_updateSession dataTaskWithRequest:updateRequest
+        NSURLSessionDataTask *task = [[self updateSession] dataTaskWithRequest:updateRequest
                                                        completionHandler:updateCompletion];
         return task;
     }
@@ -324,18 +322,18 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
     NSMutableData *body = [NSMutableData data];
     if (parameters){
         [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-            [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", _boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+            [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", [self boundary]] dataUsingEncoding:NSUTF8StringEncoding]];
             [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
             [body appendData:[[NSString stringWithFormat:@"%@", value] dataUsingEncoding:NSUTF8StringEncoding]];
         }];
     }
     
     if (fileData){
-        [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", _boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", [self boundary]] dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[@"Content-Disposition: form-data; name=\"datafile\"; filename=\"test.jpg\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[@"Content-Type: application/octet-stream\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[NSData dataWithData:fileData]];
-        [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", _boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", [self boundary]] dataUsingEncoding:NSUTF8StringEncoding]];
     }
     return [NSData dataWithData:body];
 }

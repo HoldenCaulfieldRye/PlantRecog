@@ -95,7 +95,7 @@
     NSError *error = nil;
     NSArray *array = [context executeFetchRequest:request error:&error];
     if (!error){
-        return [array filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"results.@count == 0"]];
+        return [array filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(results.@count == 0) AND (complete == TRUE)"]];
     }
     return nil;
 }

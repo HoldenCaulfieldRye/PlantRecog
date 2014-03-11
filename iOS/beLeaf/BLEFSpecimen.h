@@ -13,6 +13,7 @@
 
 @interface BLEFSpecimen : NSManagedObject
 
+@property (nonatomic) BOOL complete;
 @property (nonatomic) NSTimeInterval created;
 @property (nonatomic, retain) NSString * groupid;
 @property (nonatomic) double latitude;
