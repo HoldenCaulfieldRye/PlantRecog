@@ -29,6 +29,7 @@
 - (void)saveChanges;
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+@property (nonatomic) BOOL disableSaves;
 
 extern NSString * const BLEFDatabaseUpdateNotification;
 

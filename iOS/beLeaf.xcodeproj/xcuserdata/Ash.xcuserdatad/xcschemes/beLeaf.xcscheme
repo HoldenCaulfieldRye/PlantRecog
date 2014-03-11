@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "5E2AD5691863B6D900595828"
-               BuildableName = "beLeaf.app"
-               BlueprintName = "beLeaf"
+               BuildableName = "whatPlant.app"
+               BlueprintName = "whatPlant"
                ReferencedContainer = "container:beLeaf.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -43,8 +43,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5E2AD5691863B6D900595828"
-            BuildableName = "beLeaf.app"
-            BlueprintName = "beLeaf"
+            BuildableName = "whatPlant.app"
+            BlueprintName = "whatPlant"
             ReferencedContainer = "container:beLeaf.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5E2AD5691863B6D900595828"
-            BuildableName = "beLeaf.app"
-            BlueprintName = "beLeaf"
+            BuildableName = "whatPlant.app"
+            BlueprintName = "whatPlant"
             ReferencedContainer = "container:beLeaf.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -80,8 +80,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5E2AD5691863B6D900595828"
-            BuildableName = "beLeaf.app"
-            BlueprintName = "beLeaf"
+            BuildableName = "whatPlant.app"
+            BlueprintName = "whatPlant"
             ReferencedContainer = "container:beLeaf.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

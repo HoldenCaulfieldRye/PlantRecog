@@ -11,6 +11,7 @@
 #import "BLEFServerInterface.h"
 #import "BLEFObservation.h"
 #import "BLEFDatabase.h"
+#import "../Pods/OHHTTPStubs/OHHTTPStubs/Sources/OHHTTPStubs.h"
 
 NSManagedObjectContext *testingContext;
 NSPersistentStoreCoordinator *persistentStoreCoordinator;
@@ -32,6 +33,7 @@ extern void __gcov_flush();
 - (BLEFObservation *) nextInUploadQueue;
 - (BOOL) updateObservation:(NSManagedObjectID *)observationID usingData:(NSData *)data andError:(NSError *)error;
 - (BOOL) updateSpecimen:(NSManagedObjectID *)specimenID usingData:(NSData *)data andError:(NSError *)error;
+- (void) uploadErrorWaitAndRetry;
 
 @end
 
@@ -44,6 +46,14 @@ extern void __gcov_flush();
     NSString* path = [bundle pathForResource:@"beLeaf" ofType:@"momd"];
     NSURL *modURL = [NSURL URLWithString:path];
     model = [[NSManagedObjectModel alloc] initWithContentsOfURL:modURL];
+    
+    [OHHTTPStubs stubRequestsPassingTest:^BOOL(NSURLRequest *request) {
+        return YES;
+    } withStubResponse:^OHHTTPStubsResponse *(NSURLRequest *request) {
+        NSString *jsonResponse = @"{\"group_id\": \"group123\" , \"classification\": \"Oak Tree\" }";
+        NSData *dataFromServer = [jsonResponse dataUsingEncoding:NSUTF8StringEncoding];
+        return [OHHTTPStubsResponse responseWithData:dataFromServer statusCode:200 headers:nil];
+    }];
 }
 
 + (void)tearDown
@@ -53,6 +63,7 @@ extern void __gcov_flush();
     [[testingContext persistentStoreCoordinator] removePersistentStore:[stores firstObject] error:nil];
     __gcov_flush(); // Flush coverage files
     [super tearDown];
+    [OHHTTPStubs removeAllStubs];
 }
 
 - (UIImage*) generateTestImage
@@ -107,6 +118,7 @@ extern void __gcov_flush();
 {
     BLEFServerInterface *serverInterface = [[BLEFServerInterface alloc] init];
     [serverInterface setContext:testingContext];
+    [[serverInterface database] setDisableSaves:true];
     return serverInterface;
 }
 
@@ -172,13 +184,37 @@ extern void __gcov_flush();
     XCTAssertNotNil(task, @"Test: Update Task generated");
 }
 
+-(void)testSendUpdateTask
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    BLEFSpecimen *specimen = [self createTestSpecimen:server];
+    [specimen setGroupid:@"ABCDEFGHIKJLMNOP"];
+    
+    __block BOOL waitingForBlock = YES;
+    __block BOOL result = NO;
+    
+    
+    NSURLSessionDataTask *task = [server createUpdateTaskForSpecimen:specimen completion:^(BOOL updated){
+        waitingForBlock = NO;
+        result = updated;
+    }];
+    XCTAssertNotNil(task, @"Test: Update Task generated");
+    [task resume];
+    
+    while(waitingForBlock) {
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+                                 beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+    }
+    XCTAssertTrue(result, @"Test: Sending Resonse To Updated specimen");
+}
+
 -(void)testObservationUpdate
 {
     BLEFServerInterface *server = [self createServerInterface];
     BLEFObservation *observation = [self createTestObservation:server];
     XCTAssertFalse([observation uploaded], @"Test: Observation starts as not-uploaded");
     
-    NSString *jsonResponse = @"{\"groupID\":\"123ABC\"}";
+    NSString *jsonResponse = @"{\"group_id\":\"123ABC\"}";
     
     NSData *dataFromServer = [jsonResponse dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -250,6 +286,26 @@ extern void __gcov_flush();
     [observation setUploaded:true];
     [[observation specimen] setGroupid:@"ABC123"];
     [server processUpdates];
+}
+
+- (void)test_processUpdates
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    BLEFObservation *observation = [self createTestObservation:server];
+    [observation setUploaded:true];
+    [[observation specimen] setGroupid:@"ABC123"];
+    
+    BLEFObservation *observation2 = [self createTestObservation:server];
+    [observation2 setUploaded:true];
+    [[observation2 specimen] setGroupid:@"ABC321"];
+    [server reStartUpdateProccessing];
+    [server processUpdates];
+}
+
+- (void) test_networkRetry
+{
+    BLEFServerInterface *server = [self createServerInterface];
+    [server uploadErrorWaitAndRetry];
 }
 
 @end

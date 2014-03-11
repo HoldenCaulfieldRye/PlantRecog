@@ -18,6 +18,7 @@
                                                    selector:@selector(_mocDidSaveNotification:)
                                                        name:NSManagedObjectContextDidSaveNotification
                                                      object:nil];
+        _disableSaves = false;
     }
     return self;
 }
@@ -43,15 +44,16 @@
 
 - (void)saveChanges
 {
+    if (_disableSaves){
+        return;
+    }
     NSError *error = nil;
     if ([self managedObjectContext] != nil) {
-        if ([[self managedObjectContext] hasChanges]){
         if ([[self managedObjectContext] hasChanges] && ![[self managedObjectContext] save:&error]) {
             // Replace this implementation with code to handle the error appropriately.
             // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
             NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
             abort();
-        }
         }
     }
 }

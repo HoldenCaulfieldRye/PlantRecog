@@ -90,16 +90,7 @@
     }
     BLEFObservation * observation = [self nextInUploadQueue];
     if (observation != nil){
-        NSURLSessionUploadTask *task = [self createUploadTaskForObservation:observation completion:^(BOOL success) {
-            _uploadQueueProcessingActive = false;
-            NSLog(@"Upload Result:%hhd", success);
-            if (success){
-                [_database saveChanges];
-                [self processUploads];
-            } else {
-                [self uploadErrorWaitAndRetry];
-            }
-        }];
+        NSURLSessionUploadTask *task = [self createUploadTaskForObservation:observation completion:^(BOOL success) {[self uploadCompletion:success];}];
         if (task != nil){
             [task resume];
             return true;
@@ -107,6 +98,19 @@
     }
     _uploadQueueProcessingActive = false;
     return false;
+}
+
+- (void) uploadCompletion:(BOOL) success
+{
+    _uploadQueueProcessingActive = false;
+    NSLog(@"Upload Result:%hhd", success);
+    if (success){
+        [_database saveChanges];
+        [self processUploads];
+    } else {
+        [self uploadErrorWaitAndRetry];
+    }
+
 }
 
 - (BOOL) reStartUploadProcessing
@@ -231,13 +235,17 @@
     if ((specimen != nil) && ([specimen isKindOfClass:[BLEFSpecimen class]])){
         NSManagedObjectID *specimenID = [specimen objectID];
         NSURLRequest *updateRequest = [self createUpdateRequestForSpecimen:specimen];
+ 
+        void (^updateCompletion)(NSData*, NSURLResponse*, NSError*) =
+            ^(NSData *data, NSURLResponse *response, NSError *error) {
+                BOOL _updated = [self updateSpecimen:specimenID usingData:data andError:error];
+                if (handler){
+                    handler(_updated);
+                }
+            };
+        
         NSURLSessionDataTask *task = [_updateSession dataTaskWithRequest:updateRequest
-                                                        completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-                                                            BOOL _updated = [self updateSpecimen:specimenID usingData:data andError:error];
-                                                            if (handler){
-                                                                handler(_updated);
-                                                            }
-                                                        }];
+                                                       completionHandler:updateCompletion];
         return task;
     }
     return nil;
