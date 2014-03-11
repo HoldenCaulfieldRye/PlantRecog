@@ -52,7 +52,7 @@ class AugmentLeafDataProvider(LabeledDataProvider):
         self.data_mean = self.batch_meta['data_mean']
         self.num_colors = 3
         # patch_idx: x coordinate of patch, y coordinate of patch, flip image no/yes
-        self.patch_idx = 0,0,0  
+        self.patch_idx = [0,0,0]
         self.inner_size = 224
         # border_size: such that central patch edge is border_size pixels away from original img edge (expect 16)
         self.border_size = dp_params['crop_border'] 
@@ -61,20 +61,21 @@ class AugmentLeafDataProvider(LabeledDataProvider):
         self.num_views = 5*2
         # data_mult: multiply data matrix dimensions if in multiview test mode
         self.data_mult = self.num_views if self.multiview else 1
-        # target param in __select_patch needs numpy format with correct dimensions; set it up here
+        self.data_mean = self.batch_meta['data_mean'].reshape((3,256,256))[:,self.border_size:self.border_size+self.inner_size,self.border_size:self.border_size+self.inner_size].reshape((self.get_data_dims(), 1))
 
+        
     def get_next_batch(self):
         if self.data_dic is None or len(self.batch_range) > 1:
             self.data_dic = self.get_batch(self.curr_batchnum)
         epoch, batchnum = self.curr_epoch, self.curr_batchnum
         self.advance_batch()
-        cropped = n.zeros((self.get_data_dims(), 
-                           self.data_dic['data'].shape[1]*self.data_mult), # data_dic['data'].shape[1] == batchSize
-                          dtype=n.single)
-        self.__select_patch(self.data_dic['data'], self.inner_size, cropped) 
-        cropped = n.require((cropped - self.data_mean), dtype=n.single, requirements='C') # demean, convert to single precision float
-        # convert to single precision, make sure C-ordered
+        cropped = self.crop_batch()
+        # Subtract the mean from the data and make sure that both data and
+        # labels are in single-precision floating point.
+        # This converts the data matrix to single precision and makes sure that it is C-ordered
+        cropped = n.require((cropped - self.data_mean), dtype=n.single, requirements='C')
         self.data_dic['labels'] = n.require(self.data_dic['labels'].reshape((1,cropped.shape[1])), dtype=n.single, requirements='C')
+        
         return epoch, batchnum, [cropped, self.data_dic['labels']]
 
 
@@ -82,7 +83,7 @@ class AugmentLeafDataProvider(LabeledDataProvider):
     # idx is the index of the matrix.
     def get_data_dims(self, idx=0):
         return self.inner_size**2 * 3 if idx == 0 else 1
-    
+
     # Takes as input an array returned by get_next_batch
     # Returns a (numCases, patchSize, patchSize, 3) array which can be
     # fed to pylab for plotting.
@@ -96,6 +97,13 @@ class AugmentLeafDataProvider(LabeledDataProvider):
         self.curr_batchnum = self.batch_range[self.batch_idx]
         if self.batch_idx == 0 and self.patch_idx == [0,0,0]: # patch_idx needs to be back at 0,0,0 too
             self.curr_epoch += 1    
+
+    def crop_batch(self):
+        cropped = n.zeros((self.get_data_dims(), 
+                           self.data_dic['data'].shape[1]*self.data_mult), # data_dic['data'].shape[1] == batchSize
+                          dtype=n.single)
+        self.__select_patch(self.data_dic['data'], self.inner_size, cropped)
+        return cropped
 
     # called as __select_patch(datadic['data'], cropped)
     def __select_patch(self, x, patch_dimension, target):
@@ -121,22 +129,43 @@ class AugmentLeafDataProvider(LabeledDataProvider):
         else:
             for c in xrange(x.shape[1]): # think c is image
                 startY, startX, flip = self.patch_idx[0], self.patch_idx[1], self.patch_idx[2] # patch coordinates, and whether or not to flip
+                # print 'startY, startX:', startY, startX
                 endY, endX = startY + self.inner_size, startX + self.inner_size
                 maxX, maxY = self.border_size*2, self.border_size*2
                 patch = y[:, startY:endY, startX:endX, c] # 1st dimension is ':' because take all 3 RGB channels
-                if flip == 1: patch = patch[:,:,::-1]
+                if flip == 1:
+                    patch = patch[:,:,::-1]
                 target[:,c] = patch.reshape((self.get_data_dims(),)) # typo?
                 
             if flip == 1:
                 if self.patch_idx[0] == maxX:
                     if self.patch_idx[1] == maxY:
-                        self.patch_idx = 0,0,0
+                        # print 1
+                        # print 'patch_idx was', self.patch_idx
+                        self.patch_idx[0] = 0
+                        self.patch_idx[1] = 0
+                        self.patch_idx[2] = 0
+                        print 'patch_idx is now', self.patch_idx
+                        
                     else:
-                       self.patch_idx = 0, self.patch_idx[1]+1, 0
+                        # print 2
+                        # print 'patch_idx was', self.patch_idx
+                        self.patch_idx[0] = 0
+                        self.patch_idx[1] += 1
+                        self.patch_idx[2] = 0
+                        print 'patch_idx is now', self.patch_idx
+                        
                 else:
-                    self.patch_idx += self.patch_idx[0]+1, self.patch_idx[1], 0
+                    # print 3
+                    # print 'patch_idx was', self.patch_idx
+                    self.patch_idx[0] += 1
+                    self.patch_idx[2] = 0
+                    print 'patch_idx is now', self.patch_idx
             else:
-                self.patch_idx = self.patch_idx[0], self.patch_idx[1], 1
+                # print 4
+                # print 'patch_idx was', self.patch_idx
+                self.patch_idx[2] = 1
+                print 'patch_idx is now', self.patch_idx
 
                 
 class BasicLeafDataProvider256(LabeledDataProvider):

@@ -75,14 +75,43 @@ def create_images_to_test_patching(amount, img_size=256, patch_size=224, path_to
     return imgArray
 
 
-if __name__ == "__main__":
-    os.chdir('../../cuda_convnet/')
+def export_crops_to_jpg(dataProv, directory, num_batches):
+    for count in range(num_batches):
+        epoch, batchnum, [cropped, labels] = dataProv.get_next_batch()
 
-    testdir = set_up_dummy_batches()
+        if epoch > 1:
+            print 'epoch 2 reached, no use getting more batches, terminating jpg export'
+            return 
+
+        # unflattens array, gives it back its mean, converts into jpg writable
+        cropped += dataProv.data_mean
+        cropped = cropped.reshape(3, 224, 224, cropped.shape[1])
+        cropped = np.require(cropped, dtype=np.uint8, requirements='W')
+
+        # print os.getcwd()
+        # os.chdir(directory)
+        try:
+            os.mkdir('cropped_batch_'+`count`)
+        except:
+            shutil.rmtree('cropped_batch_'+`count`)
+            os.mkdir('cropped_batch_'+`count`)
+        os.chdir('cropped_batch_'+`count`)
+
+        for crop_img_idx in range(cropped.shape[0]):
+            crop_img = Image.fromarray(cropped[crop_img_idx,:,:,:])
+            crop_img.save('crop_'+`crop_img_idx`+'.jpg')
+        os.chdir('../')
+
+
+    
+
+if __name__ == "__main__":
+    # os.chdir('../../cuda_convnet/')
+    # testdir = set_up_dummy_batches()
 
     D = convdata.AugmentLeafDataProvider('/home/alex/Git/group-project-master/ML/tests/unit_tests/test_data/example_ensemble/One')
-    # sort out data_dic['labels']!!
-    epoch, batchnum, [cropped, self.data_dic['labels']] = D.get_next_batch() 
+    export_crops_to_jpg(D, 'DataTest/Crop', 100)
+
     
     # delete dummy batches
     # shutil.rmtree(testdir)
