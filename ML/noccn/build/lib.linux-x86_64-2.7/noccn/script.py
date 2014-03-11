@@ -85,7 +85,6 @@ def random_seed(seed):
     random.seed(seed)
 
 
-# model_cls is instance of IGPUModel in gpumodel.py
 def make_model(model_cls, section, cfg_filename=None):
     if cfg_filename is None:
         try:
@@ -102,12 +101,10 @@ def make_model(model_cls, section, cfg_filename=None):
     model = model_cls(op, load_dic)
     update_attrs_from_cfg(model, cfg, 'convnet')
     update_attrs_from_cfg(model.train_data_provider, cfg, 'dataprovider')
-    update_attrs_from_cfg(model.test_data_provider, cfg, 'dataprovider') 
+    update_attrs_from_cfg(model.test_data_provider, cfg, 'dataprovider')
     return model
 
 
 def run_model(model_cls, section, cfg_filename=None):
     model = make_model(model_cls, section, cfg_filename)
     model.start()
-
-    
