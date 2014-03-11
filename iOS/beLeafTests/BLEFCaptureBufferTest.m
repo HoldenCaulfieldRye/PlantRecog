@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import <objc/runtime.h> // To force _gcov_flush (coverage files)
 #import "BLEFCaptureBuffer.h"
+#import "BLEFDatabase.h"
 
 NSManagedObjectContext *testingContext;
 NSPersistentStoreCoordinator *persistentStoreCoordinator;
@@ -74,7 +75,9 @@ extern void __gcov_flush();
 
 - (void)testInit
 {
-    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire", @"leaf"] usingContext:testingContext];
+    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    [database setManagedObjectContext:testingContext];
+    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire", @"leaf"] usingDatabase:database];
     XCTAssertNotNil(testBuffer, @"Test init'ing buffer returns a reference");
     XCTAssertTrue([testBuffer count] == 2, @"Test: Buffer has two slots as per init");
 }
@@ -92,7 +95,9 @@ extern void __gcov_flush();
 
 - (void)testAddandRetrieveData
 {
-    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingContext:testingContext];
+    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    [database setManagedObjectContext:testingContext];
+    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingDatabase:database];
     UIImage *testImage = [self generateTestImage];
     NSData *imageData = UIImageJPEGRepresentation(testImage, 1.0f);
     
@@ -106,7 +111,9 @@ extern void __gcov_flush();
 
 - (void)testAddAndDeleteData
 {
-    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingContext:testingContext];
+    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    [database setManagedObjectContext:testingContext];
+    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingDatabase:database];
     UIImage *testImage = [self generateTestImage];
     NSData *imageData = UIImageJPEGRepresentation(testImage, 1.0f);
     XCTAssertTrue([testBuffer addData:imageData toSlot:@"entire"], @"Test: Adding data returned true");
@@ -116,7 +123,9 @@ extern void __gcov_flush();
 
 - (void)testSlotSave
 {
-    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingContext:testingContext];
+    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    [database setManagedObjectContext:testingContext];
+    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingDatabase:database];
     UIImage *testImage = [self generateTestImage];
     NSData *imageData = UIImageJPEGRepresentation(testImage, 1.0f);
     XCTAssertTrue([testBuffer addData:imageData toSlot:@"entire"], @"Test: Adding data returned true");
@@ -137,10 +146,19 @@ extern void __gcov_flush();
 
 - (void)testCompleteCapture
 {
-    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingContext:testingContext];
+    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    [database setManagedObjectContext:testingContext];
+    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingDatabase:database];
     [testBuffer completeCapture];
 }
 
+- (void)testDeleteSession
+{
+    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    [database setManagedObjectContext:testingContext];
+    BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingDatabase:database];
+    [testBuffer deleteSession];
+}
 
 
 @end

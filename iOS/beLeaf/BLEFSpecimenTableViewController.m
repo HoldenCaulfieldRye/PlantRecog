@@ -171,7 +171,7 @@
         [destination setSpecimen:(BLEFSpecimen *)sender];
     } else if ([[segue identifier] isEqualToString:@"HOMEtoCAMERA"]){
         BLEFCameraViewController *destination = [segue destinationViewController];
-        [destination setContext:[_database managedObjectContext]];
+        [destination setDatabase:_database];
     }
 }
 

@@ -23,6 +23,11 @@
     return self;
 }
 
+- (void)finalize
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (NSManagedObjectContext *) getContext
 {
     return [self managedObjectContext];

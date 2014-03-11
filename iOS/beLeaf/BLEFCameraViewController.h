@@ -13,10 +13,16 @@
 @interface BLEFCameraViewController : UIViewController
     <AVCaptureVideoDataOutputSampleBufferDelegate>
 
-@property (strong, nonatomic) NSManagedObjectContext *context;
+@property (strong, nonatomic) BLEFDatabase * database;
 
 @property (weak, nonatomic) IBOutlet UIView *previewView;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentSelection;
+
+// Buttons
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *cancelButton;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *CameraButton;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *FinishButton;
+
 
 @property (strong, nonatomic) AVCaptureVideoPreviewLayer *previewLayer;
 @property (strong, nonatomic) AVCaptureVideoDataOutput *videoDataOutput;
@@ -25,5 +31,6 @@
 
 - (IBAction)takePhotoButtonPressed:(id)sender;
 - (IBAction)finishedSessionButtonPressed:(id)sender;
+- (IBAction)cancelButtonPressed:(id)sender;
 
 @end

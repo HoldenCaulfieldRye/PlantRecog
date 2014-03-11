@@ -12,7 +12,7 @@
 
 @interface BLEFCaptureBuffer : NSObject <CLLocationManagerDelegate>
 
-- (id)initWithSlots:(NSArray *)slotNames usingContext:(NSManagedObjectContext *)context;
+- (id)initWithSlots:(NSArray *)slotNames usingDatabase:(BLEFDatabase *)database;
 - (BOOL)addData:(NSData *)data toSlot:(NSString *)slotName;
 - (BOOL)removeDataForSlot:(NSString *)slotName;
 - (UIImage*)imageForSlotNamed:(NSString *)slotName;
@@ -20,6 +20,8 @@
 - (NSInteger)count;
 - (BOOL)slotComplete:(NSString *)slotName;
 - (void)completeCapture;
+- (void)deleteSession;
+
 @property (strong, nonatomic) BLEFDatabase *database;
 
 @end

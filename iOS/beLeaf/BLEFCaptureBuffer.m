@@ -21,7 +21,7 @@
 
 @implementation BLEFCaptureBuffer
 
-- (id)initWithSlots:(NSArray *)slotNames usingContext:(NSManagedObjectContext *)context
+- (id)initWithSlots:(NSArray *)slotNames usingDatabase:(BLEFDatabase *)database
 {
     self = [super init];
     if (self){
@@ -32,8 +32,7 @@
             [_slots setValue:[NSNull null] forKey:slotName];
         }
 
-        _database = [[BLEFDatabase alloc] init];
-        [_database setManagedObjectContext:context];
+        _database = database;
         
         _locationManager = [[CLLocationManager alloc] init];
         _locationManager.desiredAccuracy = kCLLocationAccuracyBest;
@@ -150,6 +149,12 @@
     if ([[specimen observations] count] == 0){
         [[_database managedObjectContext] deleteObject:specimen];
     }
+}
+
+- (void)deleteSession
+{
+    BLEFSpecimen *specimen = [self specimen];
+    [[_database managedObjectContext] deleteObject:specimen];
 }
 
 #pragma mark - Location Delegate Methods

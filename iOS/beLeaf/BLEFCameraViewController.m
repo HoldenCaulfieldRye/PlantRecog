@@ -36,7 +36,7 @@
     
     // Setup Buffer
     _segments = @[@"entire", @"leaf" , @"flower", @"fruit"];
-    _captureBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:_segments usingContext:_context];
+    _captureBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:_segments usingDatabase:_database];
     
     // UI
     _imageReviewView = [[UIImageView alloc] init];
@@ -95,6 +95,11 @@
     }];
 }
 
+- (IBAction)cancelButtonPressed:(id)sender {
+    [_captureBuffer deleteSession];
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 - (void)processImageData:(NSData *)imageData
 {
     UIImage *image = [UIImage imageWithData:imageData];
@@ -143,10 +148,9 @@
     }];
     _selectionIndexBuffer = [_segmentSelection selectedSegmentIndex];
     
-    id objectForSegment = [_captureBuffer imageForSlotNamed:[self currentSegmentSelection]];
-    if (objectForSegment != nil){
-        UIImage *imageForSegment = [UIImage imageWithData:(NSData *)objectForSegment];
-        [self displayImage:imageForSegment];
+    UIImage *image = [_captureBuffer imageForSlotNamed:[self currentSegmentSelection]];
+    if (image != nil){
+        [self displayImage:image];
     } else {
         [self hideImage];
         [self startCaptureSession];
