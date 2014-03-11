@@ -75,6 +75,7 @@ def create_images_to_test_patching(amount, img_size=256, patch_size=224, path_to
     return imgArray
 
 
+# export crops like a motherfuckin 3rd world country
 def export_crops_to_jpg(dataProv, directory, num_batches):
     for count in range(num_batches):
         epoch, batchnum, [cropped, labels] = dataProv.get_next_batch()
