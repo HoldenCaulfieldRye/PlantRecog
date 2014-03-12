@@ -69,7 +69,7 @@ class Combiner(object):
                     os.remove(os.path.splitext(results_dict[key])[0]+'.pickle')
                 except:
                     sys.exit(ERROR_DELETING_FILES)
-            np_array *=  self.error_rates[key]
+            np_array *= (1-self.error_rates[key])
             if self.insert_list is not None:        
                 np_array = np.insert(np_array,self.insert_list[key],0)
             if combined_prob is None:

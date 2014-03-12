@@ -93,9 +93,11 @@ class ImageRecogniser(object):
             data = np.vstack([r for r in rows if r is not None]).T
             if data.shape[0] < len(filenames):    
                 sys.exit(COULD_NOT_OPEN_IMAGE_FILE)
-            if data.shape[1] > 5:
+            if data.shape[1] == 1:
+                mean = np.mean(data)
+            elif data.shape[1] > 1:
                 mean = data.mean(axis=1).reshape(((self.size[0]**2)*self.channels,1))
-                data = data - mean
+            data = data - mean
             if self.model is not None:
                 self.model.start_predictions(data)
             if next_filenames is not None:
