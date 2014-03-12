@@ -11,7 +11,7 @@ default_directories = [
 '../run.py',
 '../combine.py',
 '../bucketing/mongoHelperFunctions.py',
-#'../cuda_convnet/*', # Needs to include our data provider file as separate file
+'../cuda_convnet/plantdataproviders.py', # need base class too? ie convdata.py?
 ]
 
 
