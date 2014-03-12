@@ -6,7 +6,7 @@ var formidable = require ('formidable');
 var path = require ('path');
 var util = require ('util');
 var mkdirp = require('mkdirp');
-
+var fs = require('fs');
 
 exports.index = function(req, res){
   res.render('index', { title: 'Express' });
@@ -19,54 +19,64 @@ exports.index = function(req, res){
 exports.classify = function(db,configArgs) {
 	
 	var form = new formidable.IncomingForm();
+        form.uploadDir = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database);
+        form.keepExtensions = true;
+
+	form.on('file', function(field, file) {
+            //rename the incoming file to the file's name
+            fs.renameSync(file.path, form.uploadDir + "/" + file.name);
+	})
 
 	return function(req, res) {
 				
 			form.parse(req, function(err, fields, files){
 				
 				// Determine where to save the file
-				fileLocation = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database, fields.group_id)
+				groupLocation = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database, fields.group_id)
+             		        fileLocation = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database, files.datafile.name)
+
 				// Create the folder in which to save the file
-				mkdirp(fileLocation,function(err){
-					if(err) console.error(err)
+				mkdirp.sync(groupLocation,function(err){
+				    if(err) console.error("Error creating group directory: " + err)
+				    else console.log("Successfully created folder: " + fileLocation)
 				})
 
 				// Save the file
-				form.uploadDir = fileLocation;
-				form.keepExtensions = true;	
-
-				console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
+       	    	fs.renameSync(fileLocation, groupLocation + "/" +  files.datafile.name)
+			            
+                console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
 
 	   			filePath = files.datafile.path;	
 	   			fileName = files.datafile.name;
 			
 	        	if(files){
-
-	        		// Output where we saved the file 
-					console.log("FilePath is: \n" + filePath);
 	    
 					// Set our collection
 					var collection = db.collection('segment_images');
-					    
+			    
 					collection.findAndModify(	        	
-				    	{ 'filename': fileName }, /* example BSON: '52ff886b27d625b55344093f' */
-				            [],
-				        { $set : { "submission_state" : "File received by graphic" } },
+
+				    	    { '_id': new BSON.ObjectID(fields.segment_id) },	                                              
+					    [], 
+				            { $set : { "submission_state" : "File received by graphic"} },
+
 			    	 
 			    	    {'new': true}, 
 		              
 				        function (err,doc) {
 				        	if (err) {
 				                //If it failed, return error
-						  		console.log("Error adding information to db"); 
+						console.log("Error adding information to db"); 
 				                console.log(err);
 				                res.send("There was a problem adding the information to the database.");
 				            }
 				            else {
 				            	// If it worked, return JSON object from collection to App//
-								console.log("db updated: file received by graphic");
-				            	// Reply to app server
-				            	res.json(fields.segment_id);
+
+						console.log("db updated: file received by graphic");                                              
+					        // Reply to app server
+				            	res.json("File received by graphic");
+
 				            }
 					});
 				}
