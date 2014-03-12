@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>19191</ObservationId>
+  <FileName>40549.jpg</FileName>
+  <MediaId>40549</MediaId>
+  <Vote>3</Vote>
+  <Content>Flower</Content>
+  <ClassId>2914</ClassId>
+  <Family>FABACEAE</Family>
+  <Species>Genista tinctoria L.</Species>
+  <Genus>Genista</Genus>
+  <Author>martin serre</Author>
+  <Date>19/04/12</Date>
+  <Location>Indre (44)</Location>
+  <Latitude />
+  <Longitude />
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>

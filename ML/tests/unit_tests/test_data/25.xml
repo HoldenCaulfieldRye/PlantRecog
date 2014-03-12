@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>5000</ObservationId>
+  <FileName>25.jpg</FileName>
+  <MediaId>25</MediaId>
+  <Vote>3</Vote>
+  <Content>Leaf</Content>
+  <ClassId>29924</ClassId>
+  <Family>SAPINDACEAE</Family>
+  <Species>Acer negundo L.</Species>
+  <Genus>Acer</Genus>
+  <Author>herve goeau</Author>
+  <Date>31/03/12</Date>
+  <Location>Sainte-Geneviève-des-Bois (91)</Location>
+  <Latitude>48.633333</Latitude>
+  <Longitude>2.333333</Longitude>
+  <YearInCLEF>ImageCLEF2013</YearInCLEF>
+  <IndividualPlantId2013>256</IndividualPlantId2013>
+  <ImageID2013>18519</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>2611</ObservationId>
+  <FileName>22.jpg</FileName>
+  <MediaId>22</MediaId>
+  <Vote>4</Vote>
+  <Content>Flower</Content>
+  <ClassId>1597</ClassId>
+  <Family>BRASSICACEAE</Family>
+  <Species>Cardamine pratensis L.</Species>
+  <Genus>Cardamine</Genus>
+  <Author>herve goeau</Author>
+  <Date>04/05/13</Date>
+  <Location>Maincy (77)</Location>
+  <Latitude>48.55</Latitude>
+  <Longitude>2.7</Longitude>
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>

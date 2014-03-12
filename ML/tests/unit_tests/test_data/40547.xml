@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>13087</ObservationId>
+  <FileName>40547.jpg</FileName>
+  <MediaId>40547</MediaId>
+  <Vote>3</Vote>
+  <Content>LeafScan</Content>
+  <ClassId>8775</ClassId>
+  <Family>BETULACEAE</Family>
+  <Species>Betula utilis D.Don</Species>
+  <Genus>Betula</Genus>
+  <Author>vera bakic</Author>
+  <Date>10/09/12</Date>
+  <Location>Rocquencourt (78)</Location>
+  <Latitude>48.833333</Latitude>
+  <Longitude>2.116667</Longitude>
+  <YearInCLEF>ImageCLEF2013</YearInCLEF>
+  <IndividualPlantId2013>930</IndividualPlantId2013>
+  <ImageID2013>9173</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>

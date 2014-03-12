@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>15152</ObservationId>
+  <FileName>11.jpg</FileName>
+  <MediaId>11</MediaId>
+  <Vote>3</Vote>
+  <Content>Flower</Content>
+  <ClassId>1180</ClassId>
+  <Family>ASTERACEAE</Family>
+  <Species>Jacobaea vulgaris Gaertn.</Species>
+  <Genus>Jacobaea</Genus>
+  <Author>thierry pernot</Author>
+  <Date />
+  <Location />
+  <Latitude />
+  <Longitude />
+  <YearInCLEF>PlantCLEF2014</YearInCLEF>
+  <IndividualPlantId2013 />
+  <ImageID2013 />
+  <LearnTag>Train</LearnTag>
+</Image>

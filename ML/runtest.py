@@ -4,6 +4,10 @@ import os
 import random
 from ConfigParser import ConfigParser
 
+# Error consts
+NO_ERROR = 0
+INVALID_COMMAND_ARGS = 3
+
 def get_options(filename, section):
     parser = ConfigParser()
     parser.read(filename)
@@ -35,15 +39,15 @@ def chunks(l, n):
 def console():
     if len(sys.argv) < 3:
         print 'Must give a component type and valid image file as arguments'
-        return
-    valid_args = ['entire','stem','branch','leaf','fruit','flower']
+        sys.exit(INVALID_COMMAND_ARGS)
+    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
+    valid_args = cfg.get('valid_args','entire,stem,branch,leaf,fruit,flower').split(',')
     if sys.argv[1] not in valid_args:
         print 'First argument must be:',
         for arg in valid_args:
             print '[' + arg + '] ',
         print ''
-        return
-    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
+        sys.exit(INVALID_COMMAND_ARGS)
     num_results=int(cfg.get('number-of-results',5))
     random_labels = ['Oak','Beech','Lemon tree','Ash','Maple','Pine','Rose','Tulip','Tomato plant','Lavender','Bonsai']
     for images in chunks(sys.argv[2:],128):
@@ -57,6 +61,7 @@ def console():
                 else:
                     print '"%s":%0.03f }'%(random_result[index][0],random_result[index][1])
             
+    sys.exit(NO_ERROR)
 
 
 if __name__ == "__main__":

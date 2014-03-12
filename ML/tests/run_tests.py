@@ -4,22 +4,33 @@ import unittest
 import coverage
 import time
 
+# Only include files we have made, not third party software
 default_directories = [
-'../noccn/noccn/*',
-'../cuda_convnet/*',
-'../bucketing/*',
+'../noccn/noccn/dataset.py',
+'../noccn/noccn/tag.py',
+'../run.py',
+'../combine.py',
+'../bucketing/mongoHelperFunctions.py',
+'../cuda_convnet/plantdataproviders.py', # need base class too? ie convdata.py?
 ]
 
+
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] == '-coverage':
-        if len(sys.argv) > 2:
-            cov = coverage.coverage(include=sys.argv[2], branch=True)
-        else:
+    store_coverage = False
+    verbose = False
+    for arg in sys.argv:
+        if arg == '-coverage':
+            store_coverage = True
             cov = coverage.coverage(include=default_directories, branch=True)
-        cov.start()
+            cov.start()
+        if arg == '-verbose':
+            verbose = True
+    if not verbose:
+        f = open(os.devnull, 'w')
+        sys.stdout = f
     testsuite = unittest.TestLoader().discover('.')
     unittest.TextTestRunner(verbosity=1).run(testsuite)
-    if len(sys.argv) > 1 and sys.argv[1] == '-coverage':
+    if store_coverage:
         cov.stop()
         cov.save()
         timestr = time.strftime("%d-%m-%Y|%H-%M")

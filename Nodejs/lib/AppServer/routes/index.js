@@ -11,10 +11,6 @@ var BSON = mongo.BSONPure;
 /*
  * GET Job
  */
-function insert_segment(collection, segment_document){
-
-
-};
 
  exports.getJob = function(db) {
 

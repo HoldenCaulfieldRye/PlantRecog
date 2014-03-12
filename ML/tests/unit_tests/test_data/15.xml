@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Image>
+  <ObservationId>10871</ObservationId>
+  <FileName>15.jpg</FileName>
+  <MediaId>15</MediaId>
+  <Vote>1</Vote>
+  <Content>Branch</Content>
+  <ClassId>1837</ClassId>
+  <Family>SCROPHULARIACEAE</Family>
+  <Species>Buddleja davidii Franch.</Species>
+  <Genus>Buddleja</Genus>
+  <Author>liliane roubaudi</Author>
+  <Date>29/09/12</Date>
+  <Location>Lyon (69)</Location>
+  <Latitude>45.75</Latitude>
+  <Longitude>4.85</Longitude>
+  <YearInCLEF>ImageCLEF2013</YearInCLEF>
+  <IndividualPlantId2013>1284</IndividualPlantId2013>
+  <ImageID2013>26123</ImageID2013>
+  <LearnTag>Train</LearnTag>
+</Image>
