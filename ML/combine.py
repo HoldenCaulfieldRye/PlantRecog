@@ -100,11 +100,7 @@ class Combiner(object):
 # The console interpreter.  It checks whether the arguments
 # are valid, and also parses the configuration files.
 def console(config_file = None):
-    if config_file is None:
-        cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'combine')
-    else:
-        cfg = get_options(config_file, 'combine')
-
+    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'combine')
     valid_args = cfg.get('valid_args','entire,stem,branch,leaf,fruit,flower').split(',')
     if len(sys.argv) < 3:
         print 'Must give at least one type and image file as arguments'
@@ -126,8 +122,3 @@ def console(config_file = None):
             delete_after_combine=bool(cfg.get('delete-after-combine',0)=='1'),
             )
     combine(classifier_dict)
-
-
-# Boilerplate for running the appropriate function.
-if __name__ == "__main__":
-    console()
