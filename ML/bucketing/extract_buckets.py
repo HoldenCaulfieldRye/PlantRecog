@@ -3,7 +3,7 @@ from collections import Counter
 
 
 if __name__ == '__main__':
-    images, labels = mongoHelperFunctions.bucketing(600,'Leaf',0.4)
+    images, labels = mongoHelperFunctions.bucketing(800,'Entire',0.3)
     c = Counter(labels)
     total = 0
     classes = 0

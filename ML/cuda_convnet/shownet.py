@@ -33,9 +33,11 @@ import random as r
 import numpy.random as nr
 from convnet import ConvNet
 from options import *
+import matplotlib as mpl
+mpl.use('Agg')
 
 try:
-    import pylab as pl
+    import matplotlib.pylab as pl
 except:
     print "This script requires the matplotlib python library (Ubuntu/Fedora package name python-matplotlib). Please install it."
     sys.exit(1)
@@ -140,10 +142,15 @@ class ShowConvNet(ConvNet):
         pl.xticks([])
         pl.yticks([])
         if not combine_chans:
+            # Added save figure
+            #pl.saveFig('filters.png')
             pl.imshow(bigpic, cmap=pl.cm.gray, interpolation='nearest')
         else:
             bigpic = bigpic.swapaxes(0,2).swapaxes(0,1)
+            # Added save figure
+            #bigpic.saveFig('filters.png')
             pl.imshow(bigpic, interpolation='nearest')        
+            pl.savefig('filters.png')
         
     def plot_filters(self):
         filter_start = 0 # First filter to show
@@ -236,6 +243,7 @@ class ShowConvNet(ConvNet):
                 pl.yticks(ylocs + height/2, [l[1] for l in img_labels])
                 pl.xticks([width/2.0, width], ['50%', ''])
                 pl.ylim(0, ylocs[-1] + height*2)
+        pl.savefig('preds.png')
     
     def do_write_features(self):
         if not os.path.exists(self.feature_path):
