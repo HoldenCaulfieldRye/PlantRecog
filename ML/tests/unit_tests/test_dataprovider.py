@@ -10,15 +10,43 @@ import plantdataproviders
 
 class DataProviderTests(unittest.TestCase):
     
-    def test_augment_data_provider(self):
+    def test_get_next_batch(self, num_batches):
         D = plantdataproviders.AugmentLeafDataProvider('/home/alex/Git/group-project-master/ML/tests/unit_tests/test_data/example_ensemble/One')
-        self.export_crops_to_jpg(D, 'Crop/', 100)
-        # test_crop_size: assert images are 224x224
-        # test_forward_increment: assert pixel 0,0 of 1st image is same as pixel 0,1 in 1st img 2 batches down; do this for first 64(?) batches
-        # test_downward_increment: assert pixel 0,0 of 1st image is same as pixel 1,0 in 1st img 64 (65?) batches down
-        # test_flip: assert pixel 0,0 of 1st image is same as pixel 0,224 in 1st img one batch down; do this for first 10 batches
-        # delete dummy batches
-        # shutil.rmtree(testdir)
+        for count in range(num_batches):
+            epoch, batchnum, [cropped, labels] = dataProv.get_next_batch()
+            cropped = self.unflatten(cropped)
+            self.assertEqual(count, epoch)
+            self.assertEqual(count, batchnum)
+            
+        self.test_crop_size()
+        self.test_forward_increment()
+        self.test_downward_increment()
+        self.test_flip()
+            # test_crop_size: assert images are 224x224
+            # test_forward_increment: assert pixel 0,0 of 1st img is same as pixel 0,1 in 1st img 2 batches down; do this for 1st 64(?) batches
+            # test_downward_increment: assert pixel 0,0 of 1st image is same as pixel 1,0 in 1st img 64 (65?) batches down
+            # test_flip: assert pixel 0,0 of 1st image is same as pixel 0,224 in 1st img one batch down; do this for first 10 batches
+
+    def test_crop_size(self):
+        """assert images are 224x224. """
+        
+    def test_forward_increment(self):
+        """assert pixel 0,0 of 1st img is same as pixel 0,1 in 
+           1st image two batches down."""
+        
+    def test_downward_increment(self):
+        """assert pixel 0,0 of 1st image is same as pixel 1,0 
+           in 1st img 64 (65?) batches down."""
+
+    def test_flip(self):
+        """assert pixel 0,0 of 1st image is same as pixel 0,224 
+           in 1st img one batch down."""
+
+    def unflatten(self, dataProv, cropped):
+        cropped += dataProv.data_mean
+        cropped = cropped.reshape(3, 224, 224, cropped.shape[1])
+        cropped = np.require(cropped, dtype=np.uint8, requirements='W')
+        return cropped
         
     # parameterise number of batches and number of images per batch?
     def set_up_dummy_batches(self, batch_dir='../tests/unit_tests/'):
