@@ -9,7 +9,6 @@ var fs = require('fs');
 exports.parseConfig = function(confFile){
   
   /* Things to seek our environment variables with*/
-  /* TODO: remove vars which are not relevant to graphic02 */
   var dbSeekString = '# NODE_INI: db_database = ';
   var dbHostSeekString = '# NODE_INI: db_host = ';
   var dbPortSeekString = '# NODE_INI: db_port = ';
@@ -32,7 +31,7 @@ exports.parseConfig = function(confFile){
 
   if (!confFile){
     console.log('No arguments given, I cannot initialise without a .conf');
-    process.exit(1);
+    return -1;
   } 
 
   /* try and parse the file (use Sync readFile), catch any error */
@@ -41,7 +40,7 @@ exports.parseConfig = function(confFile){
   }
   catch (err) {
     console.log('Error parsing confFile: ' + err);
-    process.exit(1);
+    return -2;
   }   
 
   /* Extract our configuration variables */
@@ -83,7 +82,7 @@ exports.parseConfig = function(confFile){
   if(db_port === -1 || db_host === -1 || db_database === -1 ||
       classifier_host === -1 || classifier_port === -1 || appServer_port === -1){
     console.log('Invalid conf file provided, I cannot initialise!');
-    throw 'Invalid conf file provided, I cannot initialise!';
+    return -3;
   }
   
   /* Return our configuration object */
@@ -96,4 +95,4 @@ exports.parseConfig = function(confFile){
   
   return configArgs;
   
-}
+};
