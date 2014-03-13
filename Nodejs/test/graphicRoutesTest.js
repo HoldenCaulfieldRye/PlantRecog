@@ -28,40 +28,40 @@ describe('Graphic_server',function(){
     configArgs.db_port = "55517";
     configArgs.db_host = "theplant.guru";
     configArgs.db_database = "development";
-    configArgs.classifier_host = "146.169.49.11";
+    configArgs.classifier_host = "localhost";
     configArgs.classifier_port = "55581";
     configArgs.appServer_port = "55580";
 
     before(function(done){
 	/* Code to allow connection to mongo, gets new instance of MongoClient */
 
+	//var server = 'foo';
+	//testDB = 'bar';
+
 	var server = new Server('theplant.guru','55517',{auto_reconnect:true, native_parser: true}    );
 	testDB = new Db('development',server, {safe: true});
-
+	/*
 	//Actually connect to the database.
 	testDB.open(function(err, testDB) {
 	    if(!err) {
 	    	console.log("Connected to " + 'development' + " database");
-	    	testDB.collection('usercollection', {strict:true}, function(err, collection) {
+	    	testDB.collection('segment_images', {strict:true}, function(err, collection) {
 	    	    if (err) {
-	    		console.log("The 'usercollection' collection doesn't exist!");
+	    		console.log("The 'segment_images' collection doesn't exist!");
 	    		return -1;
 	    	    }
 	    	});
 
 	    }
 
+	});
+    */
 	// Set up the middleware for testing
-	app.get('/', routes.index);
 	app.post('/classify', routes.classify(testDB,configArgs));
 	//app.get('/job/:group_id', routes.getJob(testDB));
 	//app.get('/job', routes.getJob(testDB));
 	//app.post('/upload_no_db', routes.upload(null,configArgs));
 	done();
-
-
-
-	});
 
 
     });
@@ -74,28 +74,46 @@ describe('Graphic_server',function(){
 
     describe('routes.classify', function(){
 
-		it('should accept an image upload and respond with File received from Graphic', function(){
+    
+		it('should fail with Insufficient arguments supplied', function(){
+
+			this.timeout(8000);
+		    request(app)
+			.post('/classify')
+			.field("group_id", 0)			
+			.expect(200,"Insufficient arguments supplied")			
+			.end(function(err,res){
+			    if(err) throw err;
+			});
+		});
+	
+		it('should accept an image upload and respond with There was a problem adding the information to the database.', function(){
+
+			this.timeout(8000);
+		    request(app)
+			.post('/classify')
+			.field("group_id", 0)
+			.attach('datafile','./test/fixtures/sample.jpg')
+			.expect(200,"There was a problem adding the information to the database." )			
+			.end(function(err,res){
+			    if(err) throw err;
+			});
+		});
+
+		/*
+		it('should fail with Insufficient arguments supplied', function(){
 
 			this.timeout(4000);
 		    request(app)
 			.post('/classify')
-			.field("fields", "{ folder_id: '0', group_id: '0' }")
-			.field("files", null)
-			.attach('datafile','./test/fixtures/sample.jpg')
-			.expect(200,"File received by graphic" )			
+			.expect(200,"Insufficient arguments supplied")			
 			.end(function(err,res){
-			    if(err){
-				done(err);
-			    }
-			    else {
-			    assert(checkForHexRegExp.test(res.body.id));
-			    assert(checkForHexRegExp.test(res.body.group_id));
-			    setTimeout(done, 3000);
-			    };
+			    if(err) throw err;
+
 			});
+		
+		});
+		*/
 
-
-
-})
-})
+	})
 })
