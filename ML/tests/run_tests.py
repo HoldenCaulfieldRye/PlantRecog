@@ -35,5 +35,6 @@ if __name__ == '__main__':
         cov.save()
         timestr = time.strftime("%d-%m-%Y|%H-%M")
         outfile = open('test_results/'+timestr+'.result','wb')
+        cov.html_report(directory='./test_results/html/')
         cov.report(morfs=None, show_missing=True, ignore_errors=None, file=outfile, omit=None, include=None)
         outfile.close()

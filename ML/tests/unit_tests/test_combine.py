@@ -11,6 +11,14 @@ HERE = os.path.abspath(os.path.dirname(__file__))+'/'
 class CombineTests(unittest.TestCase):
 
 
+    def test_chunks(self):
+        a_list = ['a','b','c','d','g','b','a','y']
+        for items in libs.combine.chunks(a_list,2):
+            self.assertEqual(len(items),2)
+            self.assertIn(items[0],a_list)
+            self.assertIn(items[1],a_list)
+
+
     def test_without_params(self):
         with self.assertRaises(SystemExit):
             sys.argv = ['combine.py','rando',HERE+'test_data/11.jpg']
@@ -60,8 +68,10 @@ class CombineTests(unittest.TestCase):
                    'ConvNet2':HERE+'test_data/conv2.pickle', 
                    'ConvNet3':HERE+'test_data/conv3.pickle'})
         self.assertEqual(result.shape[0],6)
-        self.assertAlmostEqual(np.max(result),0.3416666666666)
-        self.assertAlmostEqual(np.min(result),0.0249999999999)
+        self.assertAlmostEqual(np.max(result),0.3833333333333)
+        self.assertAlmostEqual(np.min(result),0.0388888888888)
+        result = combiner({ 'ConvNet1':HERE+'test_data/conv1.pickle'})
+        self.assertEqual(result.shape[0],6)
 
 
 # ------------------------------------------------
