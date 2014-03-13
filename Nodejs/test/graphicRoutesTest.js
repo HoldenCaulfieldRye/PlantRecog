@@ -22,7 +22,7 @@ BSON = mongo.BSONPure;
 
 describe('Graphic_server',function(){
 
-	var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$")
+    var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$")
     var testDB;
     var configArgs = {};
     configArgs.db_port = "55517";
@@ -35,7 +35,7 @@ describe('Graphic_server',function(){
     before(function(done){
 	/* Code to allow connection to mongo, gets new instance of MongoClient */
 
-	var server = new Server('theplant.guru','55517',{auto_reconnect:true, native_parser: true});
+	var server = new Server('theplant.guru','55517',{auto_reconnect:true, native_parser: true}    );
 	testDB = new Db('development',server, {safe: true});
 
 	//Actually connect to the database.
@@ -53,7 +53,7 @@ describe('Graphic_server',function(){
 
 	// Set up the middleware for testing
 	app.get('/', routes.index);
-	app.post('/upload', routes.upload(testDB,configArgs));
+	app.post('/classify', routes.classify(testDB,configArgs));
 	//app.get('/job/:group_id', routes.getJob(testDB));
 	//app.get('/job', routes.getJob(testDB));
 	//app.post('/upload_no_db', routes.upload(null,configArgs));
@@ -74,25 +74,15 @@ describe('Graphic_server',function(){
 
     describe('routes.classify', function(){
 
-		it('should accept an image upload and respond with a new valid objectID', function(done){
+		it('should accept an image upload and respond with File received from Graphic', function(){
+
 			this.timeout(4000);
 		    request(app)
 			.post('/classify')
-			//.field("", null)
-			//.field("", null)
-			//.field("", null)
-			//.field("", null)
-			//.field("", null)
-			//.field("", null)
-			//.field("date", null)
-			//.field("latitude", null)
-			//.field("longitude", null)
-			//.field("group_id", 0)
-			//.field("segment", "flower")
+			.field("fields", "{ folder_id: '0', group_id: '0' }")
+			.field("files", null)
 			.attach('datafile','./test/fixtures/sample.jpg')
-			.expect(200,"File received by graphic")
-			.end()
-			/*
+			.expect(200,"File received by graphic" )			
 			.end(function(err,res){
 			    if(err){
 				done(err);
@@ -103,10 +93,9 @@ describe('Graphic_server',function(){
 			    setTimeout(done, 3000);
 			    };
 			});
-			*/
-
-		});
 
 
 
+})
+})
 })

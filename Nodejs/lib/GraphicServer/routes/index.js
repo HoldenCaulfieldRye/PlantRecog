@@ -42,6 +42,7 @@ exports.classify = function(db,configArgs) {
 				})
 
 				// Save the file
+                			    
        	    	fs.renameSync(fileLocation, groupLocation + "/" +  files.datafile.name)
 			            
                 console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
