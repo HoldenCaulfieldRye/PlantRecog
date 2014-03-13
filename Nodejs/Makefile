@@ -9,11 +9,10 @@ dev-install:
 test:
 	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/ 
 
-test-cov: lib-cov
-	@PLANT_COV=1; $(MAKE) test REPORTER=json-cov
+graphic_test:
+	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/graphicRoutesTest.js
 
-lib-cov:
-	@if [ -d lib-cov ] ; then rm -r lib-cov ; fi
-	@jscoverage -v --exclude ./AppServer/node_modules/ --exclude ./GraphicServer/node_modules lib lib-cov
+graphic_instantiation:
+	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/graphicTest.js	
 
-.PHONY: test test-cov lib-cov 
+.PHONY: test graphic_test

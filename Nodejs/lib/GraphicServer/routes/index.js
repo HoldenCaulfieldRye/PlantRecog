@@ -5,84 +5,164 @@ var exec = require('child_process').exec;
 var formidable = require ('formidable');
 var path = require ('path');
 var util = require ('util');
-
-
-exports.index = function(req, res){
-  res.render('index', { title: 'Express' });
-};
-
-/*
- * GET Classification	
- */
+var mkdirp = require('mkdirp');
+var fs = require('fs');
 
 exports.classify = function(db,configArgs) {
-	
-	var form = new formidable.IncomingForm();
-	form.uploadDir = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database);
-	form.keepExtensions = true;	
 
 	return function(req, res) {
 				
+			var form = new formidable.IncomingForm();
+
+	        // Switch our uploadDIR depending on how this is being run.
+	        /* istanbul ignore else */
+	        /* Ignored by Istanbul because this ONLY goes one way during TEST and PROD respectively */
+	        if(process.env.NODE_ENV ==='test'){
+	            form.uploadDir = path.join('./lib/GraphicServer/uploads', configArgs.db_database);
+	        }
+	        else{
+	            form.uploadDir = path.join('./Nodejs/lib/GraphicServer/uploads', configArgs.db_database);
+	        }
+	        form.keepExtensions = true;
+
+	        try{
+				form.on('file', function(field, file) {
+	            //rename the incoming file to the file's name
+	            	fs.renameSync(file.path, form.uploadDir + "/" + file.name);
+				})
+			} catch (err) {
+				res.send("Unable to rename file")
+				return err;
+			}
+
 			form.parse(req, function(err, fields, files){
 
-				console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
+				// Determine where to save the file
+				try{
+					groupLocation = path.join(form.uploadDir, fields.group_id)
+             		fileLocation = path.join(form.uploadDir, files.datafile.name)
+             		mkdirp.sync(groupLocation)
+
+				} catch(err){
+					res.send("Insufficient arguments supplied")
+					return err;
+				}
+				
+
+             	try{
+   	    			fs.renameSync(fileLocation, groupLocation + "/" +  files.datafile.name)
+		    	} catch(err){	
+		    		res.send("Could not rename file")
+		    	return err;
+		   		}  
+
+                console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
 
 	   			filePath = files.datafile.path;	
+	   			fileName = files.datafile.name;
 
-				/* pre-formidable code */
-				//console.log('req.body._id: ' + req.body._id);			
-				//filePath = req.files.datafile.path;
-	        	//collection = db.collection('usercollection');
-			
 	        	if(files){
-
-	        		// Output where we saved the file 
-					console.log("FilePath is: \n" + filePath);
 	    
 					// Set our collection
-					var collection = db.collection('usercollection');
+					var collection = db.collection('segment_images');
+			    
+					collection.findAndModify(	        	
 
-					// Query our net	
-					exec('python ML/runtest.py entire ../../../../' + filePath, function(err,stdout,stderr){
-					    
-					    console.log('stdout: ' + stdout);
-					    console.log('stderr: ' + stderr);
-					    
-					    if(err !== null){
-							console.log('exec error:' + err);
-					    }
-					    
-					    var output = stdout.toString();
-					    var json_obj = output.substring(output.search('{'),output.search('}')+1);
-					    
-					    console.log('json_obj: ' + json_obj);
-					    
-					    collection.findAndModify(	        	
-				              { '_id': new BSON.ObjectID(fields._id)}, /* new BSON.  '52ff886b27d625b55344093f' */
-				              [],
-				              { $set : { 
-				                  "submission_state" : "Image classified",
-		          	                  "graphic_filepath": filePath,
-		                                  "classification": json_obj}
-				              },
-					    	 
-					    	  {'new': true}, 
-				              
-					        function (err,doc) {
-					        	if (err) {
-					                //If it failed, return error
-							  		console.log("Error adding information to db"); 
-					                console.log(err);
-					                res.send("There was a problem adding the information to the database.");
-					            }
-					            else {
-					            	// If it worked, return JSON object from collection to App//
-									console.log("db updated");
-					            	res.json(doc);
-					            }
-					        });
-					});  
+				    	    { '_id': new BSON.ObjectID(fields.segment_id) },	                                              
+					    [], 
+				            { $set : { "submission_state" : "File received by graphic"} },
+
+			    	 
+			    	    {'new': true}, 
+		              
+				        function (err,doc) {
+				        	if (err) {
+				                //If it failed, return error
+								console.log("Error adding information to db: " + err); 
+				                res.send("There was a problem adding the information to the database.");
+				            }
+				            else {
+				            	// If it worked, return JSON object from collection to App//
+
+							console.log("db updated: file received by graphic");                                              
+					        // Reply to app server
+				            res.json("File received by graphic");
+
+				            }
+
+					});
 				}
 			});
 	};
 };
+
+/*
+// This script should be launched on graphic server startup
+exports.groupClassify = function(db, configArgs){
+
+	var components = [ "leaf", "flower", "branch", "fruit", "bark" ]
+	var numComponents = components.length;
+	var collection = db.collection('usercollection');
+
+	// Will loop forever
+	for (var i = 0 ;; i = (i++)%numComponents){
+
+		// Sync
+		var classification = collection.find({ "submission_state": "File Submitted from App", "image_segment" : components[i] }).sort({"submission_time": 1}).limit(128);
+		runNet(classification,components[i]);
+
+	}
+}
+
+// STEP 1.5: 'Pack' images into format (JSON?) which can be parsed by John
+
+// STEP 2: Receive results and append to DB
+// I assume that John returns the same structure as in runtest.py
+// Iterate over the collection-type object using javascript, executing a MongoDB procedure each time
+
+var runNet = function(classification, type, callback){
+
+	return function(req, res){
+
+		exec('python ML/runtest.py ' + type + ' ' + classification, function(err,stdout,stderr){
+
+			if(err !== null){
+				console.log('exec error:' + err);
+			}
+			else {
+				n = result.length;
+
+				for(var i = 0; i < n; i++) {
+
+					id = results[i][_id];
+					classification_leaf = results[i][classification]
+					collection.findAndModify(
+						{ '_id': new BSON.ObjectID(id) },
+						{ $set: { "status" : "Component classified" } }
+					)
+				}
+			}
+		});
+		// end of exec
+
+	res.json(doc);
+
+	}
+}
+*/
+
+					// Query our net	
+					//exec('python ML/runtest.py entire ../../../../' + filePath, function(err,stdout,stderr){
+					    
+					//    console.log('stdout: ' + stdout);
+					//    console.log('stderr: ' + stderr);
+					    
+					//    if(err !== null){
+					//		console.log('exec error:' + err);
+					//    }
+					    
+					//    var output = stdout.toString();
+					//    var json_obj = output.substring(output.search('{'),output.search('}')+1);
+					    
+					//    console.log('json_obj: ' + json_obj);
+
