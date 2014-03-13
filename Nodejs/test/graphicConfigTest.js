@@ -21,7 +21,7 @@ describe('Graphic_server',function(){
 			// Path relative to mocha i.e. within the Nodejs folder
 			configArgs = parseConfig('../env/graphic_dev_env.conf');
 			assert.equal(configArgs.db_database,'development');
-			assert.equal(configArgs.db_port,'57027');
+			assert.equal(configArgs.db_port,'55517');
 			assert.equal(configArgs.db_host,'plantrecogniser.no-ip.biz');
 			assert.equal(configArgs.classifier_host,'146.169.49.11');
 			assert.equal(configArgs.classifier_port,'55581');

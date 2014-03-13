@@ -10,10 +10,11 @@ import plantdataproviders
 
 class DataProviderTests(unittest.TestCase):
     
-    def test_get_next_batch(self, num_batches):
-        D = plantdataproviders.AugmentLeafDataProvider('/home/alex/Git/group-project-master/ML/tests/unit_tests/test_data/example_ensemble/One')
-        for count in range(num_batches):
-            epoch, batchnum, [cropped, labels] = dataProv.get_next_batch()
+    def test_get_next_batch(self):
+        D = plantdataproviders.AugmentLeafDataProvider('/home/alex/Git/group-project-master/ML/tests/unit_tests/test_data/example_ensemble/Alex')
+        # testing over 100 batches - cannot have this as method arg?
+        for count in range(100): 
+            epoch, batchnum, [cropped, labels] = D.get_next_batch()
             cropped = self.unflatten(cropped)
             self.assertEqual(count, epoch)
             self.assertEqual(count, batchnum)
