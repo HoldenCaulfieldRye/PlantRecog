@@ -10,6 +10,8 @@
 #import "BLEFDatabase.h"
 #import "BLEFObservation.h"
 
+NSString * boundary = @"---------------------------14737809831466499882746641449";
+
 @interface BLEFServerInterface ()
 
 // Database Interface
@@ -18,7 +20,7 @@
 // Network Session
 @property (strong, nonatomic) NSURLSession * updateSession;
 @property (strong, nonatomic) NSURLSession * uploadSession;
-@property (strong, nonatomic) NSString * boundary;
+@property (strong, nonatomic) NSURLSession * completionSession;
 
 // Re-Try Timer
 @property (strong, nonatomic) NSTimer *networkIntervalTimer;
@@ -55,8 +57,11 @@
         
         // Network Session
         _updateSession = [NSURLSession sharedSession];
-
-        _boundary = @"---------------------------14737809831466499882746641449";
+        NSURLSessionConfiguration *completionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
+        completionConfig.HTTPAdditionalHeaders = @{
+                                               @"Content-Type"  : [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary]
+                                               };
+        [self setCompletionSession:[NSURLSession sessionWithConfiguration:completionConfig]];
         
         // Subscribe to notifications
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
@@ -103,7 +108,7 @@
 - (void) uploadCompletion:(BOOL) success
 {
     _uploadQueueProcessingActive = false;
-    NSLog(@"Upload Result:%hhd", success);
+    NSLog(@"Upload %@", (success == true ? @"Success" : @"Fail"));
     if (success){
         [_database saveChanges];
         [self processUploads];
@@ -209,11 +214,11 @@
                                  @"longitude": [NSNumber numberWithDouble:[[observation specimen] longitude]]
                                  };
         if (imageData != nil && params != nil){
-            NSData *bodyData = [self createUploadBodyDataWithFields:params andFileData:imageData];
+            NSData *bodyData = [self createHTTPBodyDataWithFields:params andFileData:imageData];
             NSURLRequest *request = [self createUploadRequestForObservation:observation];
             NSURLSessionConfiguration *uploadConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
             uploadConfig.HTTPAdditionalHeaders = @{
-                                                   @"Content-Type"  : [NSString stringWithFormat:@"multipart/form-data; boundary=%@", [self boundary]]
+                                                   @"Content-Type"  : [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary]
                                                    };
             [self setUploadSession:[NSURLSession sessionWithConfiguration:uploadConfig]];
             NSURLSessionUploadTask *task = [[self uploadSession] uploadTaskWithRequest:request
@@ -244,6 +249,28 @@
         
         NSURLSessionDataTask *task = [[self updateSession] dataTaskWithRequest:updateRequest
                                                        completionHandler:updateCompletion];
+        return task;
+    }
+    return nil;
+}
+
+- (NSURLSessionDataTask *)createCompletionTaskForSpecimen:(BLEFSpecimen *)specimen completion:(void (^)(BOOL success))handler
+{
+    if ((specimen != nil) && ([specimen isKindOfClass:[BLEFSpecimen class]])){
+        NSManagedObjectID *specimenID = [specimen objectID];
+
+        NSURLRequest *completionNotification = [self createCompletionNotificationForSpecimen:specimen];
+        
+        void (^completionHandler)(NSData*, NSURLResponse*, NSError*) =
+        ^(NSData *data, NSURLResponse *response, NSError *error) {
+            BOOL _updated = [self updateSpecimen:specimenID usingData:data andError:error];
+            if (handler){
+                handler(_updated);
+            }
+        };
+        
+        NSURLSessionDataTask *task = [[self completionSession] dataTaskWithRequest:completionNotification
+                                                             completionHandler:completionHandler];
         return task;
     }
     return nil;
@@ -317,23 +344,23 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 
 #pragma mark UrlConnection Creations
 
-- (NSData *)createUploadBodyDataWithFields:(NSDictionary *)parameters andFileData:(NSData *)fileData
+- (NSData *)createHTTPBodyDataWithFields:(NSDictionary *)parameters andFileData:(NSData *)fileData
 {
     NSMutableData *body = [NSMutableData data];
     if (parameters){
         [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-            [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", [self boundary]] dataUsingEncoding:NSUTF8StringEncoding]];
+            [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
             [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
             [body appendData:[[NSString stringWithFormat:@"%@", value] dataUsingEncoding:NSUTF8StringEncoding]];
         }];
     }
     
     if (fileData){
-        [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", [self boundary]] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[@"Content-Disposition: form-data; name=\"datafile\"; filename=\"test.jpg\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[@"Content-Type: application/octet-stream\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[NSData dataWithData:fileData]];
-        [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", [self boundary]] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
     }
     return [NSData dataWithData:body];
 }
@@ -357,6 +384,22 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
     NSURL *url = [NSURL URLWithString:urlAsString];
     return [NSURLRequest requestWithURL:url];
 }
+
+- (NSURLRequest *)createCompletionNotificationForSpecimen:(BLEFSpecimen *)specimen
+{
+    //NSURL *url = [NSURL URLWithString:@"http://plantrecogniser.no-ip.biz:55580/upload"];
+    if ([specimen groupid] != nil && [[specimen groupid] length] > 2){
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://192.168.1.78:5000/completion/%@/", [specimen groupid]]];
+        //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
+        NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
+        [mutableRequest setHTTPMethod:@"PUT"];
+        NSDictionary *params = @{@"completion": @"true"};
+        [mutableRequest setHTTPBody:[self createHTTPBodyDataWithFields:params andFileData:nil]];
+        return (NSURLRequest *)mutableRequest;
+    }
+    return nil;
+}
+
 /*
   URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:
 - (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite

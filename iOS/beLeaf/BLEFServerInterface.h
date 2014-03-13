@@ -34,5 +34,6 @@ extern NSString * const BLEFNetworkRetryNotification;
 // Server Interface
 - (NSURLSessionDataTask *)createUpdateTaskForSpecimen:(BLEFSpecimen *)specimen completion:(void (^)(BOOL updated))handler;
 - (NSURLSessionUploadTask *)createUploadTaskForObservation:(BLEFObservation *)observation completion:(void (^)(BOOL success))handler;
+- (NSURLSessionDataTask *)createCompletionTaskForSpecimen:(BLEFSpecimen *)specimen completion:(void (^)(BOOL success))handler;
 
 @end
