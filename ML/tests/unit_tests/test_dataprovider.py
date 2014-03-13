@@ -11,9 +11,9 @@ import plantdataproviders
 class DataProviderTests(unittest.TestCase):
     
     def test_get_next_batch(self, num_batches):
-        D = plantdataproviders.AugmentLeafDataProvider('/home/alex/Git/group-project-master/ML/tests/unit_tests/test_data/example_ensemble/One')
+        D = plantdataproviders.AugmentLeafDataProvider('/home/alex/Git/group-project-master/ML/tests/unit_tests/test_data/example_ensemble/Alex')
         for count in range(num_batches):
-            epoch, batchnum, [cropped, labels] = dataProv.get_next_batch()
+            epoch, batchnum, [cropped, labels] = D.get_next_batch()
             cropped = self.unflatten(cropped)
             self.assertEqual(count, epoch)
             self.assertEqual(count, batchnum)
