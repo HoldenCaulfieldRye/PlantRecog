@@ -285,10 +285,9 @@ def console():
         filenames_and_labels = collector(cfg)
     else:
         images, labels = mongoHelperFunctions.bucketing(
-                             threshold=int(cfg.get('class_image_thres',1000)),
-                             component=cfg.get('limit_by_component',None),
-                             componentProb=cfg.get('component_prob_thres',0.0),
-                             )
+                                 int(cfg.get('class_image_thres',1000)),
+                                 cfg.get('limit_by_component',None),
+                                 float(cfg.get('component_prob_thres',0.0)))
         output_path=cfg.get('output-path', '/tmp/noccn-dataset')
         filter_component=str(cfg.get('limit_by_component',None)).lower()
         write_stats_to_file(output_path,labels)
