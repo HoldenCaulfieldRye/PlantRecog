@@ -31,8 +31,9 @@ var config = -1;
 */
 
 var args = process.argv.splice(2); 
-var confFile = args[0];
-  
+//var confFile = args[0];
+var confFile = '../env/graphic_dev_env.conf'  
+
 console.log("Parsing Config");
 
 try{
@@ -41,10 +42,11 @@ try{
 }
 catch (err) {
   console.log('Error during parse: ' + err);
-  process.exit(1);
+  return -1;
 }
 
 //Actually connect to the database.
+
 try{    
   mongoClient = new mongo.MongoClient(new mongo.Server(configArgs.db_host, configArgs.db_port), {native_parser: true});
   mongoClient.open(function(err, mongoClient){if (err) throw err;});
@@ -52,7 +54,7 @@ try{
 }
 catch(err){
   console.log('Error connecting to Database: ' + err);
-  process.exit(1);
+  return -1;
 }
 
 
