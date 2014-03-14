@@ -28,14 +28,14 @@ class DataProviderTests(unittest.TestCase):
             epoch, batchnum, [cropped, labels] = D.get_next_batch()
             # print 'cropped shape:', cropped.shape
             Cropped.append(cropped)
-            # cropped = self.unflatten(D, cropped) # this is for tests below
             # print 'count, epoch, batchnum: %i , %i, %i' % (count, epoch, batchnum)
 
         print 'patches have visited %i rows' % rows_visited
         self.verify_downward_increment(rows_visited,(D.border_size*2)+1)
         expected_dimensions = (D.inner_size*D.inner_size*D.num_colors, 1)
         self.verify_crop_size(cropped.shape, expected_dimensions)
-        # self.export_some_images(Cropped, )
+        Cropped = self.ready_for_jpeg(D, Cropped) # this is for exporting 
+        self.export_some_images(Cropped, 'test_data/example_ensemble/Alex')
          
     def test_get_data_dims(self):        
         D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Alex')
@@ -61,11 +61,29 @@ class DataProviderTests(unittest.TestCase):
            should be (border_size*2)+1"""
         self.assertEqual(rows_visited,twice_border_size_plus_one)
 
-    def unflatten(self, dataProv, cropped):
-        cropped += dataProv.data_mean
-        cropped = cropped.reshape(3, 224, 224, cropped.shape[1])
-        cropped = np.require(cropped, dtype=np.uint8, requirements='W')
-        return cropped
+    def export_some_images(self, Cropped, img_dir):
+        os.mkdir(img_dir+'/updown')
+        os.mkdir(img_dir+'/leftright')
+        os.mkdir(img_dir+'/flip')
+        os.chdir('updown')
+        for i in range(len(Cropped)):
+            if i % 32 == 0:
+                orig_img_np = Cropped[i].copy() # is this image demeaned?
+                Image.fromarray(orig_img_np).save('/updown/img_'+`i`+'.jpeg')
+            if i <= 32:
+                orig_img_np = Cropped[i].copy() # is this image demeaned?
+                Image.fromarray(orig_img_np).save('/leftright/img_'+`i`+'.jpeg')
+            if i <= 64 and i % 2 == 0:
+                orig_img_np = Cropped[i].copy() # is this image demeaned?
+                Image.fromarray(orig_img_np).save('/flip/img_'+`i`+'.jpeg')
+                
+        
+    def ready_for_jpeg(self, dataProv, Cropped):
+        for cropped in Cropped:
+            cropped += dataProv.data_mean
+            cropped = cropped.reshape(3, 224, 224, cropped.shape[1])
+            cropped = np.require(cropped, dtype=np.uint8, requirements='W')
+        return Cropped
         
     # parameterise number of batches and number of images per batch?
     def set_up_dummy_batches(self, batch_dir='../tests/unit_tests/'):
