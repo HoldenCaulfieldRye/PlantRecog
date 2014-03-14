@@ -13,7 +13,7 @@ class DataProviderTests(unittest.TestCase):
     
     def test_get_next_batch(self):
         D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Alex')
-        epoch, batchnum, Cropped, Labels = 0, 0, [], []
+        epoch, batchnum, Cropped, labels = 0, 0, [], []
         count = 0
         rows_visited = 0
         while epoch<2:
@@ -28,7 +28,6 @@ class DataProviderTests(unittest.TestCase):
             epoch, batchnum, [cropped, labels] = D.get_next_batch()
             # print 'cropped shape:', cropped.shape
             Cropped.append(cropped)
-            Labels.append(labels)
             # cropped = self.unflatten(D, cropped) # this is for tests below
             # print 'count, epoch, batchnum: %i , %i, %i' % (count, epoch, batchnum)
 
@@ -36,7 +35,7 @@ class DataProviderTests(unittest.TestCase):
         self.verify_downward_increment(rows_visited,(D.border_size*2)+1)
         expected_dimensions = (D.inner_size*D.inner_size*D.num_colors, 1)
         self.verify_crop_size(cropped.shape, expected_dimensions)
-
+        # self.export_some_images(Cropped, )
          
     def test_get_data_dims(self):        
         D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Alex')
