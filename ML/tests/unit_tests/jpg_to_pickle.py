@@ -4,15 +4,15 @@ import numpy as np
 from PIL import Image
 
 if __name__ == '__main__':
-    # get directory from which to fetch data
+    # get directory from which to fetch image
     try: 
         get_dir = sys.argv[3]
         data_filename = 
-    except: get_dir = 'test_data/example_ensemble/Two/'
+    except: get_dir = 'test_data/example_ensemble/'
 
-    # get filename from which to unpickle image(s)
+    # get image filename
     try: data_filename = sys.argv[2]
-    except: data_filename = 'data_batch_1'
+    except: data_filename = '12.jpg'
 
     # get pickled objects
     os.chdir(get_dir)
