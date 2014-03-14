@@ -102,7 +102,7 @@ class AugmentLeafDataProvider(LabeledDataProvider):
             self.curr_epoch += 1    
 
     def crop_batch(self):
-        print 'initialising cropped to a (%i, %i)-dimensional array' % (self.get_data_dims(), self.data_dic['data'].shape[1])#self.data_dic['data'].shape[1]*self.data_mult)
+        # print 'initialising cropped to a (%i, %i)-dimensional array' % (self.get_data_dims(), self.data_dic['data'].shape[1])
         cropped = n.zeros((self.get_data_dims(), 
                            self.data_dic['data'].shape[1]*self.data_mult), # batch['data'].shape[1] == batchSize
                           dtype=n.single)

@@ -18,25 +18,35 @@ class DataProviderTests(unittest.TestCase):
         
         # testing over 100 batches - cannot have this as method arg?
         count = 0
-        while count<2048:
-            count += 1
+        rows_visited = 1
+        while epoch<2:
             # print 'another batch..'
+            count += 1
+            # print 'row, col, flip = ', D.patch_idx
+            # can increment forwards 32 times, and flip once every time, so should
+            # increment down every 64 iterations
+            if count % 66 == 0:
+                print 'should have reached rightmost edge of 256 image just there!'
+                print 'row, col, flip = ', D.patch_idx
+                print 'count, epoch, batchnum: %i, %i, %i' % (count, epoch, batchnum)
+                rows_visited += 1
             epoch, batchnum, [cropped, labels] = D.get_next_batch()
-            print 'row, col, flip = %s' % D.patch_idx
+            # print 'cropped shape:', cropped.shape
             Cropped.append(cropped)
             Labels.append(labels)
-            cropped = self.unflatten(D, cropped)
-            print 'count, epoch, batchnum: %i , %i, %i' % (count, epoch, batchnum)
-            
-        # self.test_crop_size()
+            # cropped = self.unflatten(D, cropped) # this is for tests below
+            # print 'count, epoch, batchnum: %i , %i, %i' % (count, epoch, batchnum)
+
+        print 'patches have visited %i rows' % rows_visited
+        self.test_crop_size()
         # self.test_forward_increment()
         # self.test_downward_increment()
         # self.test_flip()
-            # test_crop_size: assert images are 224x224
             # test_forward_increment: assert pixel 0,0 of 1st img is same as pixel 0,1 in 1st img 2 batches down; do this for 1st 64(?) batches
             # test_downward_increment: assert pixel 0,0 of 1st image is same as pixel 1,0 in 1st img 64 (65?) batches down
-            # test_flip: assert pixel 0,0 of 1st image is same as pixel 0,224 in 1st img one batch down; do this for first 10 batches
+            # test_flip: assert pixel 0,0 of 1st image is same as pixel 0,225 in 1st img one batch down; do this for first 10 batches
 
+        
     def test_crop_size(self):
         """assert images are 224x224. """
         
