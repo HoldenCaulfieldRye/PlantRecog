@@ -7,7 +7,6 @@ if __name__ == '__main__':
     # get directory from which to fetch data
     try: 
         get_dir = sys.argv[3]
-        data_filename = 
     except: get_dir = 'test_data/example_ensemble/Two/'
 
     # get filename from which to unpickle image(s)
@@ -42,10 +41,10 @@ if __name__ == '__main__':
     os.chdir('../')
     try:
         os.mkdir('Alex')
+        os.chdir('Alex/')
     except:
-        shutil.rmtree('Alex/')
-        os.mkdir('Alex')
-    os.chdir('Alex/')
+        os.chdir('Alex/')
+        os.remove('orig_img.jpg')
     orig_img_jpg.save('orig_img.jpg') # saving jpg
     print 'the image the constitutes the batch was stored as orig_img.jpg in:\n', os.getcwd()
     print ''

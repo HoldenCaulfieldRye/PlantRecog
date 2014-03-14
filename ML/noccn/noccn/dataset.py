@@ -30,7 +30,7 @@ def _process_item(creator, name):
 
 
 # Yields chunks of a specified size n of a list until it
-# is empty.  Chunks are not guaranteed to be of size n
+# is empty. Chunks are not guaranteed to be of size n
 # if the list is not a multiple of the chunk size
 def chunks(l, n):
     for i in xrange(0, len(l), n):
@@ -94,21 +94,7 @@ class BatchCreator(object):
                 if key != 'super_labels':
                     index = 0
                     insert_list = []
-                    for label in self.super_meta['labels']['super_labels' ]:
-                        if label in self.super_meta['labels'][key]:
-                            index += 1
-                            continue
-                        else:
-                            insert_list.append(index)
-                    self.super_meta['insert_list'][key] = insert_list        
-            super_meta_file = open(self.super_meta_filename,'wb')
-            self.super_meta = pickle.dump(self.super_meta,super_meta_file)
-            super_meta_file.close()
-                
-
-    # Takes a certain number of sample means from the batch
-    def setup_batch_means(self, num_images, total_means = 20):    
-        self.batches_per_mean = int((num_images/total_means)/self.batch_size)
+ean = int((num_images/total_means)/self.batch_size)
         print 'Taking mean every %i batches'%(self.batches_per_mean)
         self.batch_means = None
 
