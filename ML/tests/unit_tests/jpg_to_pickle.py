@@ -4,8 +4,7 @@ import numpy as np
 from PIL import Image
 
 sys.path.append('../../noccn/noccn/')
-
-import dataset
+import datasetNoMongo as dataset
 
 if __name__ == '__main__':
     # get image location
@@ -16,7 +15,7 @@ if __name__ == '__main__':
 
     # get numpy array of image
     BC = dataset.BatchCreator
-    img_jpg = BC.load(directory+img_filename)
+    img_jpg = BC.load(BC, directory+img_filename)
     img_np = BC.preprocess(img_jpg)
 
     # get label, metadata (hacky)
