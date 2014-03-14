@@ -45,8 +45,8 @@ if __name__ == '__main__':
         os.chdir('Alex/')
     except:
         os.chdir('Alex/')
-        os.remove('orig_img.jpg')
-    orig_img_jpg.save('orig_img.jpg') # saving jpg
+        os.remove('orig_img.jpeg')
+    orig_img_jpg.save('orig_img.jpeg') # saving jpg
     print 'the image the constitutes the batch was stored as orig_img.jpg in:\n', os.getcwd()
     print ''
 
