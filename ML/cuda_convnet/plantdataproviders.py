@@ -38,7 +38,28 @@ from data import *
 import numpy.random as nr
 import numpy as n
 import random as r
-from joblib import Parallel
+from joblib import Parallel, delayed
+
+
+def augment_image(image, random_gaussian):
+    ''' Image here is a single row numpy array, with all of the channels in sequential
+    order (i.e. goes column by column then row by row for red, then same for green
+    then same for blue). '''
+    eigenvalue, eigenvector = n.linalg.eig(n.cov(image))
+    addition = n.dot(eigenvector,n.sqrt(eigenvalue).T * random_gaussian)
+    return n.clip(n.add(image.T,addition),0,255).reshape(-1)
+
+def augment_illumination(data,channels=3):
+    ''' Data here is a 2D matrix, with columns being images, and rows being pixels
+    of those images, in order of columns, then rows, starting with R, the G and
+    B in sequential order.  A matrix of similar shape is returned with the data
+    augmented to have different illumination levels via a PCA analysis & manipulation.'''
+    data = data.reshape(-1,channels,data.shape[1]).T
+    random_gaussian = n.random.normal(0,0.6,channels)
+    rows = Parallel(n_jobs=-1)(
+                    delayed(augment_image)(image, random_gaussian) 
+                    for image in data)
+    return n.vstack([r for r in rows]).T
 
 
 # MODIFY NOCCN?
@@ -53,7 +74,7 @@ class AugmentLeafDataProvider(LabeledDataProvider):
             batch_range = DataProvider.get_batch_nums(data_dir)
         self.data_mean = self.batch_meta['data_mean']
         self.num_colors = 3
-        # patch_idx: x coordinate of patch, y coordinate of patch, flip image no/yes
+        # patch_idx: x coordinate of patch, y coordinate of patch, flip image no/yes, apply PCA no/yes
         self.patch_idx = [0,0,0]
         self.inner_size = 224
         # border_size: such that central patch edge is border_size pixels away from original img edge (expect 16)
@@ -131,57 +152,31 @@ class AugmentLeafDataProvider(LabeledDataProvider):
                 pic = y[:,self.border_size:self.border_size+self.inner_size,self.border_size:self.border_size+self.inner_size, :]
                 target[:,:] = pic.reshape((self.get_data_dims(), x.shape[1]))
         else:
-            for c in xrange(x.shape[1]): # think c is image
-                startY, startX, flip = self.patch_idx[0], self.patch_idx[1], self.patch_idx[2] # patch coordinates, and whether or not to flip
+            for c in xrange(x.shape[1]): # c is image
+                # patch coordinates, whether or not to flip, whether or not to apply PCA
+                startY, startX, flip = self.patch_idx[0], self.patch_idx[1], self.patch_idx[2]
                 # print 'startY, startX:', startY, startX
                 endY, endX = startY + self.inner_size, startX + self.inner_size
                 maxX, maxY = self.border_size*2, self.border_size*2
                 patch = y[:, startY:endY, startX:endX, c] # 1st dimension is ':' because take all 3 RGB channels
                 if flip == 1:
                     patch = patch[:,:,::-1]
-                target[:,c] = patch.reshape((self.get_data_dims(),)) # typo?
-                 
-            if flip == 1:
-                if self.patch_idx[1] == maxY:
-                    if self.patch_idx[0] == maxX:
-                        self.patch_idx[1] = 0
-                        self.patch_idx[0] = 0
-                        self.patch_idx[2] = 0
-                    else:
-                        self.patch_idx[1] = 0
-                        self.patch_idx[0] += 1
-                        self.patch_idx[2] = 0
-                else:
-                    self.patch_idx[1] += 1
-                    self.patch_idx[2] = 0
-            else:
+                target[:,c] = patch.reshape((self.get_data_dims(),))
+            target = augment_illumination(target)
+            if flip == 1 and startY == maxY and startX == maxX: # patch_idx == [maxX, maxY, 1]
+                print 1
+                self.patch_idx[0] = 0
+                self.patch_idx[1] = 0
+                self.patch_idx[2] = 0
+            elif flip == 1 and startY == maxY: # patch_idx == [!maxX, maxY, 1]
+                print 2
+                self.patch_idx[0] += 1
+                self.patch_idx[1] = 0
+                self.patch_idx[2] = 0
+            elif flip == 1:                         # patch_idx == [!maxX, !maxY, 1]
+                print 3
+                self.patch_idx[1] += 1
+                self.patch_idx[2] = 0
+            else:                                   # patch_idx[!maxX, !maxY, 0]
+                print 4
                 self.patch_idx[2] = 1
-
-    def augment_image(image, random_gaussian):
-        ''' Image here is a single row numpy array, with all of the channels in sequential
-        order (i.e. goes column by column then row by row for red, then same for green
-        then same for blue). '''
-        eigenvalue, eigenvector = np.linalg.eig(np.cov(image))
-        addition = np.dot(eigenvector,np.sqrt(eigenvalue).T * random_gaussian)
-        return np.clip(np.add(image.T,addition),0,255).reshape(-1)
-
-
-    def augment_illumination(data,channels=3):
-        ''' Data here is a 2D matrix, with columns being images, and rows being pixels
-        of those images, in order of columns, then rows, starting with R, the G and
-        B in sequential order.  A matrix of similar shape is returned with the data
-        augmented to have different illumination levels via a PCA analysis & manipulation.'''
-        data = data.reshape(-1,channels,data.shape[1]).T
-        random_gaussian = np.random.normal(0,0.6,channels)
-        rows = Parallel(n_jobs=N_JOBS)(
-                        delayed(augment_image)(image, random_gaussian) 
-                        for image in data)
-        return np.vstack([r for r in rows]).T
-
-    def get_array(image,size):
-        im = Image.open(image)
-        im = ImageOps.fit(im, size, Image.ANTIALIAS)
-        im_data = np.array(im)
-        im_data = im_data.T.reshape(3, -1).reshape(-1)
-        im_data = im_data.astype(np.single)
-        return im_data
