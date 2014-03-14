@@ -14,20 +14,13 @@ class DataProviderTests(unittest.TestCase):
     def test_get_next_batch(self):
         D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Two')
         epoch, batchnum, Cropped, Labels = 0, 0, [], []
-        # make sure prelim stuff ok
-        
-        # testing over 100 batches - cannot have this as method arg?
         count = 0
         rows_visited = 0
         while epoch<2:
-            # print 'another batch..'
             count += 1
-            # print 'row, col, flip = ', D.patch_idx
-            # can increment forwards 32 times, and flip once every time, so should
-            # increment down every 64 iterations
+            # can increment forwards 33 times, and flip once every time, so should
+            # increment down every 66 iterations
             if count % 66 == 0:
-                print 'should have reached rightmost edge of 256 image just there!'
-                # twice_border_size_plus_one_1 = 
                 self.verify_forward_increment(D.patch_idx[1:],[D.border_size*2,1])
                 print 'row, col, flip = ', D.patch_idx
                 print 'count, epoch, batchnum: %i, %i, %i' % (count, epoch, batchnum)
@@ -41,11 +34,8 @@ class DataProviderTests(unittest.TestCase):
 
         print 'patches have visited %i rows' % rows_visited
         self.verify_downward_increment(rows_visited,(D.border_size*2)+1)
-        expected_dimensions = (D.inner_size*D.inner_size, D.num_colors)
+        expected_dimensions = (D.inner_size*D.inner_size*D.num_colors, 1) # or (1, D.inner_size*D.inner_size*D.num_colors) ??
         self.verify_crop_size(cropped.shape, expected_dimensions)
-            # test_forward_increment: assert pixel 0,0 of 1st img is same as pixel 0,1 in 1st img 2 batches down; do this for 1st 64(?) batches
-            # test_downward_increment: assert pixel 0,0 of 1st image is same as pixel 1,0 in 1st img 64 (65?) batches down
-            # test_flip: assert pixel 0,0 of 1st image is same as pixel 0,225 in 1st img one batch down; do this for first 10 batches
 
         
     def verify_crop_size(self, data_dimensions, expected_dimensions):
