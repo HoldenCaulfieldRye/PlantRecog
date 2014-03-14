@@ -16,7 +16,7 @@ class DataProviderTests(unittest.TestCase):
         epoch, batchnum, Cropped, labels = 0, 0, [], []
         count = 0
         rows_visited = 0
-        while epoch<2:
+        while count <=65: # epoch<2:      REPLACE CONDITION
             count += 1
             # can increment forwards 33 times, and flip once every time, so should
             # increment down every 66 iterations
@@ -31,11 +31,10 @@ class DataProviderTests(unittest.TestCase):
             # print 'count, epoch, batchnum: %i , %i, %i' % (count, epoch, batchnum)
 
         print 'patches have visited %i rows' % rows_visited
-        self.verify_downward_increment(rows_visited,(D.border_size*2)+1)
+        # self.verify_downward_increment(rows_visited,(D.border_size*2)+1)           REMOVE COMMENT
         expected_dimensions = (D.inner_size*D.inner_size*D.num_colors, 1)
         self.verify_crop_size(cropped.shape, expected_dimensions)
-        Cropped = self.ready_for_jpeg(D, Cropped) # this is for exporting 
-        self.export_some_images(Cropped, 'test_data/example_ensemble/Alex')
+        self.export_some_images(Cropped, D, 'test_data/example_ensemble/Alex')
          
     def test_get_data_dims(self):        
         D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Alex')
@@ -61,29 +60,37 @@ class DataProviderTests(unittest.TestCase):
            should be (border_size*2)+1"""
         self.assertEqual(rows_visited,twice_border_size_plus_one)
 
-    def export_some_images(self, Cropped, img_dir):
-        os.mkdir(img_dir+'/updown')
-        os.mkdir(img_dir+'/leftright')
-        os.mkdir(img_dir+'/flip')
-        os.chdir('updown')
+    def export_some_images(self, Cropped, dataProv, img_dir):
+        try:
+            os.mkdir(img_dir+'/updown')
+            os.mkdir(img_dir+'/leftright')
+            os.mkdir(img_dir+'/flip')
+        except:
+            shutil.rmtree(img_dir+'/updown')
+            shutil.rmtree(img_dir+'/leftright')
+            shutil.rmtree(img_dir+'/flip')
+            os.mkdir(img_dir+'/updown')
+            os.mkdir(img_dir+'/leftright')
+            os.mkdir(img_dir+'/flip')
         for i in range(len(Cropped)):
-            if i % 32 == 0:
-                orig_img_np = Cropped[i].copy() # is this image demeaned?
-                Image.fromarray(orig_img_np).save('/updown/img_'+`i`+'.jpeg')
-            if i <= 32:
-                orig_img_np = Cropped[i].copy() # is this image demeaned?
-                Image.fromarray(orig_img_np).save('/leftright/img_'+`i`+'.jpeg')
-            if i <= 64 and i % 2 == 0:
-                orig_img_np = Cropped[i].copy() # is this image demeaned?
-                Image.fromarray(orig_img_np).save('/flip/img_'+`i`+'.jpeg')
+            print 'img_np received has shape:', Cropped[i].shape
+            # Cropped[i] += dataProv.data_mean
+            Cropped[i] = Cropped[i].reshape(224, 224, 3)
+            Cropped[i] = np.require(Cropped[i], dtype=np.uint8, requirements='W')
+            print 'but now has shape:', Cropped[i].shape
+            orig_img_np = Cropped[i].copy() # is this image demeaned?
+            if i % 32 == 0: (Image.fromarray(orig_img_np)).save(img_dir+'/updown/img_'+`i`+'.jpeg')
+            if i <= 64 and i % 2 == 0: (Image.fromarray(orig_img_np)).save(img_dir+'/leftright/img_'+`i`+'.jpeg')
+            if i <= 4: (Image.fromarray(orig_img_np)).save(img_dir+'/flip/img_'+`i`+'.jpeg')
                 
         
-    def ready_for_jpeg(self, dataProv, Cropped):
-        for cropped in Cropped:
-            cropped += dataProv.data_mean
-            cropped = cropped.reshape(3, 224, 224, cropped.shape[1])
-            cropped = np.require(cropped, dtype=np.uint8, requirements='W')
-        return Cropped
+    # def ready_for_jpeg(self, dataProv, Cropped):
+    #     for cropped in Cropped:
+    #         cropped += dataProv.data_mean
+    #         cropped = cropped.reshape(224, 224, 3)
+    #         cropped = np.require(cropped, dtype=np.uint8, requirements='W')
+    #         print 'ready for jpeg:', Cropped[-1].shape
+    #     return Cropped.copy()
         
     # parameterise number of batches and number of images per batch?
     def set_up_dummy_batches(self, batch_dir='../tests/unit_tests/'):
