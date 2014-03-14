@@ -55,7 +55,7 @@ class DataProviderTests(unittest.TestCase):
            have traversed (border_size*2)+1==33 columns ie be on column 32, with flip and pca
            activated. We can simultaneously check that patch_idx gets correctly updated
            by making this test every 2*((border_size*2)+1)==66 iterations."""
-        self.assertEqual(column_flip_pca, twice_border_size_plus_one_1)
+        self.assertEqual(column_flip, twice_border_size_plus_one_1)
         
     def verify_downward_increment(self,rows_visited,twice_border_size_plus_one):
         """If downward increment works well, then just after an epoch has ended,
