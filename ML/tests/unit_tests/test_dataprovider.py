@@ -1,7 +1,7 @@
 import unittest
 import shutil
 import os
-from PIL import Image
+from PIL import Image, ImageOps
 import numpy as np
 import sys
 
@@ -9,6 +9,21 @@ sys.path.append(os.getcwd()+'/../../cuda_convnet/')
 import plantdataproviders
 
 data_dir = 'Alex/'
+
+
+def get_array(image, size):
+    im = Image.open(image)
+    im = ImageOps.fit(im, size, Image.ANTIALIAS)
+    im_data = np.array(im)
+    im_data = im_data.T.reshape(3, -1).reshape(-1)
+    im_data = im_data.astype(np.single)
+    return im_data
+
+pca_data = get_array(os.getcwd()+'/../../cuda_convnet/test.JPG', (256,256))
+for i in range(0,7):
+    pca_data = np.vstack((pca_data,pca_data))
+pca_data = pca_data.T
+
 
 class DataProviderTests(unittest.TestCase):
     def test_init(self):
@@ -32,7 +47,8 @@ class DataProviderTests(unittest.TestCase):
             # can increment forwards 33 times, and flip once every time, so should
             # increment down every 66 iterations
             if count % 66 == 0:
-                self.verify_forward_increment(D.patch_idx[1:],[D.border_size*2,1])
+                self.assertEqual(D.patch_idx[1:],[D.border_size*2,1])
+                self.assertEqual((D.patch_idx[0]+1)*66, count)
                 print 'row, col, flip = ', D.patch_idx
                 print 'count, epoch, batchnum: %i, %i, %i' % (count, epoch, batchnum)
                 rows_visited += 1
@@ -46,9 +62,9 @@ class DataProviderTests(unittest.TestCase):
             # print 'count, epoch, batchnum: %i , %i, %i' % (count, epoch, batchnum)
 
         print 'patches have visited %i rows' % rows_visited
-        self.verify_downward_increment(rows_visited,(D.border_size*2)+1)     
+        self.assertEqual(rows_visited,(D.border_size*2)+1)     
         expected_dimensions = (D.inner_size*D.inner_size*D.num_colors, 1)
-        self.verify_crop_size(cropped.shape, expected_dimensions)
+        self.assertEqual(cropped.shape, expected_dimensions)
         self.export_some_images(Cropped, D, data_dir)
          
     def test_get_data_dims(self):        
@@ -56,32 +72,24 @@ class DataProviderTests(unittest.TestCase):
         epoch, batchnum, [cropped, labels] = D.get_next_batch()
         self.assertEqual(D.get_data_dims(), 224*224*3)
 
-    def verify_crop_size(self, data_dimensions, expected_dimensions):
-        """assert images are 224x224xRGB. """
-        self.assertEqual(data_dimensions, expected_dimensions)
+    # def verify_crop_size(self, data_dimensions, expected_dimensions):
+    #     """assert images are 224x224xRGB. """
+    #     self.assertEqual(data_dimensions, expected_dimensions)
         
-    def verify_forward_increment(self, column_flip, twice_border_size_plus_one_1):
-        """if forward increment works well, then seeing as there are (border_size*2)+1
-           steps to increment sideways, and every time we can also flip, then after
-           every 2*((border_size*2)+1) get_next_batch iterations, patch pixel 0,0 should
-           have traversed (border_size*2)+1==33 columns ie be on column 32, with flip
-           activated. We can simultaneously check that patch_idx gets correctly updated
-           by making this test every 2*((border_size*2)+1)==66 iterations."""
-        self.assertEqual(column_flip, twice_border_size_plus_one_1)
+    # def verify_forward_increment(self, column_flip, twice_border_size_plus_one_1):
+    #     """if forward increment works well, then seeing as there are (border_size*2)+1
+    #        steps to increment sideways, and every time we can also flip, then after
+    #        every 2*((border_size*2)+1) get_next_batch iterations, patch pixel 0,0 should
+    #        have traversed (border_size*2)+1==33 columns ie be on column 32, with flip
+    #        activated. We can simultaneously check that patch_idx gets correctly updated
+    #        by making this test every 2*((border_size*2)+1)==66 iterations."""
+    #     self.assertEqual(column_flip, twice_border_size_plus_one_1)
         
-    def verify_downward_increment(self,rows_visited,twice_border_size_plus_one):
-        """If downward increment works well, then just after an epoch has ended,
-           number of rows in original image visited by pixel 0,0 of the patch
-           should be (border_size*2)+1"""
-        self.assertEqual(rows_visited,twice_border_size_plus_one)
-
-    def get_array(image,size):
-        im = Image.open(image)
-        im = ImageOps.fit(im, size, Image.ANTIALIAS)
-        im_data = np.array(im)
-        im_data = im_data.T.reshape(3, -1).reshape(-1)
-        im_data = im_data.astype(np.single)
-        return im_data
+    # def verify_downward_increment(self,rows_visited,twice_border_size_plus_one):
+    #     """If downward increment works well, then just after an epoch has ended,
+    #        number of rows in original image visited by pixel 0,0 of the patch
+    #        should be (border_size*2)+1"""
+    #     self.assertEqual(rows_visited,twice_border_size_plus_one)
 
     def export_some_images(self, Cropped, dataProv, img_dir):
         try:

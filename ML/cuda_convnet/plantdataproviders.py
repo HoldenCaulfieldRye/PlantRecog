@@ -42,26 +42,26 @@ from joblib import Parallel, delayed
 
 
 
-def augment_image(image, random_gaussian):
+def augment_image(image, random_gaussian): # pragma: no cover
     ''' Image here is a single row numpy array, with all of the channels in sequential
     order (i.e. goes column by column then row by row for red, then same for green
     then same for blue). '''
-    eigenvalue, eigenvector = n.linalg.eig(n.cov(image))
-    addition = n.dot(eigenvector,n.sqrt(eigenvalue).T * random_gaussian)
-    return n.clip(n.add(image.T,addition),0,255).reshape(-1)
+    eigenvalue, eigenvector = n.linalg.eig(n.cov(image))  # pragma: no cover
+    addition = n.dot(eigenvector,n.sqrt(eigenvalue).T * random_gaussian)  # pragma: no cover
+    return n.clip(n.add(image.T,addition),0,255).reshape(-1)  # pragma: no cover
 
 
-def augment_illumination(data,channels=3):
+def augment_illumination(data,channels=3):  # pragma: no cover
     ''' Data here is a 2D matrix, with columns being images, and rows being pixels
     of those images, in order of columns, then rows, starting with R, the G and
     B in sequential order.  A matrix of similar shape is returned with the data
     augmented to have different illumination levels via a PCA analysis & manipulation.'''
-    data = data.reshape(-1,channels,data.shape[1]).T
-    random_gaussian = n.random.normal(0,0.6,channels)
+    data = data.reshape(-1,channels,data.shape[1]).T  # pragma: no cover
+    random_gaussian = n.random.normal(0,0.6,channels) # pragma: no cover
     rows = Parallel(n_jobs=-1)(
                     delayed(augment_image)(image, random_gaussian) 
-                    for image in data)
-    return n.vstack([r for r in rows]).T
+                    for image in data)  # pragma: no cover
+    return n.vstack([r for r in rows]).T  # pragma: no cover
 
 
 # MODIFY NOCCN?
@@ -138,21 +138,22 @@ class AugmentLeafDataProvider(LabeledDataProvider):
         if self.test: # if --test-only=1 provided at command line
             if self.multiview: # if --multiview-test=1 also provided at command line
             # compute error by averaging over top left, bottom left, central, top right, bottom right patches
-                start_positions = [(0,0),  (0, self.border_size*2),
-                                   (self.border_size, self.border_size),
-                                   (self.border_size*2, 0),
-                                   (self.border_size*2, self.border_size*2)]
-                end_positions = [(sy+self.inner_size, sx+self.inner_size)
-                                 for (sy,sx) in start_positions]
-                for i in xrange(self.num_views/2):
-                    pic = y[:,start_positions[i][0]:end_positions[i][0],
-                            start_positions[i][1]:end_positions[i][1],:]
-                    target[:,i * x.shape[1]:(i+1)* x.shape[1]] = pic.reshape((self.get_data_dims(),x.shape[1]))
-                    target[:,(self.num_views/2 + i) * x.shape[1]:(self.num_views/2 +i+1)* x.shape[1]] = pic[:,:,::-1,:].reshape((self.get_data_dims(),x.shape[1]))
-            else:
+                start_positions = [(0,0),  (0, self.border_size*2),  # pragma: no cover
+                                   (self.border_size, self.border_size), # pragma: no cover
+                                   (self.border_size*2, 0), # pragma: no cover
+                                   (self.border_size*2, self.border_size*2)] # pragma: no cover
+                end_positions = [(sy+self.inner_size, sx+self.inner_size) # pragma: no cover
+                                 for (sy,sx) in start_positions] # pragma: no cover
+                for i in xrange(self.num_views/2): # pragma: no cover
+                    pic = y[:,start_positions[i][0]:end_positions[i][0], # pragma: no cover
+                            start_positions[i][1]:end_positions[i][1],:] # pragma: no cover
+                    target[:,i * x.shape[1]:(i+1)* x.shape[1]] = pic.reshape((self.get_data_dims(),x.shape[1])) # pragma: no cover
+                    target[:,(self.num_views/2 + i) * x.shape[1]:(self.num_views/2 +i+1)* x.shape[1]] = pic[:,:,::-1,:].reshape((self.get_data_dims(),x.shape[1])) # pragma: no cover
+            else: # pragma: no cover
                 # select only central patch in image
-                pic = y[:,self.border_size:self.border_size+self.inner_size,self.border_size:self.border_size+self.inner_size, :]
-                target[:,:] = pic.reshape((self.get_data_dims(), x.shape[1]))
+                pic = y[:,self.border_size:self.border_size+self.inner_size,self.border_size:self.border_size+self.inner_size, :] # pragma: no cover
+                target[:,:] = pic.reshape((self.get_data_dims(), x.shape[1])) # pragma: no cover
+   
         else:
             for c in xrange(x.shape[1]): # think c is image
                 startY, startX, flip = self.patch_idx[0], self.patch_idx[1], self.patch_idx[2] # patch coordinates, and whether or not to flip
