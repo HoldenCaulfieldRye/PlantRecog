@@ -1,0 +1,160 @@
+nohup: ignoring input
+Initialized data layer 'data', producing 150528 outputs
+Initialized data layer 'labels', producing 1 outputs
+Initialized convolutional layer 'conv1', producing 55x55 48-channel output
+Initialized max-pooling layer 'pool1', producing 27x27 48-channel output
+Initialized cross-map response-normalization layer 'rnorm1', producing 27x27 48-channel output
+Initialized convolutional layer 'conv2', producing 27x27 128-channel output
+Initialized max-pooling layer 'pool2', producing 13x13 128-channel output
+Initialized cross-map response-normalization layer 'rnorm2', producing 13x13 128-channel output
+Initialized convolutional layer 'conv3', producing 13x13 192-channel output
+Initialized convolutional layer 'conv4', producing 13x13 128-channel output
+Initialized max-pooling layer 'pool4', producing 6x6 128-channel output
+Initialized fully-connected layer 'fc5', producing 4096 outputs
+Initialized fully-connected layer 'fc6', producing 71 outputs
+Initialized softmax layer 'probs', producing 71 outputs
+Initialized logistic regression cost 'logprob'
+Initialized neuron layer 'conv1_neuron', producing 145200 outputs
+Initialized neuron layer 'conv2_neuron', producing 93312 outputs
+Initialized neuron layer 'conv3_neuron', producing 32448 outputs
+Initialized neuron layer 'conv4_neuron', producing 21632 outputs
+Initialized neuron layer 'fc5_neuron', producing 4096 outputs
+=========================
+Importing _ConvNet C++ module
+=========================
+Training ConvNet
+Always write savepoints, regardless of test err improvement: 0     [DEFAULT]
+Check gradients and quit?                                  : 0     [DEFAULT]
+Compress checkpoints?                                      : 0     [DEFAULT]
+Conserve GPU memory (slower)?                              : 0     [DEFAULT]
+Convert given conv layers to unshared local                :       
+Cropped DP: crop border size                               : 32    
+Cropped DP: logreg layer name (for --multiview-test)       :       [DEFAULT]
+Cropped DP: test on multiple patches?                      : 0     [DEFAULT]
+Data batch range: testing                                  : 701-950 
+Data batch range: training                                 : 1-700 
+Data path                                                  : /data2/ImageNet/batches/ensemble_net/Leaf 
+Data provider                                              : augmented-basic-leaf256 
+GPU override                                               : -1    [DEFAULT]
+Layer definition file                                      : /homes/bjm113/beLeaf/ML/models/ensemble_network/leaf_network/layers.cfg 
+Layer parameter file                                       : /homes/bjm113/beLeaf/ML/models/ensemble_network/leaf_network/params.cfg 
+Load file                                                  :       [DEFAULT]
+Maximum save file size (MB)                                : 0     [DEFAULT]
+Minibatch size                                             : 128   [DEFAULT]
+Number of GPUs                                             : 1     [DEFAULT]
+Number of epochs                                           : 50000 [DEFAULT]
+Save path                                                  : /homes/bjm113/beLeaf/ML/models/ensemble_network/leaf_network/saves 
+Test and quit?                                             : 0     [DEFAULT]
+Test on one batch at a time?                               : 1     [DEFAULT]
+Testing frequency                                          : 50    
+Unshare weight matrices in given layers                    :       
+=========================
+Running on CUDA device(s) -2
+Current time: Fri Mar 14 21:09:28 2014
+Saving checkpoints to /homes/bjm113/beLeaf/ML/models/ensemble_network/leaf_network/saves/ConvNet__2014-03-14_21.09.26
+=========================
+1.1... logprob:  4.457305, 0.992188 (2.322 sec)
+1.2... logprob:  4.455765, 0.984375 (2.206 sec)
+1.3... logprob:  4.339020, 0.992188 (2.236 sec)
+1.4... logprob:  4.302464, 0.968750 (2.203 sec)
+1.5... logprob:  4.242902, 0.945312 (3.048 sec)
+1.6... logprob:  4.042386, 0.867188 (2.993 sec)
+1.7... logprob:  4.211469, 0.953125 (3.110 sec)
+1.8... logprob:  4.090721, 0.898438 (3.105 sec)
+1.9... logprob:  4.117290, 0.914062 (3.110 sec)
+1.10... logprob:  4.143198, 0.906250 (3.015 sec)
+1.11... logprob:  4.073293, 0.921875 (2.996 sec)
+1.12... logprob:  4.041153, 0.890625 (3.132 sec)
+1.13... logprob:  4.015328, 0.945312 (3.102 sec)
+1.14... logprob:  4.133105, 0.937500 (3.054 sec)
+1.15... logprob:  4.054200, 0.953125 (3.172 sec)
+1.16... logprob:  4.044313, 0.945312 (3.002 sec)
+1.17... logprob:  4.195283, 0.968750 (3.039 sec)
+1.18... logprob:  4.095884, 0.929688 (3.065 sec)
+1.19... logprob:  4.139691, 0.945312 (3.140 sec)
+1.20... logprob:  4.245970, 0.937500 (3.092 sec)
+1.21... logprob:  4.016160, 0.921875 (3.181 sec)
+1.22... logprob:  4.250669, 0.937500 (3.088 sec)
+1.23... logprob:  4.019150, 0.898438 (3.060 sec)
+1.24... logprob:  3.934949, 0.875000 (3.078 sec)
+1.25... logprob:  4.071993, 0.914062 (3.135 sec)
+1.26... logprob:  4.180297, 0.921875 (3.094 sec)
+1.27... logprob:  4.081779, 0.898438 (2.993 sec)
+1.28... logprob:  4.161162, 0.937500 (3.012 sec)
+1.29... logprob:  4.058270, 0.914062 (3.025 sec)
+1.30... logprob:  4.131783, 0.914062 (3.184 sec)
+1.31... logprob:  3.963374, 0.898438 (3.015 sec)
+1.32... logprob:  4.104086, 0.937500 (3.034 sec)
+1.33... logprob:  4.277490, 0.968750 (3.029 sec)
+1.34... logprob:  4.101994, 0.929688 (3.125 sec)
+1.35... logprob:  4.140204, 0.929688 (3.087 sec)
+1.36... logprob:  4.083770, 0.945312 (3.034 sec)
+1.37... logprob:  4.296585, 0.945312 (3.147 sec)
+1.38... logprob:  4.134495, 0.898438 (3.111 sec)
+1.39... logprob:  4.098323, 0.906250 (3.187 sec)
+1.40... logprob:  4.221321, 0.945312 (3.089 sec)
+1.41... logprob:  4.142260, 0.914062 (3.056 sec)
+1.42... logprob:  4.068132, 0.906250 (3.029 sec)
+1.43... logprob:  4.200592, 0.953125 (3.168 sec)
+1.44... logprob:  4.103738, 0.937500 (3.136 sec)
+1.45... logprob:  4.053557, 0.945312 (3.041 sec)
+1.46... logprob:  4.009429, 0.898438 (3.002 sec)
+1.47... logprob:  4.035641, 0.953125 (3.150 sec)
+1.48... logprob:  4.193254, 0.929688 (3.128 sec)
+1.49... logprob:  4.239830, 0.953125 (3.168 sec)
+1.50... logprob:  4.079837, 0.906250 
+======================Test output======================
+logprob:  3.960403, 0.929688 
+------------------------------------------------------- 
+Layer 'conv1' weights[0]: 7.977078e-03 [1.372509e-06] 
+Layer 'conv1' biases: 1.169264e-06 [2.889755e-08] 
+Layer 'conv2' weights[0]: 7.963641e-03 [1.125976e-06] 
+Layer 'conv2' biases: 9.999979e-01 [1.597602e-07] 
+Layer 'conv3' weights[0]: 7.962865e-03 [9.700632e-07] 
+Layer 'conv3' biases: 2.496839e-05 [5.918237e-07] 
+Layer 'conv4' weights[0]: 7.994599e-03 [1.250446e-06] 
+Layer 'conv4' biases: 9.997079e-01 [6.913362e-06] 
+Layer 'fc5' weights[0]: 7.768826e-03 [1.035740e-06] 
+Layer 'fc5' biases: 9.999931e-01 [1.051590e-06] 
+Layer 'fc6' weights[0]: 7.951165e-03 [1.203752e-05] 
+Layer 'fc6' biases: 2.877672e-04 [1.744312e-05] 
+Train error last 700 batches: 4.137897
+-------------------------------------------------------
+Saved checkpoint to /homes/bjm113/beLeaf/ML/models/ensemble_network/leaf_network/saves/ConvNet__2014-03-14_21.09.26
+======================================================= (6.752 sec)
+1.51... logprob:  4.049550, 0.929688 (3.216 sec)
+1.52... logprob:  4.169077, 0.929688 (3.115 sec)
+1.53... logprob:  4.094007, 0.914062 (3.166 sec)
+1.54... logprob:  4.030167, 0.906250 (2.889 sec)
+1.55... logprob:  4.091686, 0.867188 (3.110 sec)
+1.56... logprob:  4.110998, 0.921875 (3.007 sec)
+1.57... logprob:  3.990278, 0.890625 (3.077 sec)
+1.58... logprob:  4.022954, 0.914062 (3.013 sec)
+1.59... logprob:  4.004344, 0.882812 (3.136 sec)
+1.60... logprob:  4.177766, 0.929688 (3.013 sec)
+1.61... logprob:  4.064826, 0.882812 (3.030 sec)
+1.62... logprob:  4.012747, 0.906250 (3.019 sec)
+1.63... logprob:  4.030715, 0.890625 (3.147 sec)
+1.64... logprob:  4.143822, 0.945312 (3.011 sec)
+1.65... logprob:  4.165002, 0.960938 (3.134 sec)
+1.66...
+Traceback (most recent call last):
+  File "/homes/bjm113/.local/bin/ccn-train", line 9, in <module>
+    load_entry_point('noccn==0.1-dev', 'console_scripts', 'ccn-train')()
+  File "/homes/bjm113/.local/lib/python2.7/site-packages/noccn-0.1_dev-py2.7.egg/noccn/train.py", line 81, in console
+    run_model(ConvNet, 'train')
+  File "/homes/bjm113/.local/lib/python2.7/site-packages/noccn-0.1_dev-py2.7.egg/noccn/script.py", line 110, in run_model
+    model.start()
+  File "/homes/bjm113/.local/lib/python2.7/site-packages/noccn-0.1_dev-py2.7.egg/noccn/train.py", line 62, in start
+    self.train()
+  File "./cuda_convnet/gpumodel.py", line 146, in train
+    next_data = self.get_next_batch()
+  File "./cuda_convnet/gpumodel.py", line 178, in get_next_batch
+    return self.parse_batch_data(dp.get_next_batch(), train=train)
+  File "./cuda_convnet/convdata.py", line 95, in get_next_batch
+    cropped = self.crop_batch()
+  File "./cuda_convnet/convdata.py", line 130, in crop_batch
+    self.__select_patch(self.data_dic['data'], self.inner_size, cropped)
+  File "./cuda_convnet/convdata.py", line 163, in __select_patch
+    target[:,c] = patch.reshape((self.get_data_dims(),)) # typo?
+ValueError: total size of new array must be unchanged
