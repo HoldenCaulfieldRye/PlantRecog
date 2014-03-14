@@ -18,7 +18,7 @@ class DataProviderTests(unittest.TestCase):
         
         # testing over 100 batches - cannot have this as method arg?
         count = 0
-        rows_visited = 1
+        rows_visited = 0
         while epoch<2:
             # print 'another batch..'
             count += 1
@@ -27,6 +27,8 @@ class DataProviderTests(unittest.TestCase):
             # increment down every 64 iterations
             if count % 66 == 0:
                 print 'should have reached rightmost edge of 256 image just there!'
+                # twice_border_size_plus_one_1 = 
+                self.verify_forward_increment(D.patch_idx[1:],[D.border_size*2,1])
                 print 'row, col, flip = ', D.patch_idx
                 print 'count, epoch, batchnum: %i, %i, %i' % (count, epoch, batchnum)
                 rows_visited += 1
@@ -38,29 +40,32 @@ class DataProviderTests(unittest.TestCase):
             # print 'count, epoch, batchnum: %i , %i, %i' % (count, epoch, batchnum)
 
         print 'patches have visited %i rows' % rows_visited
-        self.test_crop_size()
-        # self.test_forward_increment()
-        # self.test_downward_increment()
-        # self.test_flip()
+        self.verify_downward_increment(rows_visited,(D.border_size*2)+1)
+        expected_dimensions = (D.inner_size*D.inner_size, D.num_colors)
+        self.verify_crop_size(cropped.shape, expected_dimensions)
             # test_forward_increment: assert pixel 0,0 of 1st img is same as pixel 0,1 in 1st img 2 batches down; do this for 1st 64(?) batches
             # test_downward_increment: assert pixel 0,0 of 1st image is same as pixel 1,0 in 1st img 64 (65?) batches down
             # test_flip: assert pixel 0,0 of 1st image is same as pixel 0,225 in 1st img one batch down; do this for first 10 batches
 
         
-    def test_crop_size(self):
-        """assert images are 224x224. """
+    def verify_crop_size(self, data_dimensions, expected_dimensions):
+        """assert images are 224x224xRGB. """
+        self.assertEqual(data_dimensions, expected_dimensions)
         
-    def test_forward_increment(self):
-        """assert pixel 0,0 of 1st img is same as pixel 0,1 in 
-           1st image two batches down."""
+    def verify_forward_increment(self, column_flip, twice_border_size_plus_one_1):
+        """if forward increment works well, then seeing as there are (border_size*2)+1
+           steps to increment sideways, and every time we can also flip, then after
+           every 2*((border_size*2)+1) get_next_batch iterations, patch pixel 0,0 should
+           have traversed (border_size*2)+1==33 columns ie be on column 32, with flip
+           activated. We can simultaneously check that patch_idx gets correctly updated
+           by making this test every 2*((border_size*2)+1)==66 iterations."""
+        self.assertEqual(column_flip, twice_border_size_plus_one_1)
         
-    def test_downward_increment(self):
-        """assert pixel 0,0 of 1st image is same as pixel 1,0 
-           in 1st img 64 (65?) batches down."""
-
-    def test_flip(self):
-        """assert pixel 0,0 of 1st image is same as pixel 0,224 
-           in 1st img one batch down."""
+    def verify_downward_increment(self,rows_visited,twice_border_size_plus_one):
+        """If downward increment works well, then just after an epoch has ended,
+           number of rows in original image visited by pixel 0,0 of the patch
+           should be (border_size*2)+1"""
+        self.assertEqual(rows_visited,twice_border_size_plus_one)
 
     def unflatten(self, dataProv, cropped):
         cropped += dataProv.data_mean
