@@ -1,10 +1,10 @@
 import os, sys, shutil
 import cPickle as pickle
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
-sys.path.append('../../noccn/noccn/')
-import datasetNoMongo as dataset
+# sys.path.append('../../noccn/noccn/')
+# import datasetNoMongo as dataset
 
 if __name__ == '__main__':
     # get image location
@@ -14,9 +14,13 @@ if __name__ == '__main__':
     except: img_filename = '11.jpg'
 
     # get numpy array of image
-    BC = dataset.BatchCreator
-    img_jpg = BC.load(BC, directory+img_filename)
-    img_np = BC.preprocess(img_jpg)
+    if not os.path.isdir('test_data/example_ensemble/Alex'):
+        os.mkdir(output_path='test_data/example_ensemble/Alex')
+    img_jpg = Image.open(directory+img_filename).convert("RGB")
+    img_jpg = ImageOps.fit(img_jpg, (256, 256), Image.ANTIALIAS)
+    img_np = np.array(img_jpg)
+    img_np = img_np.T.reshape(3, -1).reshape(-1)
+    img_np = img_np.astype(np.single)
 
     # get label, metadata (hacky)
     os.chdir('test_data/example_ensemble/Two/')
@@ -27,10 +31,7 @@ if __name__ == '__main__':
     batch['labels'] = np.array([[1]]) # too many brackets?
     batch['data'] = img_np
     
-
-    os.chdir('../')
-    if not os.path.isdir('Alex'): os.mkdir('Alex')
-    os.chdir('Alex/')
+    os.chdir('../Alex/')
 
     # pickle dat shit
     pickle.dump(batch, open('data_batch_1', 'wb'))

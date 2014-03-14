@@ -12,10 +12,10 @@ from PIL import Image
 from PIL import ImageOps
 from joblib import Parallel
 from joblib import delayed
-from script import get_options
-from script import random_seed
-from script import resolve
-from ccn import mongoHelperFunctions
+# from script import get_options
+# from script import random_seed
+# from script import resolve
+# from ccn import mongoHelperFunctions
 # This is used to parse the xml files
 import xml.etree.ElementTree as ET # can be speeded up using lxml possibly
 
@@ -47,7 +47,7 @@ class BatchCreator(object):
     def __init__(self, batch_size=1000, channels=3, size=(256,256), output_path=None, 
                   n_jobs=N_JOBS, super_batch_meta=None, component=None, **kwargs):
         if output_path is None:
-            print 'A valid output-path is required in the options file'
+            print 'A valid output-path is required in the options file (%s given)' % output_path
             sys.exit(1)
         self.setup_output_path(output_path)
         self.setup_super_meta(super_batch_meta)
