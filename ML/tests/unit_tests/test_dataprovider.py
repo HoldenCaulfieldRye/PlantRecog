@@ -13,20 +13,17 @@ class DataProviderTests(unittest.TestCase):
     
     def test_get_next_batch(self):
         D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Two')
-        Epoch, Batchnum, Cropped, Labels = [], [], [], []
+        epoch, batchnum, Cropped, Labels = 0, 0, [], []
         # make sure prelim stuff ok
         
         # testing over 100 batches - cannot have this as method arg?
-        for count in range(100):
+        while len(Epoch)<2048:
             print 'another batch..'
             epoch, batchnum, [cropped, labels] = D.get_next_batch()
-            Epoch.append(epoch)
-            Batchnum.append(batchnum)
             Cropped.append(cropped)
             Labels.append(labels)
-            cropped = self.unflatten(cropped)
-            self.assertEqual(count, epoch)
-            self.assertEqual(count, batchnum)
+            cropped = self.unflatten(D, cropped)
+            print 'count, epoch, batchnum: %i , %i, %i' % (count, epoch, batchnum)
             
         # self.test_crop_size()
         # self.test_forward_increment()

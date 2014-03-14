@@ -69,10 +69,10 @@ class AugmentLeafDataProvider(LabeledDataProvider):
     def get_next_batch(self):
         if self.data_dic is None or len(self.batch_range) > 1:
             self.data_dic = self.get_batch(self.curr_batchnum)
-        print 'just got a batch. data shape is %s, labels shape is %s' % (self.data_dic['data'].shape, self.data_dic['labels'].shape)
+        # print 'just got a batch. data shape is %s, labels shape is %s' % (self.data_dic['data'].shape, self.data_dic['labels'].shape)
         epoch, batchnum = self.curr_epoch, self.curr_batchnum
-        self.advance_batch()
         cropped = self.crop_batch()
+        self.advance_batch()
         # Subtract the mean from the data and make sure that both data and
         # labels are in single-precision floating point.
         # This converts the data matrix to single precision and makes sure that it is C-ordered
