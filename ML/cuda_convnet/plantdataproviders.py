@@ -142,8 +142,8 @@ class AugmentLeafDataProvider(LabeledDataProvider):
                 target[:,c] = patch.reshape((self.get_data_dims(),)) # typo?
                  
             if flip == 1:
-                if self.patch_idx[1] == maxX:
-                    if self.patch_idx[0] == maxY:
+                if self.patch_idx[1] == maxY:
+                    if self.patch_idx[0] == maxX:
                         self.patch_idx[1] = 0
                         self.patch_idx[0] = 0
                         self.patch_idx[2] = 0
