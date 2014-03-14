@@ -37,7 +37,7 @@ class DataProviderTests(unittest.TestCase):
         expected_dimensions = (D.inner_size*D.inner_size*D.num_colors, 1)
         self.verify_crop_size(cropped.shape, expected_dimensions)
 
-        
+         
     def test_get_data_dims(self):        
         D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Alex')
         epoch, batchnum, [cropped, labels] = D.get_next_batch()
