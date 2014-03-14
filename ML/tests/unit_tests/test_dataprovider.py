@@ -12,7 +12,7 @@ import plantdataproviders
 class DataProviderTests(unittest.TestCase):
     
     def test_get_next_batch(self):
-        D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Two')
+        D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Alex')
         epoch, batchnum, Cropped, Labels = 0, 0, [], []
         count = 0
         rows_visited = 0
@@ -34,7 +34,7 @@ class DataProviderTests(unittest.TestCase):
 
         print 'patches have visited %i rows' % rows_visited
         self.verify_downward_increment(rows_visited,(D.border_size*2)+1)
-        expected_dimensions = (D.inner_size*D.inner_size*D.num_colors, 1) # or (1, D.inner_size*D.inner_size*D.num_colors) ??
+        expected_dimensions = (D.inner_size*D.inner_size*D.num_colors, 1)
         self.verify_crop_size(cropped.shape, expected_dimensions)
 
         

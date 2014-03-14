@@ -30,7 +30,7 @@ if __name__ == '__main__':
     # make data_mean zero because we don't want to demean 1-img data
     meta['data_mean'] = np.zeros(img_np.shape, dtype=np.float32)
     batch['labels'] = np.array([[1]]) # too many brackets?
-    batch['data'] = np.vstack([img_np]) # that's how dataset.py does it
+    batch['data'] = np.vstack([img_np]).T # that's how dataset.py does it
     # make sure dimensions ok
     print 'just made a batch. data shape is %s, labels shape is %s' % (batch['data'].shape, batch['labels'].shape)
     
