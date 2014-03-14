@@ -38,7 +38,30 @@ from data import *
 import numpy.random as nr
 import numpy as n
 import random as r
-from joblib import Parallel
+from joblib import Parallel, delayed
+
+
+
+def augment_image(image, random_gaussian):
+    ''' Image here is a single row numpy array, with all of the channels in sequential
+    order (i.e. goes column by column then row by row for red, then same for green
+    then same for blue). '''
+    eigenvalue, eigenvector = n.linalg.eig(n.cov(image))
+    addition = n.dot(eigenvector,n.sqrt(eigenvalue).T * random_gaussian)
+    return n.clip(n.add(image.T,addition),0,255).reshape(-1)
+
+
+def augment_illumination(data,channels=3):
+    ''' Data here is a 2D matrix, with columns being images, and rows being pixels
+    of those images, in order of columns, then rows, starting with R, the G and
+    B in sequential order.  A matrix of similar shape is returned with the data
+    augmented to have different illumination levels via a PCA analysis & manipulation.'''
+    data = data.reshape(-1,channels,data.shape[1]).T
+    random_gaussian = n.random.normal(0,0.6,channels)
+    rows = Parallel(n_jobs=-1)(
+                    delayed(augment_image)(image, random_gaussian) 
+                    for image in data)
+    return n.vstack([r for r in rows]).T
 
 
 # MODIFY NOCCN?
@@ -140,6 +163,7 @@ class AugmentLeafDataProvider(LabeledDataProvider):
                 if flip == 1:
                     patch = patch[:,:,::-1]
                 target[:,c] = patch.reshape((self.get_data_dims(),)) # typo?
+            target = augment_illumination(target)
                  
             if flip == 1:
                 if self.patch_idx[1] == maxY:
@@ -157,31 +181,4 @@ class AugmentLeafDataProvider(LabeledDataProvider):
             else:
                 self.patch_idx[2] = 1
 
-    def augment_image(image, random_gaussian):
-        ''' Image here is a single row numpy array, with all of the channels in sequential
-        order (i.e. goes column by column then row by row for red, then same for green
-        then same for blue). '''
-        eigenvalue, eigenvector = np.linalg.eig(np.cov(image))
-        addition = np.dot(eigenvector,np.sqrt(eigenvalue).T * random_gaussian)
-        return np.clip(np.add(image.T,addition),0,255).reshape(-1)
 
-
-    def augment_illumination(data,channels=3):
-        ''' Data here is a 2D matrix, with columns being images, and rows being pixels
-        of those images, in order of columns, then rows, starting with R, the G and
-        B in sequential order.  A matrix of similar shape is returned with the data
-        augmented to have different illumination levels via a PCA analysis & manipulation.'''
-        data = data.reshape(-1,channels,data.shape[1]).T
-        random_gaussian = np.random.normal(0,0.6,channels)
-        rows = Parallel(n_jobs=N_JOBS)(
-                        delayed(augment_image)(image, random_gaussian) 
-                        for image in data)
-        return np.vstack([r for r in rows]).T
-
-    def get_array(image,size):
-        im = Image.open(image)
-        im = ImageOps.fit(im, size, Image.ANTIALIAS)
-        im_data = np.array(im)
-        im_data = im_data.T.reshape(3, -1).reshape(-1)
-        im_data = im_data.astype(np.single)
-        return im_data
