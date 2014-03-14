@@ -10,6 +10,8 @@ print 'CACA'
 sys.path.append(os.getcwd()+'/../../cuda_convnet/')
 import plantdataproviders
 
+print 'PIPI'
+
 
 class DataProviderTests(unittest.TestCase):
     
