@@ -17,9 +17,12 @@ class DataProviderTests(unittest.TestCase):
         # make sure prelim stuff ok
         
         # testing over 100 batches - cannot have this as method arg?
-        while len(Epoch)<2048:
-            print 'another batch..'
+        count = 0
+        while count<2048:
+            count += 1
+            # print 'another batch..'
             epoch, batchnum, [cropped, labels] = D.get_next_batch()
+            print 'row, col, flip = %s' % D.patch_idx
             Cropped.append(cropped)
             Labels.append(labels)
             cropped = self.unflatten(D, cropped)
