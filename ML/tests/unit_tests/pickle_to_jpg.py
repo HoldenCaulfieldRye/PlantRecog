@@ -32,6 +32,7 @@ if __name__ == '__main__':
     except: pass
 
     # unflatten
+    print 'batch[\'data\'] needs to have shape', batch['data'].shape
     batch['data'] = batch['data'].reshape(batch['data'].shape[1], 256, 256, 3)
     batch['data'] = np.require(batch['data'], dtype=np.uint8, requirements='W')
 

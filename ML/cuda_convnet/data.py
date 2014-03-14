@@ -22,6 +22,11 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+######################################################################################
+# if possible, change name of data_dic to batch in DataProvider.                     #
+# after all, it's the unpickle of a data_batch, and data_dic is so obscure.          #
+######################################################################################
+
 import numpy as n
 from numpy.random import randn, rand, random_integers
 import os

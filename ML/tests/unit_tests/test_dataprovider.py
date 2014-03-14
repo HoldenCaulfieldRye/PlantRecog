@@ -4,6 +4,7 @@ import os
 from PIL import Image
 import numpy as np
 import sys
+
 sys.path.append(os.getcwd()+'/../../cuda_convnet/')
 import plantdataproviders
 
@@ -11,10 +12,13 @@ import plantdataproviders
 class DataProviderTests(unittest.TestCase):
     
     def test_get_next_batch(self):
-        D = plantdataproviders.AugmentLeafDataProvider('/home/alex/Git/group-project-master/ML/tests/unit_tests/test_data/example_ensemble/Alex')
+        D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Two')
         Epoch, Batchnum, Cropped, Labels = [], [], [], []
+        # make sure prelim stuff ok
+        
         # testing over 100 batches - cannot have this as method arg?
-        for count in range(100): 
+        for count in range(100):
+            print 'another batch..'
             epoch, batchnum, [cropped, labels] = D.get_next_batch()
             Epoch.append(epoch)
             Batchnum.append(batchnum)
@@ -24,10 +28,10 @@ class DataProviderTests(unittest.TestCase):
             self.assertEqual(count, epoch)
             self.assertEqual(count, batchnum)
             
-        self.test_crop_size()
-        self.test_forward_increment()
-        self.test_downward_increment()
-        self.test_flip()
+        # self.test_crop_size()
+        # self.test_forward_increment()
+        # self.test_downward_increment()
+        # self.test_flip()
             # test_crop_size: assert images are 224x224
             # test_forward_increment: assert pixel 0,0 of 1st img is same as pixel 0,1 in 1st img 2 batches down; do this for 1st 64(?) batches
             # test_downward_increment: assert pixel 0,0 of 1st image is same as pixel 1,0 in 1st img 64 (65?) batches down
