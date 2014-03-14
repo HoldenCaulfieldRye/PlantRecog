@@ -38,6 +38,11 @@ class DataProviderTests(unittest.TestCase):
         self.verify_crop_size(cropped.shape, expected_dimensions)
 
         
+    def test_get_data_dims(self):        
+        D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Alex')
+        epoch, batchnum, [cropped, labels] = D.get_next_batch()
+        self.assertEqual(D.get_data_dims(), 224*224*3)
+
     def verify_crop_size(self, data_dimensions, expected_dimensions):
         """assert images are 224x224xRGB. """
         self.assertEqual(data_dimensions, expected_dimensions)
