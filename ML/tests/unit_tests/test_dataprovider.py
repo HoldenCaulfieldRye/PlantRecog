@@ -11,6 +11,16 @@ import plantdataproviders
 data_dir = 'Alex/'
 
 class DataProviderTests(unittest.TestCase):
+    def test_init(self):
+        D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/'+data_dir)
+        self.assertEqual(3, D.num_colors)
+        self.assertEqual([0,0,0], D.patch_idx)
+        self.assertEqual(224, D.inner_size)
+        self.assertEqual(16, D.border_size)
+        self.assertEqual(False, D.multiview)
+        self.assertEqual(10, D.num_views)
+        self.assertEqual(1, D.data_mult)
+        self.assertEqual(3, D.num_colors)
     
     def test_get_next_batch(self):
         D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/'+data_dir)
@@ -27,6 +37,10 @@ class DataProviderTests(unittest.TestCase):
                 print 'count, epoch, batchnum: %i, %i, %i' % (count, epoch, batchnum)
                 rows_visited += 1
             epoch, batchnum, [cropped, labels] = D.get_next_batch()
+            if count == 1:
+                self.assertEqual(1, epoch)
+                self.assertEqual(1, batchnum)
+                self.assertEqual([[1]], labels)
             # print 'cropped shape:', cropped.shape
             Cropped.append(cropped)
             # print 'count, epoch, batchnum: %i , %i, %i' % (count, epoch, batchnum)
@@ -60,6 +74,14 @@ class DataProviderTests(unittest.TestCase):
            number of rows in original image visited by pixel 0,0 of the patch
            should be (border_size*2)+1"""
         self.assertEqual(rows_visited,twice_border_size_plus_one)
+
+    def get_array(image,size):
+        im = Image.open(image)
+        im = ImageOps.fit(im, size, Image.ANTIALIAS)
+        im_data = np.array(im)
+        im_data = im_data.T.reshape(3, -1).reshape(-1)
+        im_data = im_data.astype(np.single)
+        return im_data
 
     def export_some_images(self, Cropped, dataProv, img_dir):
         try:
