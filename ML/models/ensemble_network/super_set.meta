@@ -1,0 +1,600 @@
+(dp1
+S'labels'
+p2
+(dp3
+S'entire'
+p4
+(lp5
+Vacacia
+p6
+aVagave, century plant, American aloe
+p7
+aValbizzia, albizia
+p8
+aValder, alder tree
+p9
+aValmond tree
+p10
+aVapple tree
+p11
+aVaraucaria
+p12
+aVarborvitae
+p13
+aVarum, aroid
+p14
+aVash, ash tree
+p15
+aVaspen
+p16
+aVaster
+p17
+aVbanana, banana tree
+p18
+aVbean tree
+p19
+aVbeech, beech tree
+p20
+aVbirch, birch tree
+p21
+aVblackwood, blackwood tree
+p22
+aVbottle-tree, bottle tree
+p23
+aVcampanula, bellflower
+p24
+aVcedar, cedar tree
+p25
+aVcedar, cedar tree, true cedar
+p26
+aVcereal, cereal grass
+p27
+aVcherry, cherry tree
+p28
+aVchestnut oak
+p29
+aVchestnut, chestnut tree
+p30
+aVcitrus, citrus tree
+p31
+aVclub moss, club-moss, lycopod
+p32
+aVconifer, coniferous tree
+p33
+aVcottonwood
+p34
+aVcrucifer, cruciferous plant
+p35
+aVcycad
+p36
+aVcypress, cypress tree
+p37
+aVdogwood, dogwood tree, cornel
+p38
+aVdouglas fir
+p39
+aVechinocactus, barrel cactus
+p40
+aVelm, elm tree
+p41
+aVeucalyptus, eucalypt, eucalyptus tree
+p42
+aVfan palm
+p43
+aVfeather palm
+p44
+aVfern
+p45
+aVfig tree
+p46
+aVflowering cherry
+p47
+aVflowering fern, osmund
+p48
+aVgentian
+p49
+aVgeranium
+p50
+aVgoldenrod
+p51
+aVgramineous plant, graminaceous plant
+p52
+aVhackberry, nettle tree
+p53
+aVheath
+p54
+aVhemlock, hemlock tree
+p55
+aVholly
+p56
+aVhorsetail
+p57
+aVincense tree
+p58
+aViridaceous plant
+p59
+aVkauri pine, dammar pine
+p60
+aVlady palm
+p61
+aVlady's slipper, lady-slipper, ladies' slipper, slipper orchid
+p62
+aVlarch, larch tree
+p63
+aVlaurel
+p64
+aVlinden, linden tree, basswood, lime, lime tree
+p65
+aVlive oak
+p66
+aVlocust tree, locust
+p67
+aVlupine, lupin
+p68
+aVmagnolia
+p69
+aVmaidenhair, maidenhair fern
+p70
+aVmallow
+p71
+aVmaple
+p72
+aVmarsh plant, bog plant, swamp plant
+p73
+aVmillet
+p74
+aVmountain ash
+p75
+aVmugwort
+p76
+aVmustard
+p77
+aVnut tree
+p78
+aVoak, oak tree
+p79
+aVolive tree
+p80
+aVorange, orange tree
+p81
+aVorchid, orchidaceous plant
+p82
+aVosier
+p83
+aVpalm, palm tree
+p84
+aVpine, pine tree, true pine
+p85
+aVpinon, pinyon
+p86
+aVplane tree, sycamore, platan
+p87
+aVplum, plum tree
+p88
+aVpolypody
+p89
+aVpoplar, poplar tree
+p90
+aVpoppy
+p91
+aVprimrose, primula
+p92
+aVred oak
+p93
+aVreed grass
+p94
+aVrye grass, ryegrass
+p95
+aVsago palm
+p96
+aVsaxifrage, breakstone, rockfoil
+p97
+aVshield fern, buckler fern
+p98
+aVsilene, campion, catchfly
+p99
+aVsilver fir
+p100
+aVsouthern beech, evergreen beech
+p101
+aVspleenwort
+p102
+aVspruce
+p103
+aVspurge
+p104
+aVthistle
+p105
+aVthyme
+p106
+aVwalnut, walnut tree
+p107
+aVwattle
+p108
+aVwhite oak
+p109
+aVwhite pine
+p110
+aVwillow, willow tree
+p111
+aVwood fern, wood-fern, woodfern
+p112
+aVyellow pine
+p113
+aVyew
+p114
+asS'leaf'
+p115
+(lp116
+Vagave, century plant, American aloe
+p117
+aValder, alder tree
+p118
+aVapple tree
+p119
+aVarum, aroid
+p120
+aVash, ash tree
+p121
+aVbanana, banana tree
+p122
+aVbeech, beech tree
+p123
+aVbegonia
+p124
+aVbirch, birch tree
+p125
+aVcabbage, cultivated cabbage, Brassica oleracea
+p126
+aVcedar, cedar tree
+p127
+aVcereal, cereal grass
+p128
+aVcherry, cherry tree
+p129
+aVcitrus, citrus tree
+p130
+aVconifer, coniferous tree
+p131
+aVcrucifer, cruciferous plant
+p132
+aVcustard apple, custard apple tree
+p133
+aVcycad
+p134
+aVdogwood, dogwood tree, cornel
+p135
+aVelm, elm tree
+p136
+aVeucalyptus, eucalypt, eucalyptus tree
+p137
+aVfan palm
+p138
+aVfeather palm
+p139
+aVfern
+p140
+aVfig tree
+p141
+aVfritillary, checkered lily
+p142
+aVgeranium
+p143
+aVgourd, gourd vine
+p144
+aVgum tree, gum
+p145
+aVholly
+p146
+aVhollyhock
+p147
+aVhouseplant
+p148
+aVlady's slipper, lady-slipper, ladies' slipper, slipper orchid
+p149
+aVlaurel
+p150
+aVliana
+p151
+aVliliaceous plant
+p152
+aVlinden, linden tree, basswood, lime, lime tree
+p153
+aVmagnolia
+p154
+aVmallow
+p155
+aVmaple
+p156
+aVmarsh plant, bog plant, swamp plant
+p157
+aVmonarda, wild bergamot
+p158
+aVmountain ash
+p159
+aVnasturtium
+p160
+aVoak, oak tree
+p161
+aVorange, orange tree
+p162
+aVorchid, orchidaceous plant
+p163
+aVpalm, palm tree
+p164
+aVpetunia
+p165
+aVpine, pine tree, true pine
+p166
+aVpink, garden pink
+p167
+aVpitcher plant
+p168
+aVplum, plum tree
+p169
+aVpoplar, poplar tree
+p170
+aVpoppy
+p171
+aVradish plant, radish
+p172
+aVraspberry, raspberry bush
+p173
+aVrhododendron
+p174
+aVrose, rosebush
+p175
+aVsilene, campion, catchfly
+p176
+aVsilver fir
+p177
+aVspruce
+p178
+aVspurge
+p179
+aVsummer squash, summer squash vine, Cucurbita pepo melopepo
+p180
+aVsweet melon, muskmelon, sweet melon vine, Cucumis melo
+p181
+aVthistle
+p182
+aVtulip
+p183
+aVwhite oak
+p184
+aVwild apple, crab apple, crabapple
+p185
+aVwillow, willow tree
+p186
+aVwinter squash, winter squash plant
+p187
+asS'super_labels'
+p188
+(lp189
+g6
+ag7
+ag8
+ag9
+ag10
+ag11
+ag12
+ag13
+ag14
+ag15
+ag16
+ag17
+ag18
+ag19
+ag20
+ag124
+ag21
+ag22
+ag23
+ag126
+ag24
+ag25
+ag26
+ag27
+ag28
+ag29
+ag30
+ag31
+ag32
+ag33
+ag34
+ag35
+ag133
+ag36
+ag37
+ag38
+ag39
+ag40
+ag41
+ag42
+ag43
+ag44
+ag45
+ag46
+ag47
+ag48
+ag142
+ag49
+ag50
+ag51
+ag144
+ag52
+ag145
+ag53
+ag54
+ag55
+ag56
+ag147
+ag57
+ag148
+ag58
+ag59
+ag60
+ag61
+ag62
+ag63
+ag64
+ag151
+ag152
+ag65
+ag66
+ag67
+ag68
+ag69
+ag70
+ag71
+ag72
+ag73
+ag74
+ag158
+ag75
+ag76
+ag77
+ag160
+ag78
+ag79
+ag80
+ag81
+ag82
+ag83
+ag84
+ag165
+ag85
+ag167
+ag86
+ag168
+ag87
+ag88
+ag89
+ag90
+ag91
+ag92
+ag172
+ag173
+ag93
+ag94
+ag174
+ag175
+ag95
+ag96
+ag97
+ag98
+ag99
+ag100
+ag101
+ag102
+ag103
+ag104
+ag180
+ag181
+ag105
+ag106
+ag183
+ag107
+ag108
+ag109
+ag110
+ag185
+ag111
+ag187
+ag112
+ag113
+ag114
+assS'insert_list'
+p190
+(dp191
+g4
+(lp192
+I15
+aI18
+aI30
+aI43
+aI46
+aI47
+aI51
+aI52
+aI59
+aI59
+aI69
+aI72
+aI79
+aI80
+aI81
+aI87
+aI87
+aI89
+aI89
+aI99
+aI99
+aI101
+aI105
+aI106
+asg115
+(lp193
+I0
+aI1
+aI2
+aI3
+aI3
+aI5
+aI5
+aI6
+aI9
+aI9
+aI10
+aI11
+aI13
+aI13
+aI14
+aI15
+aI18
+aI19
+aI19
+aI25
+aI25
+aI26
+aI27
+aI28
+aI29
+aI29
+aI29
+aI31
+aI32
+aI32
+aI32
+aI32
+aI33
+aI37
+aI37
+aI37
+aI38
+aI41
+aI43
+aI43
+aI44
+aI45
+aI47
+aI51
+aI52
+aI53
+aI55
+aI57
+aI57
+aI59
+aI59
+aI59
+aI59
+aI61
+aI61
+aI66
+aI67
+aI67
+aI68
+aI71
+aI71
+aI71
+ass.

@@ -30,9 +30,18 @@ var config = -1;
 *           argv[1] is the path to the *.js
 */
 
-var args = process.argv.splice(2); 
-var confFile = args[0];
-  
+// Switch our confFile depending on how environment is set up.
+/* istanbul ignore else */
+/* Ignored by Istanbul because this ONLY goes one way during TEST and PROD respectively */
+if(process.env.NODE_ENV ==='test'){
+  /* use the confFile which will have been scoped in the test module above */
+  var confFile = module.parent.exports.conf;
+}
+else{
+  var args = process.argv.splice(2); 
+  var confFile = args[0];
+}
+
 console.log("Parsing Config");
 
 try{
@@ -41,10 +50,11 @@ try{
 }
 catch (err) {
   console.log('Error during parse: ' + err);
-  process.exit(1);
+  return -1;
 }
 
 //Actually connect to the database.
+
 try{    
   mongoClient = new mongo.MongoClient(new mongo.Server(configArgs.db_host, configArgs.db_port), {native_parser: true});
   mongoClient.open(function(err, mongoClient){if (err) throw err;});
@@ -52,7 +62,7 @@ try{
 }
 catch(err){
   console.log('Error connecting to Database: ' + err);
-  process.exit(1);
+  return -1;
 }
 
 
@@ -83,13 +93,17 @@ if ('development' == app.get('env')) {
 
 /* Routes to follow on URL */
 //app.get('/', routes.index);
-app.get('/', routes.index);
+
 
 /* Enable classify function via post at /classify url */
 //app.post('/classify', routes.classify(db));
 app.post('/classify', routes.classify(db,configArgs));
 
-/* Create HTTP Server */
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
-});
+// If we are the top module (ie, not testing) then start the app.
+/* istanbul ignore if */
+/* Ignored for coverage because we only launch app in production */
+if (!module.parent) {
+  http.createServer(app).listen(app.get('port'), function(){
+    console.log('Express server listening on port ' + app.get('port'));
+  });
+}

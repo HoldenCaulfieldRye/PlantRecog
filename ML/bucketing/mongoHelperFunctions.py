@@ -11,8 +11,12 @@ db = client['qa']
 # a list of valid tag names
 valid_tags = [ 'Leaf', 'Fruit', 'Flower', 'Entire', 'Branch', 'Stem' ]
 
+print __file__
+
 
 def bucketing(threshold, component=None, componentProb=0.0):
+    print 'About to bucket'
+    print __file__
     images = list()
     species = list()
     
