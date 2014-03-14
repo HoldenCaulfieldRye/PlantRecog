@@ -8,11 +8,12 @@ import sys
 sys.path.append(os.getcwd()+'/../../cuda_convnet/')
 import plantdataproviders
 
+data_dir = 'test_data/example_ensemble/Alex/'
 
 class DataProviderTests(unittest.TestCase):
     
     def test_get_next_batch(self):
-        D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Alex')
+        D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/'+data_dir)
         epoch, batchnum, Cropped, labels = 0, 0, [], []
         count = 0
         rows_visited = 0
@@ -34,10 +35,10 @@ class DataProviderTests(unittest.TestCase):
         # self.verify_downward_increment(rows_visited,(D.border_size*2)+1)           REMOVE COMMENT
         expected_dimensions = (D.inner_size*D.inner_size*D.num_colors, 1)
         self.verify_crop_size(cropped.shape, expected_dimensions)
-        self.export_some_images(Cropped, D, 'test_data/example_ensemble/Alex')
+        self.export_some_images(Cropped, D, data_dir)
          
     def test_get_data_dims(self):        
-        D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/test_data/example_ensemble/Alex')
+        D = plantdataproviders.AugmentLeafDataProvider(os.getcwd()+'/'+data_dir)
         epoch, batchnum, [cropped, labels] = D.get_next_batch()
         self.assertEqual(D.get_data_dims(), 224*224*3)
 
@@ -62,16 +63,16 @@ class DataProviderTests(unittest.TestCase):
 
     def export_some_images(self, Cropped, dataProv, img_dir):
         try:
-            os.mkdir(img_dir+'/updown')
-            os.mkdir(img_dir+'/leftright')
-            os.mkdir(img_dir+'/flip')
+            os.mkdir(img_dir+'updown')
+            os.mkdir(img_dir+'leftright')
+            os.mkdir(img_dir+'flip')
         except:
-            shutil.rmtree(img_dir+'/updown')
-            shutil.rmtree(img_dir+'/leftright')
-            shutil.rmtree(img_dir+'/flip')
-            os.mkdir(img_dir+'/updown')
-            os.mkdir(img_dir+'/leftright')
-            os.mkdir(img_dir+'/flip')
+            shutil.rmtree(img_dir+'updown')
+            shutil.rmtree(img_dir+'leftright')
+            shutil.rmtree(img_dir+'flip')
+            os.mkdir(img_dir+'updown')
+            os.mkdir(img_dir+'leftright')
+            os.mkdir(img_dir+'flip')
         for i in range(len(Cropped)):
             print 'img_np received has shape:', Cropped[i].shape
             # Cropped[i] += dataProv.data_mean
