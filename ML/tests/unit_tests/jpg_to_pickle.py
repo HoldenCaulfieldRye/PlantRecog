@@ -6,6 +6,8 @@ from PIL import Image, ImageOps
 # sys.path.append('../../noccn/noccn/')
 # import datasetNoMongo as dataset
 
+data_dir = 'Alex/'
+
 if __name__ == '__main__':
     # get image location
     try: directory = sys.argv[1]
@@ -14,8 +16,8 @@ if __name__ == '__main__':
     except: img_filename = '11.jpg'
 
     # get numpy array of image
-    if not os.path.isdir('test_data/example_ensemble/Alex'):
-        os.mkdir(output_path='test_data/example_ensemble/Alex')
+    if not os.path.isdir(data_dir):
+        os.mkdir(data_dir)
     img_jpg = Image.open(directory+img_filename).convert("RGB")
     img_jpg = ImageOps.fit(img_jpg, (256, 256), Image.ANTIALIAS)
     img_np = np.array(img_jpg)

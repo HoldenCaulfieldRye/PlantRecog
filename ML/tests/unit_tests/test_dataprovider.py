@@ -8,7 +8,7 @@ import sys
 sys.path.append(os.getcwd()+'/../../cuda_convnet/')
 import plantdataproviders
 
-data_dir = 'test_data/example_ensemble/Alex/'
+data_dir = 'Alex/'
 
 class DataProviderTests(unittest.TestCase):
     
