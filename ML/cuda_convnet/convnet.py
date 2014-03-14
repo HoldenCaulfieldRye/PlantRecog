@@ -194,6 +194,8 @@ class ConvNet(IGPUModel):
         DataProvider.register_data_provider('basic-leaf256', 'BasicLeaf256', BasicLeafDataProvider256)
         DataProvider.register_data_provider('dummy-cn-n', 'Dummy ConvNet', DummyConvNetDataProvider)
         DataProvider.register_data_provider('cifar-cropped', 'Cropped CIFAR', CroppedCIFARDataProvider)
+        DataProvider.register_data_provider('augmented-basic-leaf256', 'AugmentedBasicLeaf256', AugmentedLeafDataProvider)
+                            
         
         return op
     
