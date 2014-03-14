@@ -76,7 +76,7 @@ class AugmentLeafDataProvider(LabeledDataProvider):
             batch_range = DataProvider.get_batch_nums(data_dir)
         self.data_mean = self.batch_meta['data_mean']
         self.num_colors = 3
-        # patch_idx: x coordinate of patch, y coordinate of patch, flip image no/yes, apply PCA no/yes
+        # patch_idx: x coordinate of patch, y coordinate of patch, flip image no/yes
         self.patch_idx = [0,0,0]
         self.inner_size = 224
         # border_size: such that central patch edge is border_size pixels away from original img edge (expect 16)
@@ -154,9 +154,8 @@ class AugmentLeafDataProvider(LabeledDataProvider):
                 pic = y[:,self.border_size:self.border_size+self.inner_size,self.border_size:self.border_size+self.inner_size, :]
                 target[:,:] = pic.reshape((self.get_data_dims(), x.shape[1]))
         else:
-            for c in xrange(x.shape[1]): # c is image
-                # patch coordinates, whether or not to flip, whether or not to apply PCA
-                startY, startX, flip = self.patch_idx[0], self.patch_idx[1], self.patch_idx[2]
+            for c in xrange(x.shape[1]): # think c is image
+                startY, startX, flip = self.patch_idx[0], self.patch_idx[1], self.patch_idx[2] # patch coordinates, and whether or not to flip
                 # print 'startY, startX:', startY, startX
                 endY, endX = startY + self.inner_size, startX + self.inner_size
                 maxX, maxY = self.border_size*2, self.border_size*2

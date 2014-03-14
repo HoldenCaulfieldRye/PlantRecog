@@ -5,12 +5,8 @@ from PIL import Image
 import numpy as np
 import sys
 
-print 'CACA'
-
 sys.path.append(os.getcwd()+'/../../cuda_convnet/')
 import plantdataproviders
-
-print 'PII'
 
 
 class DataProviderTests(unittest.TestCase):
@@ -22,12 +18,11 @@ class DataProviderTests(unittest.TestCase):
         rows_visited = 0
         while epoch<2:
             count += 1
-            # can increment forwards 33 times, and flip twice every time,
-            # so should increment down every 66 iterations
-            print 'row, col, flip = ', D.patch_idx
+            # can increment forwards 33 times, and flip once every time, so should
+            # increment down every 66 iterations
             if count % 66 == 0:
                 self.verify_forward_increment(D.patch_idx[1:],[D.border_size*2,1])
-                # print 'row, col, flip = ', D.patch_idx
+                print 'row, col, flip = ', D.patch_idx
                 print 'count, epoch, batchnum: %i, %i, %i' % (count, epoch, batchnum)
                 rows_visited += 1
             epoch, batchnum, [cropped, labels] = D.get_next_batch()
@@ -53,9 +48,9 @@ class DataProviderTests(unittest.TestCase):
         
     def verify_forward_increment(self, column_flip, twice_border_size_plus_one_1):
         """if forward increment works well, then seeing as there are (border_size*2)+1
-           steps to increment sideways, and every time we can also flip and/or pca, then after
-           every 4*((border_size*2)+1) get_next_batch iterations, patch pixel 0,0 should
-           have traversed (border_size*2)+1==33 columns ie be on column 32, with flip and pca
+           steps to increment sideways, and every time we can also flip, then after
+           every 2*((border_size*2)+1) get_next_batch iterations, patch pixel 0,0 should
+           have traversed (border_size*2)+1==33 columns ie be on column 32, with flip
            activated. We can simultaneously check that patch_idx gets correctly updated
            by making this test every 2*((border_size*2)+1)==66 iterations."""
         self.assertEqual(column_flip, twice_border_size_plus_one_1)
