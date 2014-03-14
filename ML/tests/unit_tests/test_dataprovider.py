@@ -5,6 +5,8 @@ from PIL import Image
 import numpy as np
 import sys
 
+print 'CACA'
+
 sys.path.append(os.getcwd()+'/../../cuda_convnet/')
 import plantdataproviders
 
