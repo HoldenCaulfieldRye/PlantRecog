@@ -17,7 +17,7 @@ class DataProviderTests(unittest.TestCase):
         epoch, batchnum, Cropped, labels = 0, 0, [], []
         count = 0
         rows_visited = 0
-        while count <=65: # epoch<2:      REPLACE CONDITION
+        while epoch<2:
             count += 1
             # can increment forwards 33 times, and flip once every time, so should
             # increment down every 66 iterations
@@ -32,7 +32,7 @@ class DataProviderTests(unittest.TestCase):
             # print 'count, epoch, batchnum: %i , %i, %i' % (count, epoch, batchnum)
 
         print 'patches have visited %i rows' % rows_visited
-        # self.verify_downward_increment(rows_visited,(D.border_size*2)+1)           REMOVE COMMENT
+        self.verify_downward_increment(rows_visited,(D.border_size*2)+1)     
         expected_dimensions = (D.inner_size*D.inner_size*D.num_colors, 1)
         self.verify_crop_size(cropped.shape, expected_dimensions)
         self.export_some_images(Cropped, D, data_dir)
@@ -74,24 +74,16 @@ class DataProviderTests(unittest.TestCase):
             os.mkdir(img_dir+'leftright')
             os.mkdir(img_dir+'flip')
         for i in range(len(Cropped)):
-            print 'img_np received has shape:', Cropped[i].shape
+            # print 'img_np received has shape:', Cropped[i].shape
             # Cropped[i] += dataProv.data_mean
             Cropped[i] = Cropped[i].reshape(224, 224, 3)
             Cropped[i] = np.require(Cropped[i], dtype=np.uint8, requirements='W')
-            print 'but now has shape:', Cropped[i].shape
+            # print 'but now has shape:', Cropped[i].shape
             orig_img_np = Cropped[i].copy() # is this image demeaned?
             if i % 32 == 0: (Image.fromarray(orig_img_np)).save(img_dir+'/updown/img_'+`i`+'.jpeg')
             if i <= 64 and i % 2 == 0: (Image.fromarray(orig_img_np)).save(img_dir+'/leftright/img_'+`i`+'.jpeg')
             if i <= 4: (Image.fromarray(orig_img_np)).save(img_dir+'/flip/img_'+`i`+'.jpeg')
                 
-        
-    # def ready_for_jpeg(self, dataProv, Cropped):
-    #     for cropped in Cropped:
-    #         cropped += dataProv.data_mean
-    #         cropped = cropped.reshape(224, 224, 3)
-    #         cropped = np.require(cropped, dtype=np.uint8, requirements='W')
-    #         print 'ready for jpeg:', Cropped[-1].shape
-    #     return Cropped.copy()
         
     # parameterise number of batches and number of images per batch?
     def set_up_dummy_batches(self, batch_dir='../tests/unit_tests/'):
