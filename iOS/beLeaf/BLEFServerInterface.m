@@ -8,189 +8,372 @@
 
 #import "BLEFServerInterface.h"
 #import "BLEFDatabase.h"
-#import "BLEFAppDelegate.h"
 #import "BLEFObservation.h"
-#import "BLEFServerConnection.h"
+
+NSString * boundary = @"---------------------------14737809831466499882746641449";
 
 @interface BLEFServerInterface ()
 
-@property (strong, nonatomic) NSMutableArray *uploadQueue;
-@property (strong, nonatomic) NSMutableArray *jobQueue;
+// Database Interface
+@property (strong, nonatomic) BLEFDatabase * database;
+
+// Network Session
+@property (strong, nonatomic) NSURLSession * updateSession;
+@property (strong, nonatomic) NSURLSession * uploadSession;
+@property (strong, nonatomic) NSURLSession * completionSession;
+
+// Re-Try Timer
+@property (strong, nonatomic) NSTimer *networkIntervalTimer;
+
+// Upload Flags
 @property (nonatomic) BOOL uploadQueueProcessingActive;
-@property (nonatomic) BOOL jobQueueProcessingActive;
 @property (nonatomic) BOOL uploadQueueHalted;
-@property (nonatomic) BOOL jobQueueHalted;
+
+// Update Flags And Current Queue
+@property (strong, nonatomic) NSArray *specimenForUpdating;
+@property (nonatomic) BOOL updateQueueProcessingActive;
+@property (nonatomic) BOOL updateQueueHalted;
 
 @end
 
 @implementation BLEFServerInterface
 
+
 - (id)init
 {
     self = [super init];
     if (self){
-        _uploadQueue = [[NSMutableArray alloc] init];
-        _jobQueue = [[NSMutableArray alloc] init];
+        // Upload Queue
         _uploadQueueProcessingActive = false;
-        _jobQueueProcessingActive = false;
         _uploadQueueHalted = false;
-        _jobQueueHalted = false;
+        
+        // Update Queue
+        _updateQueueProcessingActive = false;
+        _updateQueueHalted = true;
+        
+        // Database
+        _database = [[BLEFDatabase alloc] init];
+        [_database setManagedObjectContext:nil];
+        
+        // Network Session
+        _updateSession = [NSURLSession sharedSession];
+        NSURLSessionConfiguration *completionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
+        completionConfig.HTTPAdditionalHeaders = @{
+                                               @"Content-Type"  : [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary]
+                                               };
+        [self setCompletionSession:[NSURLSession sessionWithConfiguration:completionConfig]];
+        
+        // Subscribe to notifications
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-        [center addObserver:self selector:@selector(enableQueueProcessing) name:BLEFNetworkRetryNotification object:nil];
+        [center addObserver:self selector:@selector(databaseUpdateNotification:)
+                       name:BLEFDatabaseUpdateNotification object:_database];
+        [center addObserver:self selector:@selector(reStartUploadProcessing)
+                       name:BLEFNetworkRetryNotification object:nil];
     }
     return self;
 }
 
-- (void) grabTasksFromSpecimen:(NSManagedObjectID *)specimenID
+#pragma mark - PUBLIC
+
+#pragma mark Database Methods
+
+- (void) setContext:(NSManagedObjectContext*)context
 {
-    // Fetch all observations in specimen that need uploading
+    [_database setManagedObjectContext:context];
 }
 
-- (void) addObservationToUploadQueue:(NSManagedObjectID *)observationID
+#pragma mark Upload Queue Methods
+
+- (BOOL) processUploads
 {
-    if (observationID){
-        NSLog(@"image added to Upload Queue");
-        [_uploadQueue addObject:observationID];
-        [self processQueue];
+    @synchronized(self){
+        if (![self uploadQueueHalted] && ![self uploadQueueProcessingActive]){
+            _uploadQueueProcessingActive = true;
+        } else {
+            return false;
+        }
     }
+    BLEFObservation * observation = [self nextInUploadQueue];
+    if (observation != nil){
+        NSURLSessionUploadTask *task = [self createUploadTaskForObservation:observation completion:^(BOOL success) {[self uploadCompletion:success];}];
+        if (task != nil){
+            [task resume];
+            return true;
+        }
+    }
+    _uploadQueueProcessingActive = false;
+    return false;
 }
 
-- (void) processQueue
-{
-    if (!_uploadQueueProcessingActive && !_uploadQueueHalted){
-        [self processNextInUploadQueue];
-    }
-    if (!_jobQueueProcessingActive && !_jobQueueHalted){
-        [self processNextInJobQueue];
-    }
-}
-
-- (void) stopProcessingQueue
+- (void) uploadCompletion:(BOOL) success
 {
     _uploadQueueProcessingActive = false;
-    _jobQueueProcessingActive = false;
-    _jobQueueHalted = true;
-    _uploadQueueHalted = true;
+    NSLog(@"Upload %@", (success == true ? @"Success" : @"Fail"));
+    if (success){
+        [_database saveChanges];
+        [self processUploads];
+    } else {
+        [self uploadErrorWaitAndRetry];
+    }
+
 }
 
-- (void) enableQueueProcessing
+- (BOOL) reStartUploadProcessing
 {
-    NSLog(@"Enabling queue processing");
-    _jobQueueHalted = false;
     _uploadQueueHalted = false;
-    [self processQueue];
+    [self processUploads];
+    return true;
 }
 
+- (BOOL) stopUploadProcessing;
+{
+    _uploadQueueHalted = true;
+    return true;
+}
+
+- (void) uploadErrorWaitAndRetry
+{
+    _updateQueueHalted = true;
+    [self performSelector:@selector(reStartUploadProcessing) withObject:nil afterDelay:30.0];
+}
+
+#pragma mark Update Pool Methods
+
+- (BOOL) processUpdates
+{
+    @synchronized(self){
+        if (![self updateQueueHalted] && ![self updateQueueProcessingActive]){
+            _updateQueueProcessingActive = true;
+        } else {
+            return false;
+        }
+    }
+    _specimenForUpdating = [_database getSpecimenNeedingUpdate];
+    return [self processUpdateIndex:0];
+}
+
+- (BOOL) processUpdateIndex:(NSInteger)index {
+    if (_specimenForUpdating != nil && !_updateQueueHalted){
+        if (index < [[self specimenForUpdating] count]){
+            BLEFSpecimen *specimen = (BLEFSpecimen *)[_specimenForUpdating objectAtIndex:index];
+            if (specimen != nil){
+                if ([specimen notified]){
+                    NSURLSessionDataTask *task = [self createUpdateTaskForSpecimen:specimen completion:^(BOOL updated) {
+                        if (updated){
+                            [_database saveChanges];
+                        }
+                        [self processUpdateIndex:index+1];
+                    }];
+                    if (task != nil){
+                        [task resume];
+                        return true;
+                    }
+                } else {
+                    NSURLSessionDataTask *task = [self createCompletionTaskForSpecimen:specimen completion:^(BOOL success) {
+                        [_database saveChanges];
+                        [self processUpdateIndex:index+1];
+                    }];
+                    if (task != nil){
+                        [task resume];
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    _updateQueueProcessingActive = false;
+    return false;
+}
+
+- (BOOL) reStartUpdateProccessing
+{
+    if (_updateQueueHalted){
+        _updateQueueHalted = false;
+        [self setNetworkIntervalTimer:[NSTimer timerWithTimeInterval:10.0 target:self selector:@selector(networkRetry:) userInfo:nil repeats:YES]];
+        if ([self networkIntervalTimer] != nil){
+            [[NSRunLoop mainRunLoop] addTimer:_networkIntervalTimer forMode:NSRunLoopCommonModes];
+            return true;
+        }
+    }
+    return false;
+}
+
+- (void)networkRetry:(NSTimer*)timer
+{
+    [self processUpdates];
+}
+
+- (BOOL)stopUpdateProcessing
+{
+    _updateQueueHalted = true;
+    [[self networkIntervalTimer] invalidate];
+    [self setNetworkIntervalTimer: nil];
+    return true;
+}
+
+
+#pragma mark Server Interface Methods
+
+- (NSURLSessionUploadTask *)createUploadTaskForObservation:(BLEFObservation *)observation completion:(void (^)(BOOL success))handler
+{
+    if ((observation != nil) && ([observation isKindOfClass:[BLEFObservation class]])){
+        NSManagedObjectID *observationID = [observation objectID];
+        NSData *imageData = [observation getImageData];
+        NSDictionary *params = @{@"segment": ([observation segment] != nil ? [observation segment] : @"0"),
+                                 @"group_id": ([[observation specimen] groupid]? [[observation specimen] groupid] : @"0"),
+                                 @"latitude": [NSNumber numberWithDouble:[[observation specimen] latitude]],
+                                 @"longitude": [NSNumber numberWithDouble:[[observation specimen] longitude]]
+                                 };
+        if (imageData != nil && params != nil){
+            NSData *bodyData = [self createHTTPBodyDataWithFields:params andFileData:imageData];
+            NSURLRequest *request = [self createUploadRequestForObservation:observation];
+            NSURLSessionConfiguration *uploadConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
+            uploadConfig.HTTPAdditionalHeaders = @{
+                                                   @"Content-Type"  : [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary]
+                                                   };
+            [self setUploadSession:[NSURLSession sessionWithConfiguration:uploadConfig]];
+            NSURLSessionUploadTask *task = [[self uploadSession] uploadTaskWithRequest:request
+                                                                         fromData:bodyData
+                                                                completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                                                                    BOOL _success = [self updateObservation:observationID usingData:data andError:error];
+                                                                    if (handler){handler(_success);}
+                                                                }];
+            return task;
+        }
+    }
+    return nil;
+}
+
+- (NSURLSessionDataTask *)createUpdateTaskForSpecimen:(BLEFSpecimen *)specimen completion:(void (^)(BOOL updated))handler
+{
+    if ((specimen != nil) && ([specimen isKindOfClass:[BLEFSpecimen class]])){
+        NSManagedObjectID *specimenID = [specimen objectID];
+        NSURLRequest *updateRequest = [self createUpdateRequestForSpecimen:specimen];
+ 
+        void (^updateCompletion)(NSData*, NSURLResponse*, NSError*) =
+            ^(NSData *data, NSURLResponse *response, NSError *error) {
+                BOOL _updated = [self updateSpecimen:specimenID usingData:data andError:error];
+                if (handler){
+                    handler(_updated);
+                }
+            };
+        
+        NSURLSessionDataTask *task = [[self updateSession] dataTaskWithRequest:updateRequest
+                                                       completionHandler:updateCompletion];
+        return task;
+    }
+    return nil;
+}
+
+- (NSURLSessionDataTask *)createCompletionTaskForSpecimen:(BLEFSpecimen *)specimen completion:(void (^)(BOOL success))handler
+{
+    if ((specimen != nil) && ([specimen isKindOfClass:[BLEFSpecimen class]])){
+        NSManagedObjectID *specimenID = [specimen objectID];
+
+        NSURLRequest *completionNotification = [self createCompletionNotificationForSpecimen:specimen];
+        
+        void (^completionHandler)(NSData*, NSURLResponse*, NSError*) =
+        ^(NSData *data, NSURLResponse *response, NSError *error) {
+            BOOL _updated = [self processNotificationForSpecimen:specimenID usingData:data andError:error];
+            if (handler){
+                handler(_updated);
+            }
+        };
+        
+        NSURLSessionDataTask *task = [[self completionSession] dataTaskWithRequest:completionNotification
+                                                             completionHandler:completionHandler];
+        return task;
+    }
+    return nil;
+}
+
+#pragma mark - PRIVATE
 
 NSString * const BLEFUploadDidSendDataNotification = @"BLEFUploadDidSendDataNotification";
-NSString * const BLEFJobDidSendDataNotification = @"BLEFJobDidSendDataNotification";
+NSString * const BLEFJobDidReceiveDataNotification = @"BLEFJobDidReceiveDataNotification";
+NSString * const BLEFNetworkResultNotification = @"BLEFNetworkResultNotification";
+NSString * const BLEFDatabaseUpdateNotification = @"BLEFDatabaseUpdateNotification";
 NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 
-#pragma mark Private Methods
+#pragma mark Notifications Methods
 
-- (void) addObservationToJobQueue:(NSManagedObjectID *)observationID
+- (void) databaseUpdateNotification:(NSNotification *)notification
 {
-    if (observationID){
-        NSLog(@"image added to Job Queue");
-        [_jobQueue addObject:observationID];
-        [self processQueue];
-    }
+    [self processUploads];
 }
 
-- (void)processNextInUploadQueue
+#pragma mark Upload Queue
+- (BLEFObservation *) nextInUploadQueue
 {
-    if ([_uploadQueue count] > 0){
-        _uploadQueueProcessingActive = true;
-        NSManagedObjectID *id = [_uploadQueue firstObject];
-        [_uploadQueue removeObject:id];
-        [self uploadObservation:id];
-    } else {
-        _uploadQueueProcessingActive = false;
-    }
-}
-
-- (void)processNextInJobQueue
-{
-    if ([_jobQueue count] > 0){
-        _jobQueueProcessingActive = true;
-        NSManagedObjectID *id = [_jobQueue firstObject];
-        [_jobQueue removeObject:id];
-        [self updateJobAfterDelay:id];
-    } else {
-        _jobQueueProcessingActive = false;
-    }
-}
-
-- (void)uploadObservation:(NSManagedObjectID *)observationID
-{
-    NSLog(@"Observation Upload called");
-    NSManagedObject* fetchedObject = [self fetchObjectWithID:observationID];
-    if (fetchedObject != nil){
-        BLEFObservation* observation = (BLEFObservation *)fetchedObject;
-        if (![observation uploaded]){
-            NSData *imageData = [observation getImageData];
-            //NSString *urlString = @"http://sheltered-ridge-6203.herokuapp.com/upload";
-            //NSString *urlString = @"http://192.168.1.78:5000/upload";
-            NSString *urlString = @"http://plantrecogniser.no-ip.biz:55580/upload";
-            //NSString *urlString = @"http://www.posttestserver.com/post.php";
-            NSDictionary *params = @{@"segment": [observation segment]};
-            BLEFServerConnection *serverConnection = [self uploadFields:params andFileData:imageData toUrl:urlString];
-            [serverConnection setObjID:observationID];
-            [serverConnection setUpload:true];
-            [serverConnection start];
-        } else {
-            NSLog(@"Already uploaded");
-            [self processNextInUploadQueue];
+    NSArray *uploadQueue = [_database getObservationsNeedingUploading];
+    if (uploadQueue != nil){
+        id fetchedObject = [uploadQueue firstObject];
+        if (fetchedObject != nil && [fetchedObject isKindOfClass:[BLEFObservation class]]){
+            return (BLEFObservation *)fetchedObject;
         }
-    } else {
-        NSLog(@"Error fetching observation for upload");
-        [self processNextInUploadQueue];
     }
+    return nil;
 }
 
-- (void)updateJobAfterDelay:(NSManagedObjectID*)observationID
+#pragma mark Update Handlers
+- (BOOL) updateSpecimen:(NSManagedObjectID *)specimenID usingData:(NSData *)data andError:(NSError *)error;
 {
-    [self performSelector:@selector(updateJobForObservation:) withObject:observationID afterDelay:1.0f];
-}
-
-- (void)updateJobForObservation:(NSManagedObjectID *)observationID
-{
-    NSLog(@"Job GET called");
-    NSManagedObject* fetchedObject = [self fetchObjectWithID:observationID];
-    if (fetchedObject != nil){
-        BLEFObservation *observation = (BLEFObservation *)fetchedObject;
-        NSString *jobID = [observation job];
-        if (jobID && ([jobID length] > 2)){
-            //NSString *urlString = @"http://192.168.1.78:5000/job";
-            NSString *urlString = @"http://plantrecogniser.no-ip.biz:55580/job";
-            NSDictionary *params = @{@"jobID": jobID};
-            //NSString *testjobID = @"52ff886a27d625b55344093e";
-            //NSDictionary *params = @{@"jobID": testjobID};
-            BLEFServerConnection *serverConnection = [self sendGETwithFields:params toUrl:urlString];
-            [serverConnection setObjID:observationID];
-            [serverConnection setJobUpdate:true];
-            [serverConnection start];
-        } else {
-            NSLog(@"No jobID to GET");
-            [self processNextInJobQueue];
+    NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+    if (json){
+        NSString *classification = json[@"classification"];
+        if ((classification != nil) && ([classification length] > 2)){
+            BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
+            if (specimen != nil){
+                BLEFResult *result = [_database addNewResultToSpecimen:specimen];
+                [result setName:classification];
+                return true;
+            }
         }
-    } else {
-        NSLog(@"Error fetching observation for job GET");
-        [self processNextInJobQueue];
     }
+    return false;
 }
 
-- (BLEFServerConnection *)uploadFields:(NSDictionary *)parameters andFileData:(NSData *)fileData toUrl:(NSString *)urlString
+- (BOOL) processNotificationForSpecimen:(NSManagedObjectID *)specimenID usingData:(NSData *)data andError:(NSError *)error;
 {
-    NSURL *url = [NSURL URLWithString:urlString];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    [request setHTTPMethod:@"POST"];
-    
-    NSString *boundary = @"---------------------------14737809831466499882746641449";
-    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary];
-    [request addValue:contentType forHTTPHeaderField:@"Content-Type"];
+    NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+    if (json){
+        NSString *status = json[@"status"];
+        if ((status != nil) && ([status length] >= 1)){
+            BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
+            if (specimen != nil){
+                [specimen setNotified:true];
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+- (BOOL) updateObservation:(NSManagedObjectID *)observationID usingData:(NSData *)data andError:(NSError *)error;
+{
+    if (error == nil){
+        NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+        NSString *groupID = json[@"group_id"];
+        NSLog(@"GroupID received: %@", groupID);
+        if ((groupID != nil) && ([groupID length] > 2)){
+            BLEFObservation *observation = (BLEFObservation *)[_database fetchObjectWithID:observationID];
+            if (observation != NULL){
+                if ([[observation specimen] groupid] == nil){
+                    [[observation specimen] setGroupid:groupID];
+                }
+                [observation setUploaded:true];
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+#pragma mark UrlConnection Creations
+
+- (NSData *)createHTTPBodyDataWithFields:(NSDictionary *)parameters andFileData:(NSData *)fileData
+{
     NSMutableData *body = [NSMutableData data];
-    
     if (parameters){
         [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
             [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -201,33 +384,51 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
     
     if (fileData){
         [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-        [body appendData:[@"Content-Disposition: form-data; name=\"datafile\"; filename=\"test.jpg\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[@"Content-Disposition: form-data; name=\"datafile\"; filename=\"image.jpg\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[@"Content-Type: application/octet-stream\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[NSData dataWithData:fileData]];
-        [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
     }
-    
-    [request setHTTPBody:body];
-    BLEFServerConnection *serverConnection = [[BLEFServerConnection alloc] initWithRequest:request delegate:self startImmediately:false];
-    return serverConnection;
+    [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    return [NSData dataWithData:body];
 }
 
-- (BLEFServerConnection *)sendGETwithFields:(NSDictionary *)parameters toUrl:(NSString *)urlString
+#pragma mark Connection Methods
+
+- (NSURLRequest *)createUploadRequestForObservation:(BLEFObservation *)observation
 {
-    __block NSString *urlFields = @"";
-    if (parameters){
-        [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-            urlFields = [urlFields stringByAppendingFormat:@"/%@", value];
-        }];
-    }
-    NSURL *url = [NSURL URLWithString:[urlString stringByAppendingString:urlFields]];
-    NSLog(@"GET URL = %@", url);
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    [request setHTTPMethod:@"GET"];
-    BLEFServerConnection *serverConnection = [[BLEFServerConnection alloc] initWithRequest:request delegate:self startImmediately:false];
-    return serverConnection;
+    NSURL *url = [NSURL URLWithString:@"http://plantrecogniser.no-ip.biz:55580/upload"];
+    //NSURL *url = [NSURL URLWithString:@"http://192.168.1.78:5000/upload"];
+    //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
+    NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
+    [mutableRequest setHTTPMethod:@"POST"];
+    return (NSURLRequest *)mutableRequest;
 }
 
+- (NSURLRequest *)createUpdateRequestForSpecimen:(BLEFSpecimen *)specimen
+{
+    //NSString *urlAsString = [NSString stringWithFormat:@"http://192.168.1.78:5000/job/%@/", [specimen groupid]];
+    NSString *urlAsString = [NSString stringWithFormat:@"http://plantrecogniser.no-ip.biz:55580/job/%@", [specimen groupid]];
+    NSURL *url = [NSURL URLWithString:urlAsString];
+    return [NSURLRequest requestWithURL:url];
+}
+
+- (NSURLRequest *)createCompletionNotificationForSpecimen:(BLEFSpecimen *)specimen
+{
+    if ([specimen groupid] != nil && [[specimen groupid] length] > 2){
+        //NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://192.168.1.78:5000/completion/%@/", [specimen groupid]]];
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://plantrecogniser.no-ip.biz:55580/completion/%@", [specimen groupid]]];
+        //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
+        NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
+        [mutableRequest setHTTPMethod:@"PUT"];
+        NSDictionary *params = @{@"completion": @"true"};
+        [mutableRequest setHTTPBody:[self createHTTPBodyDataWithFields:params andFileData:nil]];
+        return (NSURLRequest *)mutableRequest;
+    }
+    return nil;
+}
+
+/*
+  URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:
 - (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
 {
     BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
@@ -244,139 +445,9 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
                                         };
             [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
             [serverConnection setProgress:[progress floatValue]];
-            NSManagedObject *obj = [BLEFDatabase fetchObjectWithID:[serverConnection objID]];
-            if (obj){
-                BLEFObservation *observation = (BLEFObservation *)obj;
-                [observation setUploadProgress:[progress floatValue]];
-            }
         }
     }
 }
-
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
-{
-    BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
-    
-    NSString *dataAsString = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-    NSLog(@"didReceiveData:%@", dataAsString);
-    
-    if (serverConnection.upload) {
-        NSError* error;
-        NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
-        NSString *jobID = json[@"id"];
-        
-        if (jobID){
-            BLEFObservation *observation = (BLEFObservation *)[self fetchObjectWithID:[serverConnection objID]];
-            if (observation != NULL){
-                if (jobID) {
-                    [observation setJob:jobID];
-                    [observation setUploaded:true];
-                    [self saveDatabaseChanges];
-                }
-            }
-        }
-    }
-    
-    if (serverConnection.jobUpdate){
-        NSError* error;
-        NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
-        NSString *classification = json[@"classification"];
-        bool jobComplete = false;
-        if (classification){
-            BLEFObservation *observation = (BLEFObservation *)[self fetchObjectWithID:[serverConnection objID]];
-            if (observation != NULL){
-                [observation setResult:classification];
-                [self saveDatabaseChanges];
-                jobComplete = true;
-                NSDictionary *jobInfo = @{
-                                             @"status" : [NSNumber numberWithBool:true],
-                                             @"objectID"   : [serverConnection objID]
-                                             };
-                [[NSNotificationCenter defaultCenter] postNotificationName:BLEFJobDidSendDataNotification object:nil userInfo:jobInfo];
-                [self processNextInJobQueue];
-            }
-        }
-        if (!jobComplete){
-            [self updateJobAfterDelay:[serverConnection objID]];
-        }
-    }
-}
-
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
-{
-    NSLog(@"Connection Failed");
-    BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
-    if (serverConnection.upload){
-        _uploadQueueProcessingActive = false;
-        NSDictionary *uploadInfo = @{
-                                     @"percentage" : @0.0,
-                                     @"objectID"   : [serverConnection objID]
-                                     };
-        [[NSNotificationCenter defaultCenter] postNotificationName:BLEFUploadDidSendDataNotification object:nil userInfo:uploadInfo];
-        [self stopProcessingQueue];
-        [self addObservationToUploadQueue:[serverConnection objID]];
-    }
-    if (serverConnection.jobUpdate){
-        [self stopProcessingQueue];
-        [self addObservationToJobQueue:[serverConnection objID]];
-    }
-}
-
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection
-{
-    NSLog(@"didFinishLoading...");
-    BLEFServerConnection *serverConnection = (BLEFServerConnection *)connection;
-    if (serverConnection.upload){
-        NSLog(@"an Upload");
-        [self addObservationToJobQueue:[serverConnection objID]];
-        [self processNextInUploadQueue];
-    }
-    if (serverConnection.jobUpdate){
-        NSLog(@"a Job");
-        [self processNextInJobQueue];
-    }
-}
-
-#pragma mark - Core Data Methods
-
-- (NSManagedObjectContext *)getContext
-{
-    if (_managedObjectContext != nil) {
-            return _managedObjectContext;
-    }
-    
-    NSPersistentStoreCoordinator *coordinator = [(BLEFAppDelegate *)[[UIApplication sharedApplication] delegate] persistentStoreCoordinator];
-    if (coordinator != nil) {
-        _managedObjectContext = [[NSManagedObjectContext alloc] init];
-        [_managedObjectContext setPersistentStoreCoordinator:coordinator];
-    }
-    return _managedObjectContext;
-}
-
-- (void)saveDatabaseChanges
-{
-    NSError *error = nil;
-    NSManagedObjectContext *managedObjectContext = [self getContext];
-    if (managedObjectContext != nil) {
-        if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
-            // Replace this implementation with code to handle the error appropriately.
-            // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-            NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-            abort();
-        }
-    }
-}
-
-- (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID
-{
-    NSManagedObjectContext *context = [self getContext];
-    NSError* error = nil;
-    NSManagedObject* object = [context existingObjectWithID:objectID error:&error];
-    return object;
-}
-
-
-
-//TODO: Subscribe to changes in other context
+*/
 
 @end

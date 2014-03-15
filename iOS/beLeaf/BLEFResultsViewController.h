@@ -7,9 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BLEFDatabase.h"
+#import "BLEFSpecimen.h"
 
-@interface BLEFResultsViewController : UIViewController
+@interface BLEFResultsViewController : UIViewController <UIScrollViewDelegate>
 
-@property (strong, nonatomic) NSManagedObjectID *resultID;
+@property (strong, nonatomic) BLEFSpecimen *specimen;
+@property (strong, nonatomic) BLEFDatabase * database;
 
 @end

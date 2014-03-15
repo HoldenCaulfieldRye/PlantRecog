@@ -7,18 +7,21 @@
 //
 
 #import "BLEFSpecimen.h"
-#import "BLEFGroup.h"
 #import "BLEFObservation.h"
+#import "BLEFResult.h"
 
 
 @implementation BLEFSpecimen
 
+@dynamic complete;
 @dynamic created;
-@dynamic name;
-@dynamic finished;
-@dynamic order;
-@dynamic id;
-@dynamic group;
+@dynamic groupid;
+@dynamic latitude;
+@dynamic longitude;
+@dynamic notified;
+@dynamic updatePolling;
+
 @dynamic observations;
+@dynamic results;
 
 @end

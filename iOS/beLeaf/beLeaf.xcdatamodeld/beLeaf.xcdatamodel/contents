@@ -1,35 +1,32 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="3401" systemVersion="13B42" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
-    <entity name="Group" representedClassName="BLEFGroup" syncable="YES">
-        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="order" attributeType="Integer 16" minValueString="1" defaultValueString="1" syncable="YES"/>
-        <relationship name="specimens" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Specimen" inverseName="group" inverseEntity="Specimen" syncable="YES"/>
-    </entity>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5063" systemVersion="13C64" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Observation" representedClassName="BLEFObservation" syncable="YES">
-        <attribute name="date" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="filename" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="job" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="latitude" attributeType="Double" minValueString="-90" maxValueString="90" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="longitude" attributeType="Double" minValueString="-180" maxValueString="180" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="result" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="segment" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="thumbnail" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="uploaded" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
-        <attribute name="uploadProgress" optional="YES" transient="YES" attributeType="Float" syncable="YES"/>
         <relationship name="specimen" maxCount="1" deletionRule="Nullify" destinationEntity="Specimen" inverseName="observations" inverseEntity="Specimen" syncable="YES"/>
     </entity>
-    <entity name="Specimen" representedClassName="BLEFSpecimen" syncable="YES">
-        <attribute name="created" optional="YES" attributeType="Date" syncable="YES"/>
-        <attribute name="finished" attributeType="Boolean" minValueString="0" maxValueString="5" defaultValueString="NO" syncable="YES"/>
-        <attribute name="id" optional="YES" attributeType="Integer 16" syncable="YES"/>
+    <entity name="Result" representedClassName="BLEFResult" syncable="YES">
+        <attribute name="confidence" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="order" attributeType="Integer 16" minValueString="1" defaultValueString="1" syncable="YES"/>
-        <relationship name="group" maxCount="1" deletionRule="Nullify" destinationEntity="Group" inverseName="specimens" inverseEntity="Group" syncable="YES"/>
+        <attribute name="shortdesc" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="specimen" maxCount="1" deletionRule="Nullify" destinationEntity="Specimen" inverseName="results" inverseEntity="Specimen" syncable="YES"/>
+    </entity>
+    <entity name="Specimen" representedClassName="BLEFSpecimen" syncable="YES">
+        <attribute name="complete" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="created" attributeType="Date" syncable="YES"/>
+        <attribute name="groupid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="latitude" attributeType="Double" minValueString="-90" maxValueString="90" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" minValueString="-180" maxValueString="180" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="notified" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="updatePolling" transient="YES" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <relationship name="observations" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Observation" inverseName="specimen" inverseEntity="Observation" syncable="YES"/>
+        <relationship name="results" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Result" inverseName="specimen" inverseEntity="Result" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Group" positionX="0" positionY="0" width="0" height="0"/>
-        <element name="Observation" positionX="0" positionY="0" width="0" height="0"/>
-        <element name="Specimen" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="Observation" positionX="0" positionY="0" width="128" height="120"/>
+        <element name="Result" positionX="0" positionY="0" width="128" height="105"/>
+        <element name="Specimen" positionX="0" positionY="0" width="128" height="180"/>
     </elements>
 </model>
