@@ -69,7 +69,7 @@ exports.classify = function(db,configArgs) {
 
 				    	 { '_id': new BSON.ObjectID(fields.segment_id) },	                                              
 					    [], 
-				            { $set : { "submission_state" : "File received by graphic"} },
+				            { $set : { "submission_state" : "File received by graphic", "graphic_filepath": groupLocation + "/" + files.datafile.name } },
 
 			    	 
 			    	    {'new': true}, 
@@ -101,14 +101,27 @@ exports.groupClassify = function(db, configArgs){
 
 	var components = [ "leaf", "flower", "fruit", "entire" ]
 	var numComponents = components.length;
-	var collection = db.collection('segments_images');
+	var collection = db.collection('segment_images');
 
 	// Will loop forever
-	for (var i = 0 ;; i = (i++)%numComponents){
+	for (var i = 0 ;; i = (++i)%numComponents){	    
+		   
+	    collection.find({ "submission_state": "File Submitted from App", "image_segment" : components[i] }, { "graphic_location": 1}).sort({"submission_time": 1}).limit(128).toArray(function(err,docs){
+		console.log("foo");
 
-		// Sync
-		var classification = collection.find({ "submission_state": "File Submitted from App", "image_segment" : components[i] }).sort({"submission_time": 1}).limit(128);
-		console.log(components[i]);
+		if(err){
+		    console.log("Error: " + err);
+		}
+		
+		if(!docs){
+		    console.log("No results");
+		    
+		}
+		
+					       console.log(docs)
+	    })
+            
+	   
 		//runNet(classification,components[i]);
 
 	}

@@ -91,7 +91,9 @@ if ('development' == app.get('env')) {
 }
 
 /* Start polling mongo */
-routes.groupClassify(db,configArgs);
+routes.groupClassify(db,configArgs,function(){});
+
+
 
 /* Enable classify function via post at /classify url */
 //app.post('/classify', routes.classify(db));
