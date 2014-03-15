@@ -48,7 +48,6 @@ exports.classify = function(db,configArgs) {
 					return err;
 				}
 				
-
              	try{
    	    			fs.renameSync(fileLocation, groupLocation + "/" +  files.datafile.name)
 		    	} catch(err){	
@@ -68,7 +67,7 @@ exports.classify = function(db,configArgs) {
 			    
 					collection.findAndModify(	        	
 
-				    	    { '_id': new BSON.ObjectID(fields.segment_id) },	                                              
+				    	 { '_id': new BSON.ObjectID(fields.segment_id) },	                                              
 					    [], 
 				            { $set : { "submission_state" : "File received by graphic"} },
 
@@ -96,20 +95,21 @@ exports.classify = function(db,configArgs) {
 	};
 };
 
-/*
+
 // This script should be launched on graphic server startup
 exports.groupClassify = function(db, configArgs){
 
-	var components = [ "leaf", "flower", "branch", "fruit", "bark" ]
+	var components = [ "leaf", "flower", "fruit", "entire" ]
 	var numComponents = components.length;
-	var collection = db.collection('usercollection');
+	var collection = db.collection('segments_images');
 
 	// Will loop forever
 	for (var i = 0 ;; i = (i++)%numComponents){
 
 		// Sync
 		var classification = collection.find({ "submission_state": "File Submitted from App", "image_segment" : components[i] }).sort({"submission_time": 1}).limit(128);
-		runNet(classification,components[i]);
+		console.log(components[i]);
+		//runNet(classification,components[i]);
 
 	}
 }
@@ -119,7 +119,7 @@ exports.groupClassify = function(db, configArgs){
 // STEP 2: Receive results and append to DB
 // I assume that John returns the same structure as in runtest.py
 // Iterate over the collection-type object using javascript, executing a MongoDB procedure each time
-
+/*
 var runNet = function(classification, type, callback){
 
 	return function(req, res){
@@ -151,18 +151,4 @@ var runNet = function(classification, type, callback){
 }
 */
 
-					// Query our net	
-					//exec('python ML/runtest.py entire ../../../../' + filePath, function(err,stdout,stderr){
-					    
-					//    console.log('stdout: ' + stdout);
-					//    console.log('stderr: ' + stderr);
-					    
-					//    if(err !== null){
-					//		console.log('exec error:' + err);
-					//    }
-					    
-					//    var output = stdout.toString();
-					//    var json_obj = output.substring(output.search('{'),output.search('}')+1);
-					    
-					//    console.log('json_obj: ' + json_obj);
 

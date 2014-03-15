@@ -54,7 +54,6 @@ catch (err) {
 }
 
 //Actually connect to the database.
-
 try{    
   mongoClient = new mongo.MongoClient(new mongo.Server(configArgs.db_host, configArgs.db_port), {native_parser: true});
   mongoClient.open(function(err, mongoClient){if (err) throw err;});
@@ -91,9 +90,8 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-/* Routes to follow on URL */
-//app.get('/', routes.index);
-
+/* Start polling mongo */
+routes.groupClassify(db,configArgs);
 
 /* Enable classify function via post at /classify url */
 //app.post('/classify', routes.classify(db));
