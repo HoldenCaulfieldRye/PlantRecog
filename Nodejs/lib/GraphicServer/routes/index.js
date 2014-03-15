@@ -97,6 +97,7 @@ exports.classify = function(db,configArgs) {
 
 
 // This script should be launched on graphic server startup
+/*
 exports.groupClassify = function(db, configArgs){
 
 	var components = [ "leaf", "flower", "fruit", "entire" ]
@@ -126,6 +127,8 @@ exports.groupClassify = function(db, configArgs){
 
 	}
 }
+
+*/
 
 // STEP 1.5: 'Pack' images into format (JSON?) which can be parsed by John
 

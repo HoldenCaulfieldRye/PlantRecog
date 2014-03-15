@@ -13,6 +13,8 @@ var path = require('path');
 var mongo = require('mongodb');
 var parse = require('./config_parser');
 var async = require('async');
+var child = require('child_process');
+
 var app = express();
 
 /* Code to allow connection to mongo, gets new instance of MongoClient */
@@ -91,8 +93,8 @@ if ('development' == app.get('env')) {
 }
 
 /* Start polling mongo */
-routes.groupClassify(db,configArgs,function(){});
-
+//routes.groupClassify(db,configArgs,function(){});
+var poll = child.fork('./poll.js',configArgs)
 
 
 /* Enable classify function via post at /classify url */
