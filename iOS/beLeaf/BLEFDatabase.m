@@ -101,7 +101,7 @@
     NSArray *array = [context executeFetchRequest:request error:&error];
     if (!error){
         return [array filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:
-                                                   @"(results.@count == 0) AND (complete == TRUE) AND (notified == TRUE)"]];
+                                                   @"(results.@count == 0) AND (complete == TRUE)"]];
     }
     return nil;
 }

@@ -157,15 +157,26 @@ NSString * boundary = @"---------------------------14737809831466499882746641449
         if (index < [[self specimenForUpdating] count]){
             BLEFSpecimen *specimen = (BLEFSpecimen *)[_specimenForUpdating objectAtIndex:index];
             if (specimen != nil){
-                NSURLSessionDataTask *task = [self createUpdateTaskForSpecimen:specimen completion:^(BOOL updated) {
-                    if (updated){
-                        [_database saveChanges];
+                if ([specimen notified]){
+                    NSURLSessionDataTask *task = [self createUpdateTaskForSpecimen:specimen completion:^(BOOL updated) {
+                        if (updated){
+                            [_database saveChanges];
+                        }
+                        [self processUpdateIndex:index+1];
+                    }];
+                    if (task != nil){
+                        [task resume];
+                        return true;
                     }
-                    [self processUpdateIndex:index+1];
-                }];
-                if (task != nil){
-                    [task resume];
-                    return true;
+                } else {
+                    NSURLSessionDataTask *task = [self createCompletionTaskForSpecimen:specimen completion:^(BOOL success) {
+                        [_database saveChanges];
+                        [self processUpdateIndex:index+1];
+                    }];
+                    if (task != nil){
+                        [task resume];
+                        return true;
+                    }
                 }
             }
         }
@@ -178,7 +189,7 @@ NSString * boundary = @"---------------------------14737809831466499882746641449
 {
     if (_updateQueueHalted){
         _updateQueueHalted = false;
-        [self setNetworkIntervalTimer:[NSTimer timerWithTimeInterval:5.0 target:self selector:@selector(networkRetry:) userInfo:nil repeats:YES]];
+        [self setNetworkIntervalTimer:[NSTimer timerWithTimeInterval:10.0 target:self selector:@selector(networkRetry:) userInfo:nil repeats:YES]];
         if ([self networkIntervalTimer] != nil){
             [[NSRunLoop mainRunLoop] addTimer:_networkIntervalTimer forMode:NSRunLoopCommonModes];
             return true;
@@ -376,8 +387,8 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
         [body appendData:[@"Content-Disposition: form-data; name=\"datafile\"; filename=\"image.jpg\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[@"Content-Type: application/octet-stream\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[NSData dataWithData:fileData]];
-        [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
     }
+    [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
     return [NSData dataWithData:body];
 }
 
@@ -385,8 +396,8 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 
 - (NSURLRequest *)createUploadRequestForObservation:(BLEFObservation *)observation
 {
-    //NSURL *url = [NSURL URLWithString:@"http://plantrecogniser.no-ip.biz:55580/upload"];
-    NSURL *url = [NSURL URLWithString:@"http://192.168.1.78:5000/upload"];
+    NSURL *url = [NSURL URLWithString:@"http://plantrecogniser.no-ip.biz:55580/upload"];
+    //NSURL *url = [NSURL URLWithString:@"http://192.168.1.78:5000/upload"];
     //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
     NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
     [mutableRequest setHTTPMethod:@"POST"];
@@ -395,17 +406,17 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 
 - (NSURLRequest *)createUpdateRequestForSpecimen:(BLEFSpecimen *)specimen
 {
-    //NSString *urlAsString = [@"http://plantrecogniser.no-ip.biz:55580/job/" stringByAppendingString:[specimen groupid]];
-    NSString *urlAsString = [NSString stringWithFormat:@"http://192.168.1.78:5000/job/%@/", [specimen groupid]];
+    //NSString *urlAsString = [NSString stringWithFormat:@"http://192.168.1.78:5000/job/%@/", [specimen groupid]];
+    NSString *urlAsString = [NSString stringWithFormat:@"http://plantrecogniser.no-ip.biz:55580/job/%@", [specimen groupid]];
     NSURL *url = [NSURL URLWithString:urlAsString];
     return [NSURLRequest requestWithURL:url];
 }
 
 - (NSURLRequest *)createCompletionNotificationForSpecimen:(BLEFSpecimen *)specimen
 {
-    //NSURL *url = [NSURL URLWithString:@"http://plantrecogniser.no-ip.biz:55580/upload"];
     if ([specimen groupid] != nil && [[specimen groupid] length] > 2){
-        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://192.168.1.78:5000/completion/%@/", [specimen groupid]]];
+        //NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://192.168.1.78:5000/completion/%@/", [specimen groupid]]];
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://plantrecogniser.no-ip.biz:55580/completion/%@", [specimen groupid]]];
         //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
         NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
         [mutableRequest setHTTPMethod:@"PUT"];
