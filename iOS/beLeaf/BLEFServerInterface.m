@@ -178,7 +178,7 @@ NSString * boundary = @"---------------------------14737809831466499882746641449
 {
     if (_updateQueueHalted){
         _updateQueueHalted = false;
-        [self setNetworkIntervalTimer:[NSTimer timerWithTimeInterval:15.0 target:self selector:@selector(networkRetry:) userInfo:nil repeats:YES]];
+        [self setNetworkIntervalTimer:[NSTimer timerWithTimeInterval:5.0 target:self selector:@selector(networkRetry:) userInfo:nil repeats:YES]];
         if ([self networkIntervalTimer] != nil){
             [[NSRunLoop mainRunLoop] addTimer:_networkIntervalTimer forMode:NSRunLoopCommonModes];
             return true;
@@ -263,7 +263,7 @@ NSString * boundary = @"---------------------------14737809831466499882746641449
         
         void (^completionHandler)(NSData*, NSURLResponse*, NSError*) =
         ^(NSData *data, NSURLResponse *response, NSError *error) {
-            BOOL _updated = [self updateSpecimen:specimenID usingData:data andError:error];
+            BOOL _updated = [self processNotificationForSpecimen:specimenID usingData:data andError:error];
             if (handler){
                 handler(_updated);
             }
@@ -322,6 +322,22 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
     return false;
 }
 
+- (BOOL) processNotificationForSpecimen:(NSManagedObjectID *)specimenID usingData:(NSData *)data andError:(NSError *)error;
+{
+    NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+    if (json){
+        NSString *status = json[@"status"];
+        if ((status != nil) && ([status length] >= 1)){
+            BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
+            if (specimen != nil){
+                [specimen setNotified:true];
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 - (BOOL) updateObservation:(NSManagedObjectID *)observationID usingData:(NSData *)data andError:(NSError *)error;
 {
     if (error == nil){
@@ -357,7 +373,7 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
     
     if (fileData){
         [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-        [body appendData:[@"Content-Disposition: form-data; name=\"datafile\"; filename=\"test.jpg\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[@"Content-Disposition: form-data; name=\"datafile\"; filename=\"image.jpg\"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[@"Content-Type: application/octet-stream\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[NSData dataWithData:fileData]];
         [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];

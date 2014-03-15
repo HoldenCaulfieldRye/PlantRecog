@@ -18,6 +18,7 @@
 @property (nonatomic, retain) NSString * groupid;
 @property (nonatomic) double latitude;
 @property (nonatomic) double longitude;
+@property (nonatomic) BOOL notified;
 @property (nonatomic) BOOL updatePolling;
 @property (nonatomic, retain) NSSet * observations;
 @property (nonatomic, retain) NSSet * results;

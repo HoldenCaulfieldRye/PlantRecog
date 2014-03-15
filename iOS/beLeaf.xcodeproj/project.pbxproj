@@ -95,7 +95,6 @@
 		E9772F6A18CF5DA800D15247 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		E9829C6B189D7662004DD07F /* BLEFObservation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFObservation.h; sourceTree = "<group>"; };
 		E9829C6C189D7662004DD07F /* BLEFObservation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFObservation.m; sourceTree = "<group>"; };
-		E98EF99B18C3597A001EC74A /* beLeaf copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "beLeaf copy-Info.plist"; path = "/Users/ashleycutmore/Documents/MCS_GROUP_MASTER/group-project-master/iOS/beLeaf copy-Info.plist"; sourceTree = "<absolute>"; };
 		E98EF99C18C36D4D001EC74A /* BLEFCameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFCameraViewController.h; sourceTree = "<group>"; };
 		E98EF99D18C36D4D001EC74A /* BLEFCameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFCameraViewController.m; sourceTree = "<group>"; };
 		E9A5C87418C20EC000F9F6CF /* BLEFResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFResult.h; sourceTree = "<group>"; };
@@ -151,7 +150,6 @@
 				5E2AD5921863B6DA00595828 /* beLeafTests */,
 				5E2AD56C1863B6D900595828 /* Frameworks */,
 				5E2AD56B1863B6D900595828 /* Products */,
-				E98EF99B18C3597A001EC74A /* beLeaf copy-Info.plist */,
 				9B5FD93065DA4C2E89495E05 /* Pods.xcconfig */,
 			);
 			sourceTree = "<group>";

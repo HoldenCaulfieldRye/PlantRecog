@@ -94,13 +94,14 @@
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Specimen"];
     [request setPredicate:[NSPredicate predicateWithFormat: @"(NONE observations.uploaded == FALSE) AND (groupid != NULL)"]];
     
-    [request setSortDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO]]];
+    [request setSortDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES]]];
 
     NSManagedObjectContext *context = [self getContext];
     NSError *error = nil;
     NSArray *array = [context executeFetchRequest:request error:&error];
     if (!error){
-        return [array filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(results.@count == 0) AND (complete == TRUE)"]];
+        return [array filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:
+                                                   @"(results.@count == 0) AND (complete == TRUE) AND (notified == TRUE)"]];
     }
     return nil;
 }
