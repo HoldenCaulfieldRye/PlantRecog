@@ -1,6 +1,8 @@
 var mongo = require('mongodb');
+var BSON = mongo.BSONPure;
 var exec = require('child_process').exec;
 var async = require('async');
+
 var db_host = process.argv[2];
 var db_port = process.argv[3];
 var db_database = process.argv[4];
@@ -15,7 +17,7 @@ try{
 	  console.log("Error opening database")
       throw err;
       }
-    // Connect to the relevant database
+       // Connect to the relevant database
       db = mongoClient.db(db_database);
 
       var components = ["leaf", "flower", "fruit", "entire", "x"];
@@ -24,45 +26,60 @@ try{
 
       async.forever(function(callback){
           db.collection('segment_images').find({"submission_state" : "File received by graphic", "image_segment": components[i]}).sort({"submission_time": -1}).limit(128).toArray(function(err,docs){
-			                 console.log("retrieved doc in whilst loop");
-                       console.log("Return #" + docs.length + " documents.")
-	      // need to iterate over docs, collectiing the graphic_filepaths, and then exec-ing John's script
-	      var count = 0;
-	      str = '';
-	      if(docs.length != 0){	  
-		  async.whilst( function(){ return count < docs.length },
-				function(callback){
-				    if(docs[count].graphic_filepath){
-					str = str + " " + docs[count].graphic_filepath;
-					//console.log("str = " + str);
-				    }
-				    count = count + 1;
-				    console.log("count = " + count);
-				    setImmediate(callback);
-				},
-				function(err){
-//				    console.log("str = " + str);
-				}
-			      )
-	      }
-          })
-	  
-	  //console.log("str = " + str);
-	  
-	  exec('python ./ML/run.py ' + components[i] + ' ' + str, function(error, stdout, stderr){
-	      console.log('stdout: ' + stdout);
-	      console.log('stderr: ' + stderr);
-	      if(error != null){
-		  console.log('exec error: ' + error);
-	      }
-	  })
-                       i = (++i)%numComponents;
-	  setTimeout(callback,5000);
+			                // console.log("retrieved doc in whilst loop");
+                      // console.log("Return #" + docs.length + " documents.")
+	                    var count = 0;
+              	      str = '';
+              	      if(docs.length != 0){	  
+              		      async.whilst( function(){ return count < docs.length },
+              				                function(callback){
+                            				    if(docs[count].graphic_filepath){
+                            					     str = str + " " + docs[count].graphic_filepath;
+                            				    }
+                            				    count = count + 1;
+                            				    //console.log("count = " + count);
+                            				    setImmediate(callback);
+                            				},
+              				                function(err){}
+              			   )
+            
+
+                      //exec('python ./ML/run.py ' + components[i] + ' ' + str, function(error, stdout, stderr){
+                      //    console.log('stdout: ' + stdout);
+                      //    console.log('stderr: ' + stderr);
+                      //    if(error != null){
+                      //      console.log('exec error: ' + error);
+                      //    } 
+                      //    else{
+                            // update all the relevant mongo entries
+                                  async.whilst( function(){ return count < docs.length },
+                                                function(callback){
+                                                  if(docs[count].graphic_filepath){
+                                                     db.collection('groups').update({"_id" = new BSON.ObjectID(docs[count].group_id)},{ $inc { "classified_count": 1} })
+                                                  
+                                                     //if(image_count == classified_count)
+                                                      //exec(combine)
+                                                  }
+
+                                                  count = count + 1;
+                                                  setImmediate(callback);
+                                              },
+                                                function(err){}
+                                 )
+                      //    }
+                      //});
+          	      }
+        });
+	  	         
+       // Put these in the exec callback?
+       i = (++i)%numComponents;
+	     setTimeout(callback,5000);
       },  
-                    function(err){
-                      console.log("An error occured");
-                    }    
-                  )
+      
+        function(err){
+            console.log("An error occured");
+        }    
+      )
 
   });
 
