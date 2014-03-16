@@ -92,10 +92,12 @@ exports.classify = function(db,configArgs) {
 					});
 
 			    /* Test code */
-
+			    /*
 			    var result = collection.find({"submission_state": "File Submitted from App"}).toArray(function(err,docs){
 				console.log("retrieved records in routes/index.js");
 				console.log(docs[0].vm_filepath);
+				*/
+
 });
 
 			    
