@@ -1,6 +1,6 @@
 var mongo = require('mongodb');
 var exec = require('child_process').exec;
-var whilst = require('async');
+var async = require('async');
 var db_host = process.argv[2];
 var db_port = process.argv[3];
 var db_database = process.argv[4];
@@ -19,21 +19,21 @@ try{
 
       var components = ["leaf", "flower", "fruit", "entire"];
       var numComponents = components.length;
- 
-//      for(var i = 0 ;; i = (++i)%numComponents){
-//	  console.log("foo");
-    async.whilst(true,  
-	     function(){
-          db.collection('segment_images').find().toArray(function(err,docs){
-	           console.log("retrieved doc")
-	           console.log(docs[0].vm_filepath)
-	      });
+      var i = 0;
+
+      async.forever(function(callback){
+                       db.collection('segment_images').find().toArray(function(err,docs){
+			   console.log("retrieved doc in whilst loop");
+			   console.log(docs[0].vm_filepath);
+			   setImmediate(callback);
+		       });
         },
       function(err){
         console.log("An error occured");
       } 
-  ) 
-//      }
+  )
+ 
+
   });
 
 }
