@@ -4,6 +4,7 @@ var async = require('async');
 var db_host = process.argv[2];
 var db_port = process.argv[3];
 var db_database = process.argv[4];
+var str = '';
 
 console.log("db_host: " + db_host + " db_port: " + db_port + " db_database: " + db_database);
 
@@ -22,14 +23,42 @@ try{
       var i = 0;
 
       async.forever(function(callback){
-                      db.collection('segment_images').find({"submission_state" : "File received by graphic", "image_segment": components[i]}).toArray(function(err,docs){
+          db.collection('segment_images').find({"submission_state" : "File received by graphic", "image_segment": components[i]}).sort({"submission_time": -1}).limit(128).toArray(function(err,docs){
 			                 console.log("retrieved doc in whilst loop");
                        console.log("Return #" + docs.length + " documents.")
-                       console.log(docs[0].vm_filepath);
+	      // need to iterate over docs, collectiing the graphic_filepaths, and then exec-ing John's script
+	      var count = 0;
+	      str = '';
+	      if(docs.length != 0){	  
+		  async.whilst( function(){ return count < docs.length },
+				function(callback){
+				    if(docs[count].graphic_filepath){
+					str = str + " " + docs[count].graphic_filepath;
+					//console.log("str = " + str);
+				    }
+				    count = count + 1;
+				    console.log("count = " + count);
+				    setImmediate(callback);
+				},
+				function(err){
+//				    console.log("str = " + str);
+				}
+			      )
+	      }
+          })
+	  
+	  //console.log("str = " + str);
+	  
+	  exec('python ./ML/run.py ' + components[i] + ' ' + str, function(error, stdout, stderr){
+	      console.log('stdout: ' + stdout);
+	      console.log('stderr: ' + stderr);
+	      if(error != null){
+		  console.log('exec error: ' + error);
+	      }
+	  })
                        i = (++i)%numComponents;
-			                 setImmediate(callback);
-		                  });
-                    },
+	  setTimeout(callback,5000);
+      },  
                     function(err){
                       console.log("An error occured");
                     }    
