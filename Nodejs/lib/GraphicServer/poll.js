@@ -17,22 +17,23 @@ try{
     // Connect to the relevant database
       db = mongoClient.db(db_database);
 
-      var components = ["leaf", "flower", "fruit", "entire"];
+      var components = ["leaf", "flower", "fruit", "entire", "x"];
       var numComponents = components.length;
       var i = 0;
 
       async.forever(function(callback){
-                       db.collection('segment_images').find().toArray(function(err,docs){
-			   console.log("retrieved doc in whilst loop");
-			   console.log(docs[0].vm_filepath);
-			   setImmediate(callback);
-		       });
-        },
-      function(err){
-        console.log("An error occured");
-      } 
-  )
- 
+                      db.collection('segment_images').find({"submission_state" : "File received by graphic", "image_segment": components[i]}).toArray(function(err,docs){
+			                 console.log("retrieved doc in whilst loop");
+                       console.log("Return #" + docs.length + " documents.")
+                       console.log(docs[0].vm_filepath);
+                       i = (++i)%numComponents;
+			                 setImmediate(callback);
+		                  });
+                    },
+                    function(err){
+                      console.log("An error occured");
+                    }    
+                  )
 
   });
 
