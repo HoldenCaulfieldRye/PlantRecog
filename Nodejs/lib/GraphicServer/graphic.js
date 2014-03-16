@@ -94,7 +94,7 @@ if ('development' == app.get('env')) {
 
 /* Start polling mongo */
 //routes.groupClassify(db,configArgs,function(){});
-var poll = child.fork('./poll.js',configArgs)
+var poll = child.fork('./Nodejs/lib/GraphicServer/poll.js',[configArgs.db_host,configArgs.db_port,configArgs.db_database])
 
 
 /* Enable classify function via post at /classify url */

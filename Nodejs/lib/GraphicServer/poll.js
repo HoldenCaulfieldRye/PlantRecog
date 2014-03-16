@@ -1,10 +1,12 @@
 var mongo = require('mongodb');
-var configArgs = process.argv[2];
+var db_host = process.argv[2];
+var db_port = process.argv[3];
+var db_database = process.argv[4];
 
 try{    
-  mongoClient = new mongo.MongoClient(new mongo.Server(configArgs.db_host, configArgs.db_port), {native_parser: true});
+  mongoClient = new mongo.MongoClient(new mongo.Server(db_host, db_port), {native_parser: true});
   mongoClient.open(function(err, mongoClient){if (err) throw err;});
-  db = mongoClient.db(configArgs.db_database);
+  db = mongoClient.db(db_database);
 }
 catch(err){
   console.log('Error connecting to Database: ' + err);
