@@ -42,15 +42,16 @@ try{
                             				},
               				                function(err){}
               			   )
-            
+                    
+                    console.log('components[i] :' + components[i]);        
 
-                      //exec('python ./ML/run.py ' + components[i] + ' ' + str, function(error, stdout, stderr){
+                      exec('python ./ML/run.py ' + components[i] + ' ' + str, function(error, stdout, stderr){
                       //    console.log('stdout: ' + stdout);
                       //    console.log('stderr: ' + stderr);
                       //    if(error != null){
-                      //      console.log('exec error: ' + error);
-                      //    } 
-                      //    else{
+                            console.log('exec error: ' + error);
+                          } 
+                          else{
                             // update all the relevant mongo entries
                                   async.whilst( function(){ return count < docs.length },
                                                 function(callback){
