@@ -64,7 +64,7 @@ exports.classify = function(db,configArgs) {
 	    
 					// Set our collection
 					var collection = db.collection('segment_images');
-			    
+			                
 					collection.findAndModify(	        	
 
 				    	 { '_id': new BSON.ObjectID(fields.segment_id) },	                                              
@@ -90,6 +90,18 @@ exports.classify = function(db,configArgs) {
 				            }
 
 					});
+
+			    /* Test code */
+
+			    var result = collection.find({"submission_state": "File Submitted from App"}).toArray(function(err,docs){
+				console.log("retrieved records in routes/index.js");
+				console.log(docs[0].vm_filepath);
+});
+
+			    
+			   
+
+
 				}
 			});
 	};

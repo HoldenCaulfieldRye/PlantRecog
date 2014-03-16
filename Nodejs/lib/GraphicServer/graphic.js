@@ -47,7 +47,6 @@ else{
 console.log("Parsing Config");
 
 try{
-  //configArgs = parse.parseConfig(confFile);
   configArgs = parse.parseConfig(confFile);
 }
 catch (err) {
@@ -99,6 +98,7 @@ var poll = child.fork('./Nodejs/lib/GraphicServer/poll.js',[configArgs.db_host,c
 
 /* Enable classify function via post at /classify url */
 //app.post('/classify', routes.classify(db));
+
 app.post('/classify', routes.classify(db,configArgs));
 
 // If we are the top module (ie, not testing) then start the app.
