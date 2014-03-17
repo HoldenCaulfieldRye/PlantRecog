@@ -13,22 +13,16 @@
 
 @interface BLEFObservation : NSManagedObject
 
-@property (nonatomic) NSTimeInterval date;
 @property (nonatomic, retain) NSString * filename;
-@property (nonatomic, retain) NSString * job;
-@property (nonatomic) double latitude;
-@property (nonatomic) double longitude;
-@property (nonatomic, retain) NSString * result;
 @property (nonatomic, retain) NSString * segment;
 @property (nonatomic, retain) id thumbnail;
 @property (nonatomic) BOOL uploaded;
-@property (nonatomic) float uploadProgress;
 @property (nonatomic, retain) BLEFSpecimen *specimen;
 
 - (UIImage *)getImage;
 - (NSData *)getImageData;
 - (UIImage *)getThumbnail;
 - (void)generateThumbnailFromImage:(UIImage *)image;
-- (void)saveImage:(UIImage *)image;
+- (void)saveImage:(NSData *)imageData completion:(void (^) (BOOL success))handler;
 
 @end

@@ -2,38 +2,29 @@
 //  BLEFCameraViewController.m
 //  beLeaf
 //
-//  Created by Ashley Cutmore on 04/02/2014.
+//  Created by Ashley Cutmore on 02/03/2014.
 //  Copyright (c) 2014 DocMcs13group12. All rights reserved.
 //
 
 #import "BLEFCameraViewController.h"
+#import "BLEFCaptureBuffer.h"
 
 @interface BLEFCameraViewController ()
 
-@property (nonatomic) BOOL displayPicker;
-
-@property (weak, nonatomic) IBOutlet UIButton *cancelButton;
-@property (weak, nonatomic) IBOutlet UIButton *takePhotoButton;
-@property (weak, nonatomic) IBOutlet UISegmentedControl *componentSelection;
-
-@property (strong, nonatomic) CLLocationManager *locationManager;
-@property (strong, nonatomic) CLLocation *location;
-
-@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
-
-@property (strong, nonatomic) UIImagePickerController *imagePickerController;
+@property (strong, nonatomic) UIImageView * imageReviewView;
+@property (strong, nonatomic) BLEFCaptureBuffer *captureBuffer;
+@property (strong, nonatomic) NSArray *segments;
+@property (nonatomic) NSInteger selectionIndexBuffer;
 
 @end
 
 @implementation BLEFCameraViewController
 
-@synthesize delegate;
-
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // custom init
+        // Custom initialization
     }
     return self;
 }
@@ -41,35 +32,27 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    _locationManager = [[CLLocationManager alloc] init];
-    _locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-    _locationManager.delegate = self;
-    _location = nil;
-    [_locationManager startUpdatingLocation];
+	// Do any additional setup after loading the view.
     
-    self.imagePickerController = [[UIImagePickerController alloc] init];
-    self.imagePickerController.delegate = self;
-    self.imagePickerController.allowsEditing = NO;
-    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-        self.imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-        self.imagePickerController.showsCameraControls = NO;
-        self.imagePickerController.cameraFlashMode = UIImagePickerControllerCameraFlashModeOff;
-        NSArray *cameraViews =  [[NSBundle mainBundle] loadNibNamed:@"BLEFCameraView" owner:self options:nil];
-        UIView *camerView = [cameraViews objectAtIndex:0];
-        self.imagePickerController.cameraOverlayView = camerView;
-    } else {
-        self.imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    }
-    self.displayPicker = true;
+    // Setup Buffer
+    _segments = @[@"entire", @"leaf" , @"flower", @"fruit"];
+    _captureBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:_segments usingDatabase:_database];
+    
+    // UI
+    _imageReviewView = [[UIImageView alloc] init];
+    _imageReviewView.frame = _previewView.bounds;
+    [_previewView addSubview:_imageReviewView];
+    [_segmentSelection addTarget:self action:@selector(segmentSelectionChanged:) forControlEvents:UIControlEventValueChanged];
+    _selectionIndexBuffer = 0;
+    
+    // AV
+    [self setupCaptureSession];
+    [self startCaptureSession];
 }
 
--(void)viewDidAppear:(BOOL)animated
+- (void)viewWillDisappear:(BOOL)animated
 {
-    if (self.displayPicker)
-        [self presentViewController:self.imagePickerController animated:NO completion:^{
-            [self.activityIndicator stopAnimating];
-        }];
-    self.displayPicker = false;
+    [self stopCaptureSession];
 }
 
 - (void)didReceiveMemoryWarning
@@ -78,99 +61,175 @@
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark - Custom Camera View Methods
-- (IBAction)userCancel:(id)sender
+#pragma mark - UI Methods
+
+- (NSString *)currentSegmentSelection
 {
-    NSLog(@"User Cancel");
-    [self.imagePickerController dismissViewControllerAnimated:NO completion:^{
-            [delegate blefCameraViewControllerDidDismiss:self];
+    return [_segments objectAtIndex:[_segmentSelection selectedSegmentIndex]];
+}
+
+- (IBAction)takePhotoButtonPressed:(id)sender
+{
+    if ([_captureSession isRunning]){
+        [self captureImageWithHandler:^(NSData *imageData) {
+            [self processImageData:imageData];
+        }];
+    } else if (![_captureBuffer slotComplete:[self currentSegmentSelection]]){
+        [self hideImage];
+        [_captureBuffer removeDataForSlot:[self currentSegmentSelection]];
+        [self startCaptureSession];
+    }
+}
+
+- (IBAction)finishedSessionButtonPressed:(id)sender
+{
+    // Disable Button
+    UIButton *button = (UIButton *)sender;
+    button.enabled = false;
+    
+    // Save current segment
+    [_captureBuffer completeSlotNamed:[self currentSegmentSelection] completion:^(BOOL success) {
+        [_captureBuffer completeCapture];
+        [[_captureBuffer database] saveChanges];
+        [self dismissViewControllerAnimated:YES completion:nil];
     }];
 }
 
-- (IBAction)takePhoto:(id)sender
-{
-    NSLog(@"User Take Photo");
-    [self flash];
-    [self.imagePickerController takePicture];
+- (IBAction)cancelButtonPressed:(id)sender {
+    [_captureBuffer deleteSession];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(void)flash
+- (void)processImageData:(NSData *)imageData
 {
-    self.imagePickerController.cameraOverlayView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:1.0f];
-    [UIView animateWithDuration:0.5f animations:^{
-        self.imagePickerController.cameraOverlayView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.0f];
+    UIImage *image = [UIImage imageWithData:imageData];
+    [self flashToImage:image];
+    [_captureBuffer addData:imageData toSlot:[self currentSegmentSelection]];
+}
+
+- (void)displayImage:(UIImage *)image
+{
+    [_captureSession stopRunning];
+    _imageReviewView.image = image;
+    _imageReviewView.hidden = NO;
+    [_previewView bringSubviewToFront:_imageReviewView];
+}
+
+- (void)flashToImage:(UIImage *)image
+{
+    UIView *whiteView = [[UIView alloc] initWithFrame:[_previewView bounds]];
+    [whiteView setBackgroundColor:[UIColor colorWithWhite:1.0f alpha:1.0f]];
+    [_previewView addSubview:whiteView];
+    [_captureSession stopRunning];
+    _imageReviewView.image = image;
+    [_previewView bringSubviewToFront:_imageReviewView];
+    [_previewView bringSubviewToFront:whiteView];
+    _imageReviewView.hidden = NO;
+    [UIView animateWithDuration:0.75f animations:^{
+        whiteView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.0f];
+    } completion:^(BOOL finished) {
+        [whiteView removeFromSuperview];
     }];
 }
 
-
-- (IBAction)userSwipeRight:(id)sender {
-    NSInteger numberofSegments = [self.componentSelection numberOfSegments];
-    NSInteger selectedSegment =  [self.componentSelection selectedSegmentIndex];
-    if (selectedSegment < numberofSegments)
-        [self.componentSelection setSelectedSegmentIndex:selectedSegment+1];
-}
-
-- (IBAction)userSwipeLeft:(id)sender {
-    NSInteger selectedSegment =  [self.componentSelection selectedSegmentIndex];
-    if (selectedSegment > 0)
-        [self.componentSelection setSelectedSegmentIndex:(selectedSegment -1)];
-}
-
-#pragma mark - Image Picker Delegate Methods
-
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+- (void)hideImage
 {
-    NSLog(@"imagePicker took photo");
-    UIImage* image = info[UIImagePickerControllerOriginalImage];
+    if (_imageReviewView){
+        _imageReviewView.hidden = YES;
+        _imageReviewView.image = nil;
+        _imageReviewView.opaque = NO;
+    }
+}
+
+- (void)segmentSelectionChanged:(id)sender
+{
+    [_captureBuffer completeSlotNamed:[_segments objectAtIndex:_selectionIndexBuffer] completion:^(BOOL success){
+        [[_captureBuffer database] saveChanges];
+    }];
+    _selectionIndexBuffer = [_segmentSelection selectedSegmentIndex];
     
-    __block NSNumber *longitude = [NSNumber numberWithDouble:0.0];
-    __block NSNumber *latitude = [NSNumber numberWithDouble:0.0];
-    if (_location != nil){
-        longitude = [NSNumber numberWithDouble:_location.coordinate.longitude];
-        latitude = [NSNumber numberWithDouble:_location.coordinate.latitude];
+    UIImage *image = [_captureBuffer imageForSlotNamed:[self currentSegmentSelection]];
+    if (image != nil){
+        [self displayImage:image];
+    } else {
+        [self hideImage];
+        [self startCaptureSession];
+    }
+}
+
+#pragma mark - AV Methods
+
+- (void) setupCaptureSession {
+    //Setup Capture Session
+    _captureSession = [[AVCaptureSession alloc] init];
+    [_captureSession setSessionPreset:AVCaptureSessionPresetMedium];
+    
+    //Setup Input Device
+    AVCaptureDevice *inputDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    
+    NSError *error = nil;
+    AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:inputDevice error: &error];
+    
+    //Add Input Device to Capture Session
+    if ( [_captureSession canAddInput:deviceInput] ){
+        [_captureSession addInput:deviceInput];
     }
     
-    NSString *segment;
-    NSInteger selectedSegment =  [self.componentSelection selectedSegmentIndex];
-    switch (selectedSegment) {
-        case 0:
-            segment = @"entire";
-            break;
-        case 1:
-            segment = @"branch";
-            break;
-        case 2:
-            segment = @"stem";
-            break;
-        case 3:
-            segment = @"fruit";
-            break;
-        case 4:
-            segment = @"flower";
-            break;
-        case 5:
-            segment = @"leaf";
-            break;
-        default:
-            break;
+    //Setup Output
+    _AVImageOutput = [[AVCaptureStillImageOutput alloc] init];
+    if ([_captureSession canAddOutput:_AVImageOutput]){
+        [_captureSession addOutput:_AVImageOutput];
     }
     
-    NSDictionary *observationInfo = @{@"segment": segment, @"lat": latitude, @"long": longitude};
+    //Setup Preview
+    AVCaptureVideoPreviewLayer *previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:_captureSession];
+    [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
+    CALayer *rootLayer = [_previewView layer];
+    [rootLayer setMasksToBounds:YES];
+    [previewLayer setFrame:rootLayer.bounds];
+    [rootLayer insertSublayer:previewLayer atIndex:0];
+}
+
+- (void) startCaptureSession {
+    [_captureSession startRunning];
+}
+
+- (void) stopCaptureSession {
+    [_captureSession stopRunning];
+}
+
+- (void) captureImageWithHandler:(void (^) (NSData *imageData))handler
+{
+    AVCaptureConnection *videoConnection = nil;
+    for (AVCaptureConnection *connection in _AVImageOutput.connections) {
+        
+        for (AVCaptureInputPort *port in [connection inputPorts]) {
+            
+            if ([[port mediaType] isEqual:AVMediaTypeVideo] ) {
+                videoConnection = connection;
+                break;
+            }
+        }
+        
+        if (videoConnection) {
+            break;
+        }
+    }
+    if (videoConnection == nil){
+        handler(nil);
+        return;
+    }
     
-    [delegate blefCameraViewController:self tookPhoto:image withInfo:observationInfo];
+    [_AVImageOutput captureStillImageAsynchronouslyFromConnection:videoConnection
+                                                completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error)
+        {
+            NSData *_imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
+            handler(_imageData);
+        }
+    ];
 }
 
-- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
-{
-    NSLog(@"Did cancel");
-    [picker dismissViewControllerAnimated:NO completion:NULL];
-    [delegate blefCameraViewControllerDidDismiss:self];
-}
 
-#pragma mark - Location Services
--(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
-{
-    _location = [locations lastObject];
-}
+
 
 @end

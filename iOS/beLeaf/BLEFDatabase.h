@@ -7,24 +7,30 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BLEFGroup.h"
 #import "BLEFSpecimen.h"
 #import "BLEFObservation.h"
+#import "BLEFResult.h"
 
 @interface BLEFDatabase : NSObject
 
-+ (NSArray*)getGroups;
-+ (NSArray*)getSpecimensFromGroup:(BLEFGroup *)group;
-+ (NSArray*)getObservationsFromSpecimen:(BLEFSpecimen *)specimen;
+- (NSArray*)getAllSpecimens;
+- (NSArray*)getSpecimenNeedingUpdate;
+- (NSFetchedResultsController*)fetchSpecimen;
+- (NSArray*)getObservationsFromSpecimen:(BLEFSpecimen *)specimen;
+- (NSArray*)getObservationsNeedingUploading;
+- (NSArray*)getResultsFromSpecimen:(BLEFSpecimen *)specimen;
 
-+ (BLEFSpecimen*)addNewSpecimentToGroup:(BLEFGroup *)group;
-+ (BLEFObservation*)addNewObservationToSpecimen:(BLEFSpecimen *)specimen;
+- (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID;
 
-+ (NSManagedObject *)fetchObjectWithID:(NSManagedObjectID *)objectID;
+- (BLEFSpecimen*)newSpecimen;
+- (BLEFObservation*)addNewObservationToSpecimen:(BLEFSpecimen *)specimen;
+- (BLEFResult*)addNewResultToSpecimen:(BLEFSpecimen *)specimen;
 
-+ (void)saveChanges;
+- (void)saveChanges;
 
-+ (void) ensureGroupsExist;
-+ (void) createStartingPoint;
+@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+@property (nonatomic) BOOL disableSaves;
+
+extern NSString * const BLEFDatabaseUpdateNotification;
 
 @end
