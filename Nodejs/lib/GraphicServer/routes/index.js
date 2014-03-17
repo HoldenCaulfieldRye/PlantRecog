@@ -69,7 +69,7 @@ exports.classify = function(db,configArgs) {
 
 				    	 { '_id': new BSON.ObjectID(fields.segment_id) },	                                              
 					    [], 
-				            { $set : { "submission_state" : "File received by graphic", "graphic_filepath": "/homes/sd3112/group-project-master/Nodejs/lib/GraphicServer/uploads" + "/" + configArgs.db_database + "/" + fields.group_id + "/" + files.datafile.name } },
+				            { $set : { "submission_state" : "File received by graphic", "graphic_filepath": "/homes/sd3112/GroupProject/group-project-master/Nodejs/lib/GraphicServer/uploads" + "/" + configArgs.db_database + "/" + fields.group_id + "/" + files.datafile.name } },
 
 			    	 
 			    	    {'new': true}, 
