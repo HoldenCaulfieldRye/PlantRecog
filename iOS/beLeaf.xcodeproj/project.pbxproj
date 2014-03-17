@@ -24,6 +24,7 @@
 		5E2AD58F1863B6DA00595828 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E2AD5731863B6D900595828 /* CoreData.framework */; };
 		5E2AD5971863B6DA00595828 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5951863B6DA00595828 /* InfoPlist.strings */; };
 		5E2AD5A31863BB5A00595828 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
+		5E94AB3118D7231B0005C36F /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 5E94AB3018D7231B0005C36F /* Settings.bundle */; };
 		E9100F6B18BA437800006AF0 /* beLeaf.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5811863B6DA00595828 /* beLeaf.xcdatamodeld */; };
 		E9100F6D18BA439800006AF0 /* BLEFSpecimen.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396271897F8830067A991 /* BLEFSpecimen.m */; };
 		E9100F6E18BA439800006AF0 /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
@@ -81,6 +82,7 @@
 		5E2AD5941863B6DA00595828 /* beLeafTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "beLeafTests-Info.plist"; sourceTree = "<group>"; };
 		5E2AD5961863B6DA00595828 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5E2AD5A21863BB5A00595828 /* iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = iPhone.storyboard; sourceTree = "<group>"; };
+		5E94AB3018D7231B0005C36F /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		9B5FD93065DA4C2E89495E05 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
 		A64737D915944062A1EA1E51 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E923896418BCDD40001066A9 /* BLEFServerInterfaceTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFServerInterfaceTest.m; sourceTree = "<group>"; };
@@ -207,6 +209,7 @@
 				E947179A18C92431006C8B1D /* BLEFSpecimenTableViewCell.m */,
 				E9772F6418CF49EE00D15247 /* BLEFCaptureBuffer.h */,
 				E9772F6518CF49EE00D15247 /* BLEFCaptureBuffer.m */,
+				5E94AB3018D7231B0005C36F /* Settings.bundle */,
 			);
 			path = beLeaf;
 			sourceTree = "<group>";
@@ -320,6 +323,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5E94AB3118D7231B0005C36F /* Settings.bundle in Resources */,
 				5E2AD57A1863B6D900595828 /* InfoPlist.strings in Resources */,
 				5E2AD5A31863BB5A00595828 /* iPhone.storyboard in Resources */,
 				5E2AD5851863B6DA00595828 /* Images.xcassets in Resources */,

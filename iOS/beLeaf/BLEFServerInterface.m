@@ -396,7 +396,8 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 
 - (NSURLRequest *)createUploadRequestForObservation:(BLEFObservation *)observation
 {
-    NSURL *url = [NSURL URLWithString:@"http://plantrecogniser.no-ip.biz:55580/upload"];
+    NSString *serverURL = [[NSUserDefaults standardUserDefaults] stringForKey:@"serverURL"];
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/upload", serverURL]];
     //NSURL *url = [NSURL URLWithString:@"http://192.168.1.78:5000/upload"];
     //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
     NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
@@ -407,7 +408,8 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 - (NSURLRequest *)createUpdateRequestForSpecimen:(BLEFSpecimen *)specimen
 {
     //NSString *urlAsString = [NSString stringWithFormat:@"http://192.168.1.78:5000/job/%@/", [specimen groupid]];
-    NSString *urlAsString = [NSString stringWithFormat:@"http://plantrecogniser.no-ip.biz:55580/job/%@", [specimen groupid]];
+    NSString *serverURL = [[NSUserDefaults standardUserDefaults] stringForKey:@"serverURL"];
+    NSString *urlAsString = [NSString stringWithFormat:@"%@/job/%@", serverURL, [specimen groupid]];
     NSURL *url = [NSURL URLWithString:urlAsString];
     return [NSURLRequest requestWithURL:url];
 }
@@ -415,8 +417,9 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 - (NSURLRequest *)createCompletionNotificationForSpecimen:(BLEFSpecimen *)specimen
 {
     if ([specimen groupid] != nil && [[specimen groupid] length] > 2){
+        NSString *serverURL = [[NSUserDefaults standardUserDefaults] stringForKey:@"serverURL"];
         //NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://192.168.1.78:5000/completion/%@/", [specimen groupid]]];
-        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://plantrecogniser.no-ip.biz:55580/completion/%@", [specimen groupid]]];
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/completion/%@", serverURL ,[specimen groupid]]];
         //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
         NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
         [mutableRequest setHTTPMethod:@"PUT"];

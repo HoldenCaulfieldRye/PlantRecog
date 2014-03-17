@@ -25,6 +25,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    // Register Settings
+    NSDictionary *appDefaults = @{@"serverURL": @"http://plantrecogniser.no-ip.biz:55580"};
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+    
     [self serverInterfaceInit];
     return YES;
 }
