@@ -36,30 +36,46 @@
 
 - (UIImage *)squareCrop
 {
-    double ratio;
-    double delta;
-    CGPoint offset;
+    CGFloat destSize = 512.0;
+    CGRect rect = CGRectMake(0, 0, destSize, destSize);
     
-    CGSize sz = CGSizeMake(512.0f, 512.0f);
+    UIGraphicsBeginImageContext(rect.size);
     
-    if (self.size.width > self.size.height){
-        ratio = 512.0f / self.size.width;
-        delta = (ratio * self.size.width - ratio*self.size.height);
-        offset = CGPointMake(delta/2, 0);
-    } else {
-        ratio = 512.0f / self.size.height;
-        delta = (ratio*self.size.height - ratio * self.size.width);
-        offset = CGPointMake(0, delta/2);
+    if(self.size.width != self.size.height)
+    {
+        CGFloat ratio;
+        CGRect destRect;
+        
+        if (self.size.width > self.size.height)
+        {
+            ratio = destSize / self.size.height;
+            
+            CGFloat destWidth = self.size.width * ratio;
+            CGFloat destX = (destWidth - destSize) / 2.0;
+            
+            destRect = CGRectMake(-destX, 0, destWidth, destSize);
+            
+        }
+        else
+        {
+            ratio = destSize / self.size.width;
+            
+            CGFloat destHeight = self.size.height * ratio;
+            CGFloat destY = (destHeight - destSize) / 2.0;
+            
+            destRect = CGRectMake(0, -destY, destSize, destHeight);
+        }
+        [self drawInRect:destRect];
     }
+    else
+    {
+        [self drawInRect:rect];
+    }
+    UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
     
-    CGRect clipRect = CGRectMake(-offset.x, -offset.y, (ratio * self.size.width) + delta, (ratio *self.size.height) + delta );
-    
-    UIGraphicsBeginImageContext(sz);
-    UIRectClip(clipRect);
-    [self drawInRect:clipRect];
-    UIImage *croppedImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    return croppedImage;
+    
+    return scaledImage;
 }
 
 @end
