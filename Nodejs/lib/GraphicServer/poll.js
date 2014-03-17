@@ -42,15 +42,16 @@ try{
                             				    setImmediate(callback);
                             				},
               				                function(err){
-							    //console.log('str: ' + str);
+							    console.log('str: ' + str);
 							    
-                      //exec('python ./ML/run.py ' + components[i] + ' ' + str, function(error, stdout, stderr){
+							    
+                      exec('python ./ML/run.py ' + components[i] + ' ' + str, function(error, stdout, stderr){
                         //  console.log('stdout: ' + stdout);
                           //console.log('stderr: ' + stderr);
-                         // if(error != null){
-                         // console.log('exec error: ' + error);
-                         // } 
-//                          else{
+                         if(error != null){
+                         console.log('exec error: ' + error);
+                          } 
+                          else{
                             // update all the relevant mongo entries
 							    var count2 = 0;
                                   async.whilst( function(){ return count2 < docs.length },
@@ -95,8 +96,8 @@ try{
 						    )
 						}
                                  )
-  //                        }
-                     // });
+                          }
+                      });
 
 		});
 
