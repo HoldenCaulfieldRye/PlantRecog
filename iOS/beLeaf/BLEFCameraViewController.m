@@ -18,6 +18,52 @@
 
 @end
 
+@implementation UIImage (crop)
+
+- (UIImage *)crop:(CGRect)rect {
+    
+    //rect = AVMakeRectWithAspectRatioInsideRect(rect.size, CGRectMake(0, 0, self.size.width, self.size.height));
+    
+    CGFloat scale = self.size.width / rect.size.width;
+    
+    rect = CGRectMake(rect.origin.x * scale, rect.origin.y * scale, rect.size.width * scale, rect.size.height * scale);
+    
+    CGImageRef imageRef = CGImageCreateWithImageInRect(self.CGImage, rect);
+    UIImage *result = [UIImage imageWithCGImage:imageRef scale:self.scale orientation:self.imageOrientation];
+    CGImageRelease(imageRef);
+    return result;
+}
+
+- (UIImage *)squareCrop
+{
+    double ratio;
+    double delta;
+    CGPoint offset;
+    
+    CGSize sz = CGSizeMake(512.0f, 512.0f);
+    
+    if (self.size.width > self.size.height){
+        ratio = 512.0f / self.size.width;
+        delta = (ratio * self.size.width - ratio*self.size.height);
+        offset = CGPointMake(delta/2, 0);
+    } else {
+        ratio = 512.0f / self.size.height;
+        delta = (ratio*self.size.height - ratio * self.size.width);
+        offset = CGPointMake(0, delta/2);
+    }
+    
+    CGRect clipRect = CGRectMake(-offset.x, -offset.y, (ratio * self.size.width) + delta, (ratio *self.size.height) + delta );
+    
+    UIGraphicsBeginImageContext(sz);
+    UIRectClip(clipRect);
+    [self drawInRect:clipRect];
+    UIImage *croppedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return croppedImage;
+}
+
+@end
+
 @implementation BLEFCameraViewController
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -38,15 +84,23 @@
     _segments = @[@"entire", @"leaf" , @"flower", @"fruit"];
     _captureBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:_segments usingDatabase:_database];
     
+    // Setup Camera
+    [self setupCaptureSession];
+    
     // UI
-    _imageReviewView = [[UIImageView alloc] init];
-    _imageReviewView.frame = _previewView.bounds;
+    _imageReviewView = [[UIImageView alloc] initWithFrame:_previewView.bounds];
+    [_imageReviewView setContentMode:UIViewContentModeScaleAspectFill];
     [_previewView addSubview:_imageReviewView];
+    
+    _whiteView = [[UIView alloc] initWithFrame:[_previewView bounds]];
+    [_whiteView setHidden:TRUE];
+    [_whiteView setBackgroundColor:[UIColor colorWithWhite:1.0f alpha:1.0f]];
+    [_previewView addSubview:_whiteView];
+    
     [_segmentSelection addTarget:self action:@selector(segmentSelectionChanged:) forControlEvents:UIControlEventValueChanged];
     _selectionIndexBuffer = 0;
     
-    // AV
-    [self setupCaptureSession];
+    // Start Camera
     [self startCaptureSession];
 }
 
@@ -71,8 +125,10 @@
 - (IBAction)takePhotoButtonPressed:(id)sender
 {
     if ([_captureSession isRunning]){
-        [self captureImageWithHandler:^(NSData *imageData) {
-            [self processImageData:imageData];
+        [self flashWhile:^{
+            [self captureImageWithHandler:^(NSData *imageData) {
+                [self processImageData:imageData];
+            }];
         }];
     } else if (![_captureBuffer slotComplete:[self currentSegmentSelection]]){
         [self hideImage];
@@ -102,9 +158,12 @@
 
 - (void)processImageData:(NSData *)imageData
 {
-    UIImage *image = [UIImage imageWithData:imageData];
-    [self flashToImage:image];
-    [_captureBuffer addData:imageData toSlot:[self currentSegmentSelection]];
+    UIImage *largerImage = [UIImage imageWithData:imageData];
+    
+    UIImage *croppedImage = [largerImage squareCrop];
+    
+    [self displayImage:croppedImage];
+    [_captureBuffer addData:UIImageJPEGRepresentation(croppedImage, 1.0f) toSlot:[self currentSegmentSelection]];
 }
 
 - (void)displayImage:(UIImage *)image
@@ -115,20 +174,18 @@
     [_previewView bringSubviewToFront:_imageReviewView];
 }
 
-- (void)flashToImage:(UIImage *)image
+- (void)flashWhile:(void (^) (void))handler
 {
-    UIView *whiteView = [[UIView alloc] initWithFrame:[_previewView bounds]];
-    [whiteView setBackgroundColor:[UIColor colorWithWhite:1.0f alpha:1.0f]];
-    [_previewView addSubview:whiteView];
-    [_captureSession stopRunning];
-    _imageReviewView.image = image;
-    [_previewView bringSubviewToFront:_imageReviewView];
-    [_previewView bringSubviewToFront:whiteView];
-    _imageReviewView.hidden = NO;
+    [_previewView bringSubviewToFront:_whiteView];
+    [_whiteView setHidden:false];
+    _whiteView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:1.0f];
+    
+    if (handler) handler();
+    
     [UIView animateWithDuration:0.75f animations:^{
-        whiteView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.0f];
+        _whiteView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.0f];
     } completion:^(BOOL finished) {
-        [whiteView removeFromSuperview];
+        [_whiteView setHidden:true];
     }];
 }
 
@@ -162,7 +219,7 @@
 - (void) setupCaptureSession {
     //Setup Capture Session
     _captureSession = [[AVCaptureSession alloc] init];
-    [_captureSession setSessionPreset:AVCaptureSessionPresetMedium];
+    [_captureSession setSessionPreset:AVCaptureSessionPresetiFrame960x540];
     
     //Setup Input Device
     AVCaptureDevice *inputDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
@@ -182,12 +239,13 @@
     }
     
     //Setup Preview
-    AVCaptureVideoPreviewLayer *previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:_captureSession];
-    [previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
+    _previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:_captureSession];
+    [_previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
+    [_previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
     CALayer *rootLayer = [_previewView layer];
     [rootLayer setMasksToBounds:YES];
-    [previewLayer setFrame:rootLayer.bounds];
-    [rootLayer insertSublayer:previewLayer atIndex:0];
+    [_previewLayer setFrame:rootLayer.bounds];
+    [rootLayer insertSublayer:_previewLayer atIndex:0];
 }
 
 - (void) startCaptureSession {

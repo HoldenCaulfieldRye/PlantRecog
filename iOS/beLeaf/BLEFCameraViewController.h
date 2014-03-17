@@ -16,6 +16,7 @@
 @property (strong, nonatomic) BLEFDatabase * database;
 
 @property (weak, nonatomic) IBOutlet UIView *previewView;
+@property (strong, nonatomic) UIView *whiteView;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentSelection;
 
 // Buttons
@@ -23,7 +24,7 @@
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *CameraButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *FinishButton;
 
-
+// AV
 @property (strong, nonatomic) AVCaptureVideoPreviewLayer *previewLayer;
 @property (strong, nonatomic) AVCaptureVideoDataOutput *videoDataOutput;
 @property (strong, nonatomic) AVCaptureSession *captureSession;
