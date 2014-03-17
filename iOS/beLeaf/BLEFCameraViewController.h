@@ -20,7 +20,7 @@
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentSelection;
 
 // Buttons
-@property (weak, nonatomic) IBOutlet UIBarButtonItem *cancelButton;
+@property (weak, nonatomic) IBOutlet UIButton *cancelButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *CameraButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *FinishButton;
 

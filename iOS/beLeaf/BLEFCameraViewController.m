@@ -20,23 +20,9 @@
 
 @implementation UIImage (crop)
 
-- (UIImage *)crop:(CGRect)rect {
-    
-    //rect = AVMakeRectWithAspectRatioInsideRect(rect.size, CGRectMake(0, 0, self.size.width, self.size.height));
-    
-    CGFloat scale = self.size.width / rect.size.width;
-    
-    rect = CGRectMake(rect.origin.x * scale, rect.origin.y * scale, rect.size.width * scale, rect.size.height * scale);
-    
-    CGImageRef imageRef = CGImageCreateWithImageInRect(self.CGImage, rect);
-    UIImage *result = [UIImage imageWithCGImage:imageRef scale:self.scale orientation:self.imageOrientation];
-    CGImageRelease(imageRef);
-    return result;
-}
-
 - (UIImage *)squareCrop
 {
-    CGFloat destSize = 512.0;
+    CGFloat destSize = 512.0f;
     CGRect rect = CGRectMake(0, 0, destSize, destSize);
     
     UIGraphicsBeginImageContext(rect.size);
