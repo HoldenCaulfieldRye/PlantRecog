@@ -61,6 +61,7 @@ describe('Application_server',function(){
 	    	app.get('/job', routes.getJob(testDB));
 	    	app.post('/upload', routes.upload(testDB,configArgs));
 	    	app.post('/upload_no_db', routes.upload(null,configArgs));
+	    	app.put('/completion/:group_id', routes.putComplete(testDB));
 	    	done();
 	    }
 	});
@@ -280,6 +281,73 @@ describe('Application_server',function(){
 
 		});
     })
+
+	describe('routes.completion', function(){
+
+		it('should accept a completion request and respond with the same objectID and status', function(done){
+			this.timeout(4000);
+			g_id = "531b4461aa4b00752588b5d7";
+		    request(app)
+			.put('/completion/' + g_id)
+			.field("completion", true)
+			.expect(200)
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+			    assert(checkForHexRegExp.test(res.body.group_id));
+			    assert(res.body.group_id === g_id);
+			    assert(res.body.completion_status === "true");
+			    setTimeout(done, 3000);
+			    };
+			});
+
+		});
+
+		it('should say record was now updated', function(done){
+			this.timeout(4000);
+			g_id = "531b4461aa4b00752588b5d7";
+		    request(app)
+			.put('/completion/' + g_id)
+			.field("completion", false)
+			.expect(200)
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+			    assert(checkForHexRegExp.test(res.body.group_id));
+			    assert(res.body.updated === "true");
+			    assert(res.body.completion_status = "false");
+			    setTimeout(done, 3000);
+			    };
+			});
+
+		});
+
+
+		it('should show record not updated', function(done){
+			this.timeout(4000);
+			g_id = "531b4461aa4b00752588b5d7";
+		    request(app)
+			.put('/completion/' + g_id)
+			.field("completion", false)
+			.expect(200)
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+			    assert(checkForHexRegExp.test(res.body.group_id));
+			    assert(res.body.updated === "false");
+			    assert(res.body.completion_status = "false");
+			    setTimeout(done, 3000);
+			    };
+			});
+
+		});
+	});
 
 
 })
