@@ -13,6 +13,8 @@ var path = require('path');
 var mongo = require('mongodb');
 var parse = require('./config_parser');
 var async = require('async');
+var child = require('child_process');
+
 var app = express();
 
 /* Code to allow connection to mongo, gets new instance of MongoClient */
@@ -45,7 +47,6 @@ else{
 console.log("Parsing Config");
 
 try{
-  //configArgs = parse.parseConfig(confFile);
   configArgs = parse.parseConfig(confFile);
 }
 catch (err) {
@@ -54,7 +55,6 @@ catch (err) {
 }
 
 //Actually connect to the database.
-
 try{    
   mongoClient = new mongo.MongoClient(new mongo.Server(configArgs.db_host, configArgs.db_port), {native_parser: true});
   mongoClient.open(function(err, mongoClient){if (err) throw err;});
@@ -91,12 +91,14 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-/* Routes to follow on URL */
-//app.get('/', routes.index);
+/* Start polling mongo */
+//routes.groupClassify(db,configArgs,function(){});
+var poll = child.fork('./Nodejs/lib/GraphicServer/poll.js',[configArgs.db_host,configArgs.db_port,configArgs.db_database])
 
 
 /* Enable classify function via post at /classify url */
 //app.post('/classify', routes.classify(db));
+
 app.post('/classify', routes.classify(db,configArgs));
 
 // If we are the top module (ie, not testing) then start the app.
