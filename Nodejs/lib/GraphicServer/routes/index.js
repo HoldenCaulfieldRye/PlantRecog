@@ -59,10 +59,21 @@ exports.classify = function(db,configArgs) {
 
 	   			filePath = files.datafile.path;	
 	   			fileName = files.datafile.name;
-
+			    
+			        // I'm sorry
+			        var absoluteFilePath = "/homes/sd3112/GroupProject/group-project-master/Nodejs/lib/GraphicServer/uploads" + "/" + configArgs.db_database + "/" + fields.group_id + "/" + files.datafile.name;
+			        var segment = fields.image_segment
+			        var obj = {}
+                                obj[segment] = absoluteFilePath
+                       
 	        	if(files){
 	    
-					// Set our collection
+			                /* update the mongo groups document with segment time and path */    
+			                db.collection('groups').update( { "_id" : new BSON.ObjectID(fields.group_id) } , { $set: obj }, function(err,results){
+					    if(err) console.log("Error updating groups collection: " + err)
+					})
+			
+			                // Set our collection
 					var collection = db.collection('segment_images');
 			                
 					collection.findAndModify(	        	
@@ -75,110 +86,24 @@ exports.classify = function(db,configArgs) {
 			    	    {'new': true}, 
 		              
 				        function (err,doc) {
-				        	if (err) {
+				            if (err) {
 				                //If it failed, return error
-								console.log("Error adding information to db: " + err); 
+						console.log("Error adding information to db: " + err); 
 				                res.send("There was a problem adding the information to the database.");
 				            }
 				            else {
-				            	// If it worked, return JSON object from collection to App//
-
-							console.log("db updated: file received by graphic");                                              
+				            	// If it worked, return JSON object from collection to App
+						console.log("db updated: file received by graphic");                                              
 					        // Reply to app server
-				            res.json("File received by graphic");
+						res.json("File received by graphic");
 
 				            }
 
 					});
-
-			    /* Test code */
-			    /*
-			    var result = collection.find({"submission_state": "File Submitted from App"}).toArray(function(err,docs){
-				console.log("retrieved records in routes/index.js");
-				console.log(docs[0].vm_filepath);
-				
-
-});
-*/
-			    
-			   
-
-
 				}
 			});
 	};
 };
 
-
-// This script should be launched on graphic server startup
-/*
-exports.groupClassify = function(db, configArgs){
-
-	var components = [ "leaf", "flower", "fruit", "entire" ]
-	var numComponents = components.length;
-	var collection = db.collection('segment_images');
-
-	// Will loop forever
-	for (var i = 0 ;; i = (++i)%numComponents){	    
-		   
-	    collection.find({ "submission_state": "File Submitted from App", "image_segment" : components[i] }, { "graphic_location": 1}).sort({"submission_time": 1}).limit(128).toArray(function(err,docs){
-		console.log("foo");
-
-		if(err){
-		    console.log("Error: " + err);
-		}
-		
-		if(!docs){
-		    console.log("No results");
-		    
-		}
-		
-					       console.log(docs)
-	    })
-            
-	   
-		//runNet(classification,components[i]);
-
-	}
-}
-
-*/
-
-// STEP 1.5: 'Pack' images into format (JSON?) which can be parsed by John
-
-// STEP 2: Receive results and append to DB
-// I assume that John returns the same structure as in runtest.py
-// Iterate over the collection-type object using javascript, executing a MongoDB procedure each time
-/*
-var runNet = function(classification, type, callback){
-
-	return function(req, res){
-
-		exec('python ML/runtest.py ' + type + ' ' + classification, function(err,stdout,stderr){
-
-			if(err !== null){
-				console.log('exec error:' + err);
-			}
-			else {
-				n = result.length;
-
-				for(var i = 0; i < n; i++) {
-
-					id = results[i][_id];
-					classification_leaf = results[i][classification]
-					collection.findAndModify(
-						{ '_id': new BSON.ObjectID(id) },
-						{ $set: { "status" : "Component classified" } }
-					)
-				}
-			}
-		});
-		// end of exec
-
-	res.json(doc);
-
-	}
-}
-*/
 
 
