@@ -48,7 +48,6 @@ exports.classify = function(db,configArgs) {
 					return err;
 				}
 				
-
              	try{
    	    			fs.renameSync(fileLocation, groupLocation + "/" +  files.datafile.name)
 		    	} catch(err){	
@@ -65,12 +64,12 @@ exports.classify = function(db,configArgs) {
 	    
 					// Set our collection
 					var collection = db.collection('segment_images');
-			    
+			                
 					collection.findAndModify(	        	
 
-				    	    { '_id': new BSON.ObjectID(fields.segment_id) },	                                              
+				    	 { '_id': new BSON.ObjectID(fields.segment_id) },	                                              
 					    [], 
-				            { $set : { "submission_state" : "File received by graphic"} },
+				            { $set : { "submission_state" : "File received by graphic", "graphic_filepath": "/homes/sd3112/GroupProject/group-project-master/Nodejs/lib/GraphicServer/uploads" + "/" + configArgs.db_database + "/" + fields.group_id + "/" + files.datafile.name } },
 
 			    	 
 			    	    {'new': true}, 
@@ -91,35 +90,66 @@ exports.classify = function(db,configArgs) {
 				            }
 
 					});
+
+			    /* Test code */
+			    /*
+			    var result = collection.find({"submission_state": "File Submitted from App"}).toArray(function(err,docs){
+				console.log("retrieved records in routes/index.js");
+				console.log(docs[0].vm_filepath);
+				
+
+});
+*/
+			    
+			   
+
+
 				}
 			});
 	};
 };
 
-/*
+
 // This script should be launched on graphic server startup
+/*
 exports.groupClassify = function(db, configArgs){
 
-	var components = [ "leaf", "flower", "branch", "fruit", "bark" ]
+	var components = [ "leaf", "flower", "fruit", "entire" ]
 	var numComponents = components.length;
-	var collection = db.collection('usercollection');
+	var collection = db.collection('segment_images');
 
 	// Will loop forever
-	for (var i = 0 ;; i = (i++)%numComponents){
+	for (var i = 0 ;; i = (++i)%numComponents){	    
+		   
+	    collection.find({ "submission_state": "File Submitted from App", "image_segment" : components[i] }, { "graphic_location": 1}).sort({"submission_time": 1}).limit(128).toArray(function(err,docs){
+		console.log("foo");
 
-		// Sync
-		var classification = collection.find({ "submission_state": "File Submitted from App", "image_segment" : components[i] }).sort({"submission_time": 1}).limit(128);
-		runNet(classification,components[i]);
+		if(err){
+		    console.log("Error: " + err);
+		}
+		
+		if(!docs){
+		    console.log("No results");
+		    
+		}
+		
+					       console.log(docs)
+	    })
+            
+	   
+		//runNet(classification,components[i]);
 
 	}
 }
+
+*/
 
 // STEP 1.5: 'Pack' images into format (JSON?) which can be parsed by John
 
 // STEP 2: Receive results and append to DB
 // I assume that John returns the same structure as in runtest.py
 // Iterate over the collection-type object using javascript, executing a MongoDB procedure each time
-
+/*
 var runNet = function(classification, type, callback){
 
 	return function(req, res){
@@ -151,18 +181,4 @@ var runNet = function(classification, type, callback){
 }
 */
 
-					// Query our net	
-					//exec('python ML/runtest.py entire ../../../../' + filePath, function(err,stdout,stderr){
-					    
-					//    console.log('stdout: ' + stdout);
-					//    console.log('stderr: ' + stderr);
-					    
-					//    if(err !== null){
-					//		console.log('exec error:' + err);
-					//    }
-					    
-					//    var output = stdout.toString();
-					//    var json_obj = output.substring(output.search('{'),output.search('}')+1);
-					    
-					//    console.log('json_obj: ' + json_obj);
 
