@@ -242,13 +242,16 @@ exports.upload = function(db, configArgs) {
     
         form.parse(req, function (err, fields, files) {
 
+            /* Extract status from put request */
+            var new_status = (fields.completion === "true") ? "Complete" : "Cancelled";
+
             if(req.params.group_id){
                 console.log('Finding job: ' + group_id);
                 try{
                     groups_col.findAndModify(
                         { _id : new BSON.ObjectID(group_id) },
                         {}, //sort order
-                        { $set: {completion_status: fields.completion} }, //replace status
+                        { $set: {group_status: new_status } }, //replace status
                         {new: false}, //give us the  old record
                         function (db_err, docs) {
                             if (db_err) {
@@ -259,7 +262,7 @@ exports.upload = function(db, configArgs) {
                             }
                             else{
                                 /* If it worked, return JSON object from collection to App */
-                                var has_updated = (docs.completion_status !== fields.completion) ? "true" : "false";
+                                var has_updated = (docs.group_status !== new_status) ? "true" : "false";
                                 res.json( { group_id : docs._id, completion_status : fields.completion, updated: has_updated });
                                 //console.log({ group_id : docs._id, completion_status : fields.completion, updated: has_updated }) ;
 
