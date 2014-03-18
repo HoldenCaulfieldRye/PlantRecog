@@ -145,7 +145,9 @@
     NSManagedObjectContext *databaseMOD = [self generateManagedObjectContext];
     _serverinterface = [[BLEFServerInterface alloc] init];
     [_serverinterface setContext:databaseMOD];
+    [[_serverinterface database] cleanup];
     [_serverinterface reStartUpdateProccessing];
+    [_serverinterface reStartUploadProcessing];
 }
 
 

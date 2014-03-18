@@ -102,6 +102,8 @@
     [_segmentSelection addTarget:self action:@selector(segmentSelectionChanged:) forControlEvents:UIControlEventValueChanged];
     _selectionIndexBuffer = 0;
     
+    [self UI_cameraMode];
+    
     // Start Camera
     [self startCaptureSession];
 }
@@ -119,6 +121,58 @@
 
 #pragma mark - UI Methods
 
+- (void)UI_cameraMode
+{
+    [[self activityIndicator] stopAnimating];
+    [[self cancelButton] setEnabled:true];
+    [[self CameraButton] setEnabled:true];
+    [[self retakeButton] setEnabled:false];
+    [[self retakeButton] setTitle:@""];
+    if ([[self captureBuffer] completeCount] > 0){
+        [[self FinishButton] setEnabled:true];
+    } else {
+        [[self FinishButton] setEnabled:false];
+    }
+}
+
+- (void)UI_reTakeMode
+{
+    [[self activityIndicator] stopAnimating];
+    [[self cancelButton] setEnabled:true];
+    [[self CameraButton] setEnabled:false];
+    [[self retakeButton] setEnabled:true];
+    [[self retakeButton] setTitle:@"Retake"];
+    if ([[self captureBuffer] completeCount] > 0){
+        [[self FinishButton] setEnabled:true];
+    } else {
+        [[self FinishButton] setEnabled:false];
+    }
+}
+
+- (void)UI_reviewMode
+{
+    [[self activityIndicator] stopAnimating];
+    [[self cancelButton] setEnabled:true];
+    [[self CameraButton] setEnabled:false];
+    [[self retakeButton] setEnabled:false];
+    [[self retakeButton] setTitle:@""];
+    if ([[self captureBuffer] completeCount] > 0){
+        [[self FinishButton] setEnabled:true];
+    } else {
+        [[self FinishButton] setEnabled:false];
+    }
+}
+
+- (void)UI_busyMode
+{
+    [[self activityIndicator] startAnimating];
+    [[self cancelButton] setEnabled:false];
+    [[self CameraButton] setEnabled:false];
+    [[self retakeButton] setEnabled:false];
+    [[self retakeButton] setTitle:@""];
+    [[self FinishButton] setEnabled:false];
+}
+
 - (NSString *)currentSegmentSelection
 {
     return [_segments objectAtIndex:[_segmentSelection selectedSegmentIndex]];
@@ -127,15 +181,13 @@
 - (IBAction)takePhotoButtonPressed:(id)sender
 {
     if ([_captureSession isRunning]){
+        [self UI_busyMode];
         [self flashWhile:^{
             [self captureImageWithHandler:^(NSData *imageData) {
                 [self processImageData:imageData];
+                [self UI_reTakeMode];
             }];
         }];
-    } else if (![_captureBuffer slotComplete:[self currentSegmentSelection]]){
-        [self hideImage];
-        [_captureBuffer removeDataForSlot:[self currentSegmentSelection]];
-        [self startCaptureSession];
     }
 }
 
@@ -156,6 +208,15 @@
 - (IBAction)cancelButtonPressed:(id)sender {
     [_captureBuffer deleteSession];
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (IBAction)retakeButtonPressed:(id)sender {
+    if (![_captureSession isRunning]){
+        [self UI_cameraMode];
+        [self hideImage];
+        [_captureBuffer removeDataForSlot:[self currentSegmentSelection]];
+        [self startCaptureSession];
+    }
 }
 
 - (void)processImageData:(NSData *)imageData
@@ -204,13 +265,18 @@
 {
     [_captureBuffer completeSlotNamed:[_segments objectAtIndex:_selectionIndexBuffer] completion:^(BOOL success){
         [[_captureBuffer database] saveChanges];
+        if (success){
+            [_segmentSelection setTitle:@"" forSegmentAtIndex:_selectionIndexBuffer];
+        }
+        _selectionIndexBuffer = [_segmentSelection selectedSegmentIndex];
     }];
-    _selectionIndexBuffer = [_segmentSelection selectedSegmentIndex];
     
     UIImage *image = [_captureBuffer imageForSlotNamed:[self currentSegmentSelection]];
     if (image != nil){
         [self displayImage:image];
+        [self UI_reviewMode];
     } else {
+        [self UI_cameraMode];
         [self hideImage];
         [self startCaptureSession];
     }

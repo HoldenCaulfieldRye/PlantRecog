@@ -18,6 +18,7 @@
 - (UIImage*)imageForSlotNamed:(NSString *)slotName;
 - (BOOL)completeSlotNamed:(NSString *)slotName completion:(void (^) (BOOL success))handler;
 - (NSInteger)count;
+- (NSInteger)completeCount;
 - (BOOL)slotComplete:(NSString *)slotName;
 - (void)completeCapture;
 - (void)deleteSession;

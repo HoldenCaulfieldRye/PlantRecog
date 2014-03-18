@@ -137,6 +137,11 @@
     return [[self slots] count];
 }
 
+- (NSInteger)completeCount
+{
+    return [[self completedSlots] count];
+}
+
 - (BOOL)slotComplete:(NSString *)slotName
 {
     return [[self completedSlots] containsObject:slotName];

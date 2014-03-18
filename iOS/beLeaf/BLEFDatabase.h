@@ -26,6 +26,8 @@
 - (BLEFObservation*)addNewObservationToSpecimen:(BLEFSpecimen *)specimen;
 - (BLEFResult*)addNewResultToSpecimen:(BLEFSpecimen *)specimen;
 
+- (void)cleanup;
+
 - (void)saveChanges;
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
