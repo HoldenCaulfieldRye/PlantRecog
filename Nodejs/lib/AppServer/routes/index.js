@@ -8,6 +8,9 @@ var util = require ('util');
 
 var BSON = mongo.BSONPure;
 
+/* We use this to test Mongo ID's */
+var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$")
+
 /*
  * GET Job
  */
@@ -23,23 +26,29 @@ var BSON = mongo.BSONPure;
 	
         if(req.params.group_id){
             console.log('Retrieving job: ' + group_id);
-            try{
-                groups_col.findOne({'_id':new BSON.ObjectID(group_id)}, function(err, item) {
-                    if(item === null){
-                        res.send('There is no document in the collection matching that JobID!');
-                    }
-                    else {
-                        res.send(item);
-                    }
-                });
+            /* Check if valid GroupID */
+            if(checkForHexRegExp.test(group_id)){
+                try{
+                    groups_col.findOne({'_id':new BSON.ObjectID(group_id)}, function(err, item) {
+                        if(item === null){
+                            res.send('There is no document in the collection matching that GroupID!');
+                        }
+                        else {
+                            res.send(item);
+                        }
+                    });
+                }
+                catch(err){
+                    console.log(err);
+                    res.send("Error retrieving the GroupID: " + group_id);
+                }
             }
-            catch(err){
-                console.log(err);
-                res.send("You did not submit a valid JobID!");
+            else{
+                res.send("You did not submit a valid GroupID!");
             }
-        }
+        }    
         else{
-            res.send("You did not submit a JobID");
+            res.send("You did not submit a GroupID");
         }
     };
 };
@@ -74,7 +83,7 @@ exports.upload = function(db, configArgs) {
         /* log the body of this upload */
         form.parse(req, function (err, fields, files) {
 
-            console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );    
+            //console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );    
 
             try {
                 filePath = files.datafile.path;
@@ -90,7 +99,7 @@ exports.upload = function(db, configArgs) {
             }
 
             /* output where we saved the file */
-            console.log("FilePath is: \n" + filePath);
+            //console.log("FilePath is: \n" + filePath);
 
             /* Set our collections */
             try{
@@ -151,7 +160,7 @@ exports.upload = function(db, configArgs) {
                                     else {
                                         /* If it worked, return JSON object from collection to App */
                                         res.json( { id : docs[0]._id, group_id : docs[0].group_id });
-                                        console.log({ id : docs[0]._id, group_id : docs[0].group_id });
+                                        //console.log({ id : docs[0]._id, group_id : docs[0].group_id });
                                         /* Send the image over to the classifier */
                                         restler.post(graphicServer + "/classify", {
                                             multipart: true,
@@ -162,7 +171,7 @@ exports.upload = function(db, configArgs) {
                                                 datafile: restler.file(files.datafile.path, null, files.datafile.size, null, "image/jpeg")
                                             }
                                         }).on("complete", function(data) {
-                                            console.log("GraphicServer response: \n" + util.inspect(data) );
+                                            //console.log("GraphicServer response: \n" + util.inspect(data) );
                                         });
                                     }
                             });
@@ -173,48 +182,60 @@ exports.upload = function(db, configArgs) {
                 group_id = fields.group_id;
                 segment_document.group_id = group_id;
 
-                /* Increment the number of images in group */
-                groups_col.update(
-                    {_id : new BSON.ObjectID(group_id) },
-                    { $inc: { image_count: 1 } },
-                    {safe:true},
-                    function (db_err, docs) {
-                        if (db_err) {
-                            /* If it failed, return error */
-                            res.send("There was a problem incrementing the image_count in GROUP collection");
-                            return db_err;
-                        }
-                    }
-                );
-
-                /* Submit to the SegmentDB */
-                segment_images_col.insert(
-                    segment_document,
-                    {safe: true}, 
-                    function (db_err, docs) {
-                        if (db_err) {
-                            /* If it failed, return error */
-                            res.send("There was a problem adding the information to the SEGMENT_IMAGES collection");
-                            return db_err;
-                        }
-                        else {
-                            /* If it worked, return JSON object from collection to App */
-                            res.json( { id : docs[0]._id, group_id : docs[0].group_id });
-                            console.log({ id : docs[0]._id, group_id : docs[0].group_id });
-                            /* Send the image over to the classifier */
-                            restler.post(graphicServer + "/classify", {
-                                multipart: true,
-                                data: {
-                                    segment_id: docs[0]._id,
-                                    group_id: docs[0].group_id,
-                                    image_segment: docs[0].image_segment,
-                                    datafile: restler.file(files.datafile.path, null, files.datafile.size, null, "image/jpeg")
+                if(checkForHexRegExp.test(group_id)){
+                    try{
+                        /* Increment the number of images in group */
+                        groups_col.update(
+                            {_id : new BSON.ObjectID(group_id) },
+                            { $inc: { image_count: 1 } },
+                            {safe:true},
+                            function (db_err, docs) {
+                                if (db_err) {
+                                    /* If it failed, return error */
+                                    res.send("There was a problem incrementing the image_count in GROUP collection");
+                                    return -1;
                                 }
-                            }).on("complete", function(data) {
-                                console.log("GraphicServer response: \n" + util.inspect(data) );
+                            }
+                            );
+
+                        /* Submit to the SegmentDB */
+                        segment_images_col.insert(
+                            segment_document,
+                            {safe: true}, 
+                            function (db_err, docs) {
+                                if (db_err) {
+                                    /* If it failed, return error */
+                                    res.send("There was a problem adding the information to the SEGMENT_IMAGES collection");
+                                    return -1;
+                                }
+                                else {
+                                    /* If it worked, return JSON object from collection to App */
+                                    res.json( { id : docs[0]._id, group_id : docs[0].group_id });
+                                    //console.log({ id : docs[0]._id, group_id : docs[0].group_id });
+                                    /* Send the image over to the classifier */
+                                    restler.post(graphicServer + "/classify", {
+                                        multipart: true,
+                                        data: {
+                                            segment_id: docs[0]._id,
+                                            group_id: docs[0].group_id,
+                                            image_segment: docs[0].image_segment,
+                                            datafile: restler.file(files.datafile.path, null, files.datafile.size, null, "image/jpeg")
+                                        }
+                                    }).on("complete", function(data) {
+                                        //console.log("GraphicServer response: \n" + util.inspect(data) );
+                                    });
+                                }
                             });
-                        }
-                });
+                    }
+                    catch(err){
+                        res.send("Error whilst updating group!");
+                        console.log("Error whilst updating group with image: " + err);
+                        return -1;
+                    }
+                }
+                else{
+                    res.send("You did not submit a valid GroupID!");
+                }
             }
 
 
@@ -224,3 +245,61 @@ exports.upload = function(db, configArgs) {
 };
 
 
+/*
+ * Put Completion
+ */
+
+ exports.putComplete = function(db) {
+
+    return function(req, res){
+        /* Set our collection */
+        var groups_col= db.collection('groups');
+        var group_id = req.params.group_id;
+    
+        // console.log('PUT request parameters are: ' + util.inspect(req.params) );
+
+        /* Make formidable the multipart form parser */
+        var form = new formidable.IncomingForm();
+    
+        form.parse(req, function (err, fields, files) {
+
+            /* Extract status from put request */
+            var new_status = (fields.completion === "true") ? "Complete" : "Cancelled";
+
+            if(req.params.group_id){
+                console.log('Finding job: ' + group_id);
+                try{
+                    groups_col.findAndModify(
+                        { _id : new BSON.ObjectID(group_id) },
+                        {}, //sort order
+                        { $set: {group_status: new_status } }, //replace status
+                        {new: false}, //give us the  old record
+                        function (db_err, docs) {
+                            if (db_err) {
+                                /* If it failed, return error */
+                                res.send("Could not find that GroupID in the DB");
+                                return db_err;
+
+                            }
+                            else{
+                                /* If it worked, return JSON object from collection to App */
+                                var has_updated = (docs.group_status !== new_status) ? "true" : "false";
+                                res.json( { group_id : docs._id, completion_status : fields.completion, updated: has_updated });
+                                //console.log({ group_id : docs._id, completion_status : fields.completion, updated: has_updated }) ;
+
+                            }
+                        });
+                }
+                catch(err){
+                    console.log(err);
+                    res.send("You did not submit a valid GroupID!");
+                }
+            }
+            else{
+                res.send("You did not submit a GroupID");
+            }
+
+        });
+
+    };
+};

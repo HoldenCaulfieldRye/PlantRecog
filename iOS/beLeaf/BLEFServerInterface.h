@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BLEFDatabase.h"
 
 @class BLEFSpecimen, BLEFObservation;
 
@@ -19,6 +20,8 @@ extern NSString * const BLEFDatabaseUpdateNotification;
 extern NSString * const BLEFNetworkRetryNotification;
 
 // Database
+// Database Interface
+@property (strong, nonatomic) BLEFDatabase * database;
 - (void) setContext:(NSManagedObjectContext*)context;
 
 // Upload

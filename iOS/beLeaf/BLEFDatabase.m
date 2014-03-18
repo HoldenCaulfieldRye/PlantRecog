@@ -213,6 +213,24 @@
     return nil;
 }
 
+- (void)cleanup
+{
+    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Specimen"];
+    [request setPredicate:[NSPredicate predicateWithFormat: @"complete == FALSE"]];
+    
+    [request setSortDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES]]];
+    
+    NSManagedObjectContext *context = [self getContext];
+    NSError *error = nil;
+    NSArray *array = [context executeFetchRequest:request error:&error];
+    if (!error){
+        for (BLEFSpecimen *specimen in array) {
+            [context deleteObject:specimen];
+        }
+    }
+    [self saveChanges];
+}
+
 
 
 @end

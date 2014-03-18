@@ -103,6 +103,9 @@ else{
   /* Enable upload function via post at /upload url */
   app.post('/upload', routes.upload(db,configArgs));
 
+  /* Enable completion function via put at /completion */
+  app.put('/completion/:group_id', routes.putComplete(db));
+
 
 // If we are the top module (ie, not testing) then start the app.
 /* istanbul ignore if */

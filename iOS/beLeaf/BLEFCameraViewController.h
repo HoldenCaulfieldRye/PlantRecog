@@ -18,11 +18,14 @@
 @property (weak, nonatomic) IBOutlet UIView *previewView;
 @property (strong, nonatomic) UIView *whiteView;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segmentSelection;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 // Buttons
 @property (weak, nonatomic) IBOutlet UIButton *cancelButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *CameraButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *FinishButton;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *retakeButton;
+
 
 // AV
 @property (strong, nonatomic) AVCaptureVideoPreviewLayer *previewLayer;
@@ -33,5 +36,6 @@
 - (IBAction)takePhotoButtonPressed:(id)sender;
 - (IBAction)finishedSessionButtonPressed:(id)sender;
 - (IBAction)cancelButtonPressed:(id)sender;
+- (IBAction)retakeButtonPressed:(id)sender;
 
 @end

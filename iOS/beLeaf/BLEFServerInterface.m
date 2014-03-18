@@ -7,15 +7,11 @@
 //
 
 #import "BLEFServerInterface.h"
-#import "BLEFDatabase.h"
 #import "BLEFObservation.h"
 
 NSString * boundary = @"---------------------------14737809831466499882746641449";
 
 @interface BLEFServerInterface ()
-
-// Database Interface
-@property (strong, nonatomic) BLEFDatabase * database;
 
 // Network Session
 @property (strong, nonatomic) NSURLSession * updateSession;
@@ -134,7 +130,9 @@ NSString * boundary = @"---------------------------14737809831466499882746641449
 - (void) uploadErrorWaitAndRetry
 {
     _updateQueueHalted = true;
-    [self performSelector:@selector(reStartUploadProcessing) withObject:nil afterDelay:30.0];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self performSelector:@selector(reStartUploadProcessing) withObject:nil afterDelay:10.0];
+    });
 }
 
 #pragma mark Update Pool Methods
@@ -337,8 +335,8 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 {
     NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
     if (json){
-        NSString *status = json[@"status"];
-        if ((status != nil) && ([status length] >= 1)){
+        NSString *status = json[@"updated"];
+        if ((status != nil) && ([status isEqualToString:@"true"])){
             BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
             if (specimen != nil){
                 [specimen setNotified:true];
