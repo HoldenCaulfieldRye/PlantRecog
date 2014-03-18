@@ -337,8 +337,8 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 {
     NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
     if (json){
-        NSString *status = json[@"status"];
-        if ((status != nil) && ([status length] >= 1)){
+        NSString *status = json[@"updated"];
+        if ((status != nil) && ([status isEqualToString:@"true"])){
             BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
             if (specimen != nil){
                 [specimen setNotified:true];
