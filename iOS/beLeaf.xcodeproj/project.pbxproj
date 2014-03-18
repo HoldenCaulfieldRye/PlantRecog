@@ -49,6 +49,29 @@
 		E9BEE40A18A68FFF00F3A648 /* BLEFResultsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9BEE40918A68FFF00F3A648 /* BLEFResultsViewController.m */; };
 		E9E396281897F8830067A991 /* BLEFSpecimen.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396271897F8830067A991 /* BLEFSpecimen.m */; };
 		E9E3962E1897F94F0067A991 /* BLEFDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962D1897F94F0067A991 /* BLEFDatabase.m */; };
+		E9FB662E18D8A70500EB2EB5 /* BLEFAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD57F1863B6DA00595828 /* BLEFAppDelegate.m */; };
+		E9FB662F18D8A70500EB2EB5 /* BLEFDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E3962D1897F94F0067A991 /* BLEFDatabase.m */; };
+		E9FB663018D8A70500EB2EB5 /* BLEFSpecimen.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396271897F8830067A991 /* BLEFSpecimen.m */; };
+		E9FB663118D8A70500EB2EB5 /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
+		E9FB663218D8A70500EB2EB5 /* BLEFResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E9A5C87518C20EC000F9F6CF /* BLEFResult.m */; };
+		E9FB663318D8A70500EB2EB5 /* BLEFCaptureBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = E9772F6518CF49EE00D15247 /* BLEFCaptureBuffer.m */; };
+		E9FB663418D8A70500EB2EB5 /* BLEFSpecimenTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9BD3A461898399E001B8570 /* BLEFSpecimenTableViewController.m */; };
+		E9FB663518D8A70500EB2EB5 /* BLEFCameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E98EF99D18C36D4D001EC74A /* BLEFCameraViewController.m */; };
+		E9FB663618D8A70500EB2EB5 /* BLEFResultsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9BEE40918A68FFF00F3A648 /* BLEFResultsViewController.m */; };
+		E9FB663718D8A70500EB2EB5 /* BLEFSpecimenTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E947179A18C92431006C8B1D /* BLEFSpecimenTableViewCell.m */; };
+		E9FB663818D8A70500EB2EB5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD57B1863B6DA00595828 /* main.m */; };
+		E9FB663918D8A70500EB2EB5 /* beLeaf.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5811863B6DA00595828 /* beLeaf.xcdatamodeld */; };
+		E9FB663A18D8A70500EB2EB5 /* BLEFServerInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = E9B5BA3218982F5B000161F7 /* BLEFServerInterface.m */; };
+		E9FB663C18D8A70500EB2EB5 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9772F6A18CF5DA800D15247 /* CoreLocation.framework */; };
+		E9FB663D18D8A70500EB2EB5 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E95C85391864564000CFEC40 /* AVFoundation.framework */; };
+		E9FB663E18D8A70500EB2EB5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E2AD56F1863B6D900595828 /* CoreGraphics.framework */; };
+		E9FB663F18D8A70500EB2EB5 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E2AD5731863B6D900595828 /* CoreData.framework */; };
+		E9FB664018D8A70500EB2EB5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E2AD5711863B6D900595828 /* UIKit.framework */; };
+		E9FB664118D8A70500EB2EB5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E2AD56D1863B6D900595828 /* Foundation.framework */; };
+		E9FB664318D8A70500EB2EB5 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 5E94AB3018D7231B0005C36F /* Settings.bundle */; };
+		E9FB664418D8A70500EB2EB5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5781863B6D900595828 /* InfoPlist.strings */; };
+		E9FB664518D8A70500EB2EB5 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
+		E9FB664618D8A70500EB2EB5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5841863B6DA00595828 /* Images.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,6 +133,8 @@
 		E9E396271897F8830067A991 /* BLEFSpecimen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFSpecimen.m; sourceTree = "<group>"; };
 		E9E3962C1897F94F0067A991 /* BLEFDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFDatabase.h; sourceTree = "<group>"; };
 		E9E3962D1897F94F0067A991 /* BLEFDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFDatabase.m; sourceTree = "<group>"; };
+		E9FB664B18D8A70500EB2EB5 /* whatPlant copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "whatPlant copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E9FB664C18D8A70500EB2EB5 /* whatPlant copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "whatPlant copy-Info.plist"; path = "/Users/ashleycutmore/Documents/MCS_GROUP_MASTER/group-project-master/iOS/whatPlant copy-Info.plist"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +165,19 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E9FB663B18D8A70500EB2EB5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9FB663C18D8A70500EB2EB5 /* CoreLocation.framework in Frameworks */,
+				E9FB663D18D8A70500EB2EB5 /* AVFoundation.framework in Frameworks */,
+				E9FB663E18D8A70500EB2EB5 /* CoreGraphics.framework in Frameworks */,
+				E9FB663F18D8A70500EB2EB5 /* CoreData.framework in Frameworks */,
+				E9FB664018D8A70500EB2EB5 /* UIKit.framework in Frameworks */,
+				E9FB664118D8A70500EB2EB5 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -151,6 +189,7 @@
 				5E2AD56C1863B6D900595828 /* Frameworks */,
 				5E2AD56B1863B6D900595828 /* Products */,
 				9B5FD93065DA4C2E89495E05 /* Pods.xcconfig */,
+				E9FB664C18D8A70500EB2EB5 /* whatPlant copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -159,6 +198,7 @@
 			children = (
 				5E2AD56A1863B6D900595828 /* whatPlant.app */,
 				5E2AD58A1863B6DA00595828 /* beLeafTests.xctest */,
+				E9FB664B18D8A70500EB2EB5 /* whatPlant copy.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -285,6 +325,23 @@
 			productReference = 5E2AD58A1863B6DA00595828 /* beLeafTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		E9FB662B18D8A70500EB2EB5 /* whatPlant2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E9FB664818D8A70500EB2EB5 /* Build configuration list for PBXNativeTarget "whatPlant2" */;
+			buildPhases = (
+				E9FB662D18D8A70500EB2EB5 /* Sources */,
+				E9FB663B18D8A70500EB2EB5 /* Frameworks */,
+				E9FB664218D8A70500EB2EB5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = whatPlant2;
+			productName = beLeaf;
+			productReference = E9FB664B18D8A70500EB2EB5 /* whatPlant copy.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -314,6 +371,7 @@
 			targets = (
 				5E2AD5691863B6D900595828 /* whatPlant */,
 				5E2AD5891863B6DA00595828 /* beLeafTests */,
+				E9FB662B18D8A70500EB2EB5 /* whatPlant2 */,
 			);
 		};
 /* End PBXProject section */
@@ -336,6 +394,17 @@
 			files = (
 				E9772F6318CF35DC00D15247 /* iPhone.storyboard in Resources */,
 				5E2AD5971863B6DA00595828 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9FB664218D8A70500EB2EB5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9FB664318D8A70500EB2EB5 /* Settings.bundle in Resources */,
+				E9FB664418D8A70500EB2EB5 /* InfoPlist.strings in Resources */,
+				E9FB664518D8A70500EB2EB5 /* iPhone.storyboard in Resources */,
+				E9FB664618D8A70500EB2EB5 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -409,6 +478,26 @@
 				E9772F6718CF49EE00D15247 /* BLEFCaptureBuffer.m in Sources */,
 				E95131B318B96AB700B2DDAD /* BLEFDatabase.m in Sources */,
 				E9772F6918CF4A0900D15247 /* BLEFCaptureBufferTest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9FB662D18D8A70500EB2EB5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9FB662E18D8A70500EB2EB5 /* BLEFAppDelegate.m in Sources */,
+				E9FB662F18D8A70500EB2EB5 /* BLEFDatabase.m in Sources */,
+				E9FB663018D8A70500EB2EB5 /* BLEFSpecimen.m in Sources */,
+				E9FB663118D8A70500EB2EB5 /* BLEFObservation.m in Sources */,
+				E9FB663218D8A70500EB2EB5 /* BLEFResult.m in Sources */,
+				E9FB663318D8A70500EB2EB5 /* BLEFCaptureBuffer.m in Sources */,
+				E9FB663418D8A70500EB2EB5 /* BLEFSpecimenTableViewController.m in Sources */,
+				E9FB663518D8A70500EB2EB5 /* BLEFCameraViewController.m in Sources */,
+				E9FB663618D8A70500EB2EB5 /* BLEFResultsViewController.m in Sources */,
+				E9FB663718D8A70500EB2EB5 /* BLEFSpecimenTableViewCell.m in Sources */,
+				E9FB663818D8A70500EB2EB5 /* main.m in Sources */,
+				E9FB663918D8A70500EB2EB5 /* beLeaf.xcdatamodeld in Sources */,
+				E9FB663A18D8A70500EB2EB5 /* BLEFServerInterface.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -595,6 +684,46 @@
 			};
 			name = Release;
 		};
+		E9FB664918D8A70500EB2EB5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9B5FD93065DA4C2E89495E05 /* Pods.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "beLeaf/beLeaf-Prefix.pch";
+				INFOPLIST_FILE = "whatPlant copy-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				PRODUCT_NAME = "whatPlant copy";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = 1;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		E9FB664A18D8A70500EB2EB5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9B5FD93065DA4C2E89495E05 /* Pods.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "beLeaf/beLeaf-Prefix.pch";
+				INFOPLIST_FILE = "whatPlant copy-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				PRODUCT_NAME = "whatPlant copy";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = 1;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -621,6 +750,15 @@
 			buildConfigurations = (
 				5E2AD5A01863B6DA00595828 /* Debug */,
 				5E2AD5A11863B6DA00595828 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E9FB664818D8A70500EB2EB5 /* Build configuration list for PBXNativeTarget "whatPlant2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E9FB664918D8A70500EB2EB5 /* Debug */,
+				E9FB664A18D8A70500EB2EB5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
