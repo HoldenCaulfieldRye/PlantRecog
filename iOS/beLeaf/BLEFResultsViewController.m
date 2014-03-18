@@ -8,6 +8,7 @@
 
 #import "BLEFResultsViewController.h"
 #import "BLEFDatabase.h"
+#import "BLEFresultLabel.h"
 
 @interface BLEFResultsViewController ()
 
@@ -23,8 +24,15 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+        // Custom Init
     }
+    return self;
+}
+
+- (id)init
+{
+    self = [super init];
+    NSLog(@"INIT");
     return self;
 }
 
@@ -32,7 +40,8 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-
+    self.mainScrollView.frame = self.view.frame;
+    
     if (_specimen){
 
         
@@ -53,20 +62,22 @@
         }
         */
         
-        [[self resultLabel] setText:@"No classification..yet"];
-        
+        NSInteger resultY = 0;
+        NSInteger resultWidth = 400;
+        NSInteger resultHeight = 100;
         NSSet *results = [_specimen results];
         if (results != nil){
-            BLEFResult *result = (BLEFResult *)[results anyObject];
-            if (result != nil){
-                if (result.name != nil)
-                    [[self resultLabel] setText:result.name];
+            for (BLEFResult *result in results) {
+                BLEFresultLabel *resultLabel = [[BLEFresultLabel alloc] initWithFrame:CGRectMake(0, resultY, resultWidth, resultHeight)];
+                [resultLabel setText:[result name]];
+                [resultLabel setProgress:0.5];
+                resultY = resultY + resultHeight;
+                [_resultsArea addSubview:resultLabel];
             }
         }        
         
         // Images
         
-        // TODO : Get images for specimen
         
         NSArray *observations = [_database getObservationsFromSpecimen:_specimen];
         NSMutableArray *images = [[NSMutableArray alloc] init];
@@ -91,7 +102,11 @@
         }
         //Set the content size of our scrollview according to the total width of our imageView objects.
         self.imageScrollView.contentSize = CGSizeMake(self.imageScrollView.frame.size.width * [imageArray count], self.imageScrollView.frame.size.height);
-        self.pageControl.numberOfPages = [imageArray count];
+        if ([imageArray count] > 1){
+            self.pageControl.numberOfPages = [imageArray count];
+        } else {
+            self.pageControl.hidden = true;
+        }
     }
 }
 

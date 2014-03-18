@@ -318,14 +318,15 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 {
     NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
     if (json){
-        NSString *classification = json[@"classification"];
-        if ((classification != nil) && ([classification length] > 2)){
-            BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
-            if (specimen != nil){
+        BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
+        if (specimen != nil){
+            [json enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
+                NSLog(@"%@ : %@", key, value);
                 BLEFResult *result = [_database addNewResultToSpecimen:specimen];
-                [result setName:classification];
-                return true;
-            }
+                [result setName:key];
+                [result setConfidence:0.5];
+            }];
+            return true;
         }
     }
     return false;
