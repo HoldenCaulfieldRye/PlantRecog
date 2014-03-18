@@ -122,3 +122,7 @@ def console(config_file = None):
             delete_after_combine=bool(cfg.get('delete-after-combine',0)=='1'),
             )
     combine(classifier_dict)
+
+
+if __name__ == '__main__':
+    console()
