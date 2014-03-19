@@ -89,11 +89,13 @@ class Combiner(object):
     def output_results(self, probability, short_names = True):
         top_results = np.argsort(probability,axis=0)[::-1][:self.num_results]
         print '{',
-        for result in top_results:
+        for id, result in enumerate(top_results):
             label = self.labels_list[result]
             if short_names:
                 label = label.split(',')[0]
-            print '"%s":%.03f,'%(label,probability[result]),
+            print '"%s":%.03f'%(label,probability[result]),
+            if id < len(top_results) - 1:
+                print ',',
         print '}'
 
 
