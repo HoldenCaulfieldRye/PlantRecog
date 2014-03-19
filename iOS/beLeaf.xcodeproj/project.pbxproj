@@ -142,7 +142,6 @@
 		E9E3962C1897F94F0067A991 /* BLEFDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFDatabase.h; sourceTree = "<group>"; };
 		E9E3962D1897F94F0067A991 /* BLEFDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFDatabase.m; sourceTree = "<group>"; };
 		E9FB664B18D8A70500EB2EB5 /* whatPlant copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "whatPlant copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		E9FB664C18D8A70500EB2EB5 /* whatPlant copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "whatPlant copy-Info.plist"; path = "/Users/ashleycutmore/Documents/MCS_GROUP_MASTER/group-project-master/iOS/whatPlant copy-Info.plist"; sourceTree = "<absolute>"; };
 		E9FB665018D8EAF600EB2EB5 /* BLEFresultLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BLEFresultLabel.h; sourceTree = "<group>"; };
 		E9FB665118D8EAF600EB2EB5 /* BLEFresultLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BLEFresultLabel.m; sourceTree = "<group>"; };
 		E9FB665718D8F94500EB2EB5 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -202,7 +201,6 @@
 				5E2AD56C1863B6D900595828 /* Frameworks */,
 				5E2AD56B1863B6D900595828 /* Products */,
 				9B5FD93065DA4C2E89495E05 /* Pods.xcconfig */,
-				E9FB664C18D8A70500EB2EB5 /* whatPlant copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};

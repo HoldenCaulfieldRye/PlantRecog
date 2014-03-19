@@ -319,13 +319,20 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
     NSDictionary *classification;
     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
     if (json){
-        classification = json[@"classification"];
+        NSString *classificationSTR = json[@"classification"];
+        if ((classificationSTR != nil) && [classificationSTR length] > 2){
+            NSData *classificationDATA = [classificationSTR dataUsingEncoding:NSUTF8StringEncoding];
+            NSError *error;
+            classification = [NSJSONSerialization JSONObjectWithData:classificationDATA options:kNilOptions error:&error];
+            if (error){
+                return false;
+            }
+        }
     }
-    if (classification){
+    if ((classification != nil) && ([classification isKindOfClass:[NSDictionary class]])){
         BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
         if (specimen != nil){
             [classification enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-                NSLog(@"%@ : %@", key, value);
                 BLEFResult *result = [_database addNewResultToSpecimen:specimen];
                 [result setName:key];
                 [result setConfidence:[value floatValue]];
@@ -400,10 +407,10 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 
 - (NSURLRequest *)createUploadRequestForObservation:(BLEFObservation *)observation
 {
-    NSString *serverURL = [[NSUserDefaults standardUserDefaults] stringForKey:@"serverURL"];
+    NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+    NSString *serverURL = ([(NSNumber*)[settings objectForKey:@"useLocal"] boolValue]?
+                           [settings stringForKey:@"localServerURL"] : [settings stringForKey:@"serverURL"]);
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/upload", serverURL]];
-    //NSURL *url = [NSURL URLWithString:@"http://192.168.1.78:5000/upload"];
-    //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
     NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
     [mutableRequest setHTTPMethod:@"POST"];
     return (NSURLRequest *)mutableRequest;
@@ -411,8 +418,9 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 
 - (NSURLRequest *)createUpdateRequestForSpecimen:(BLEFSpecimen *)specimen
 {
-    //NSString *urlAsString = [NSString stringWithFormat:@"http://192.168.1.78:5000/job/%@/", [specimen groupid]];
-    NSString *serverURL = [[NSUserDefaults standardUserDefaults] stringForKey:@"serverURL"];
+    NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+    NSString *serverURL = ([(NSNumber*)[settings objectForKey:@"useLocal"] boolValue]?
+                           [settings stringForKey:@"localServerURL"] : [settings stringForKey:@"serverURL"]);
     NSString *urlAsString = [NSString stringWithFormat:@"%@/job/%@", serverURL, [specimen groupid]];
     NSURL *url = [NSURL URLWithString:urlAsString];
     return [NSURLRequest requestWithURL:url];
@@ -421,10 +429,10 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 - (NSURLRequest *)createCompletionNotificationForSpecimen:(BLEFSpecimen *)specimen
 {
     if ([specimen groupid] != nil && [[specimen groupid] length] > 2){
-        NSString *serverURL = [[NSUserDefaults standardUserDefaults] stringForKey:@"serverURL"];
-        //NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://192.168.1.78:5000/completion/%@/", [specimen groupid]]];
+        NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+        NSString *serverURL = ([(NSNumber*)[settings objectForKey:@"useLocal"] boolValue]?
+                               [settings stringForKey:@"localServerURL"] : [settings stringForKey:@"serverURL"]);
         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/completion/%@", serverURL ,[specimen groupid]]];
-        //NSURL *url = [NSURL URLWithString:@"http://www.hashemian.com/tools/form-post-tester.php/beLeaf999"];
         NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
         [mutableRequest setHTTPMethod:@"PUT"];
         NSDictionary *params = @{@"completion": @"true"};
