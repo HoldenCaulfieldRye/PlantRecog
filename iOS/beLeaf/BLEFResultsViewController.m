@@ -8,6 +8,7 @@
 
 #import "BLEFResultsViewController.h"
 #import "BLEFDatabase.h"
+#import "BLEFresultLabel.h"
 
 @interface BLEFResultsViewController ()
 
@@ -23,8 +24,15 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+        // Custom Init
     }
+    return self;
+}
+
+- (id)init
+{
+    self = [super init];
+    NSLog(@"INIT");
     return self;
 }
 
@@ -32,41 +40,28 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-
+    self.mainScrollView.frame = self.view.frame;
+    self.mainScrollView.contentSize = CGSizeMake(self.mainScrollView.contentSize.width, self.mainScrollView.contentSize.height * 2);
+    
     if (_specimen){
 
         
-        /*
-        // JSON PARSE
-         NSString *result = nil;
-        if (result){
-            NSDictionary* resultDic = [NSJSONSerialization JSONObjectWithData:[result dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:nil];
-            __block NSString *formatedResult = @"";
-            if (resultDic){
-                [resultDic enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-                    formatedResult = [formatedResult stringByAppendingString:[NSString stringWithFormat:@"%@ : %@ \n\n", key, value]];
-                }];
-            }
-            [[self resultLabel] setText:formatedResult];
-        } else {
-            [[self resultLabel] setText:@"No classification..yet"];
-        }
-        */
-        
-        [[self resultLabel] setText:@"No classification..yet"];
-        
+        NSInteger resultY = 0;
+        NSInteger resultWidth = self.resultsArea.bounds.size.width;
+        NSInteger resultHeight = 30;
         NSSet *results = [_specimen results];
         if (results != nil){
-            BLEFResult *result = (BLEFResult *)[results anyObject];
-            if (result != nil){
-                if (result.name != nil)
-                    [[self resultLabel] setText:result.name];
+            for (BLEFResult *result in results) {
+                BLEFresultLabel *resultLabel = [[BLEFresultLabel alloc] initWithFrame:CGRectMake(0, resultY, resultWidth, resultHeight)
+                                                                           confidence:[result confidence]];
+                [resultLabel setText:[result name]];
+                resultY = resultY + resultHeight;
+                [_resultsArea addSubview:resultLabel];
             }
         }        
         
         // Images
         
-        // TODO : Get images for specimen
         
         NSArray *observations = [_database getObservationsFromSpecimen:_specimen];
         NSMutableArray *images = [[NSMutableArray alloc] init];
@@ -91,7 +86,11 @@
         }
         //Set the content size of our scrollview according to the total width of our imageView objects.
         self.imageScrollView.contentSize = CGSizeMake(self.imageScrollView.frame.size.width * [imageArray count], self.imageScrollView.frame.size.height);
-        self.pageControl.numberOfPages = [imageArray count];
+        if ([imageArray count] > 1){
+            self.pageControl.numberOfPages = [imageArray count];
+        } else {
+            self.pageControl.hidden = true;
+        }
     }
 }
 

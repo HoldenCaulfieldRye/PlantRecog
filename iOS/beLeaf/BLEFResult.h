@@ -15,7 +15,7 @@
 
 @property (nonatomic, retain) NSString * name;
 @property (nonatomic, retain) NSString * shortdesc;
-@property (nonatomic) int16_t confidence;
+@property (nonatomic) CGFloat confidence;
 @property (nonatomic, retain) BLEFSpecimen *specimen;
 
 @end
