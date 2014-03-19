@@ -40,8 +40,6 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.mainScrollView.frame = self.view.frame;
-    self.mainScrollView.contentSize = CGSizeMake(self.mainScrollView.contentSize.width, self.mainScrollView.contentSize.height * 2);
     
     if (_specimen){
 
@@ -92,6 +90,9 @@
             self.pageControl.hidden = true;
         }
     }
+    //self.mainScrollView.frame = self.view.frame;
+    //self.mainScrollView.autoresizesSubviews = NO;
+    //self.mainScrollView.contentSize = CGSizeMake(self.view.frame.size.width, 2000);
 }
 
 - (void)didReceiveMemoryWarning
