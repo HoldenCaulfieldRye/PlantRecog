@@ -179,14 +179,16 @@ exports.upload = function(db, configArgs) {
                     }); 
             }
             else {
-                group_id = fields.group_id;
-                segment_document.group_id = group_id;
-
-                if(checkForHexRegExp.test(group_id)){
+                if(checkForHexRegExp.test(fields.group_id)){
                     try{
+                        /* Turn groupID into ObjectID */
+                        group_id = new BSON.ObjectID(fields.group_id);
+                        /* Store objectID in doc to be inserted */
+                        segment_document.group_id = group_id;
+                        
                         /* Increment the number of images in group */
                         groups_col.update(
-                            {_id : new BSON.ObjectID(group_id) },
+                            {_id : group_id },
                             { $inc: { image_count: 1 } },
                             {safe:true},
                             function (db_err, docs) {
