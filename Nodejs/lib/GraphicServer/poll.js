@@ -54,26 +54,29 @@ try{
 		              var count2 = 0;
                               async.whilst( function(){ return count2 < docs.length },
                                             function(callback){
+						  //console.log("we think the group_id is: " + docs[count2].group_id)
                                                   if(docs[count2].graphic_filepath){
-                                                     db.collection('groups').update({"_id" : new BSON.ObjectID(docs[count2].group_id)},{ $inc : { "classified_count": 1} },function(err,result){ 
+                                                     db.collection('groups').update({"_id" : new BSON.ObjectID(String(docs[count2].group_id))},{ $inc : { "classified_count": 1} },function(err,result){ 
 							 if (err) throw err;
-							 console.log("result: " + result);
-						     })
+					             })
                                                      console.log("Updated group: " + docs[count2].group_id)
-                                                  }
+                                                     db.collection('segment_images').update({"_id" : docs[count2]._id}, { $set : {"submission_state": "File analysed by net" } }, function(err,rez){
+							 if (err) throw err;
+						     })						     
+						  }
 						  count2 = count2 + 1;
-                                                  setImmediate(callback);
+                                                  setTimeout(callback,1000);
                                                  },
                                             function(err){
-			      var count3 = 0;  
-	                      //var result_set = ''
+	                      
 			      // Iterate through groups whose images we have analysed and check whether images_count = classified_count 
+			      var count3 = 0;
 			      async.whilst(function(){ return count3 < docs.length },			  
 			     		   function(callback){
 					        if(docs[count3].graphic_filepath){
 						    console.log("docs.length: " + docs.length);
 					            console.log("docs[count3].group_id: " + docs[count3].group_id )
-						    db.collection('groups').find({"_id" : new BSON.ObjectID(docs[count3].group_id)}).toArray(function(err,results){
+						    db.collection('groups').find({"_id" : new BSON.ObjectID(String(docs[count3].group_id))}).toArray(function(err,results){
 							//console.log("got here!")
 							//console.log("results.length: " + results.length)
 							if(!err && results.length == 1){
