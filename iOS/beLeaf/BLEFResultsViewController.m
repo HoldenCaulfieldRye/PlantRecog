@@ -41,36 +41,20 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.mainScrollView.frame = self.view.frame;
+    self.mainScrollView.contentSize = CGSizeMake(self.mainScrollView.contentSize.width, self.mainScrollView.contentSize.height * 2);
     
     if (_specimen){
 
         
-        /*
-        // JSON PARSE
-         NSString *result = nil;
-        if (result){
-            NSDictionary* resultDic = [NSJSONSerialization JSONObjectWithData:[result dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:nil];
-            __block NSString *formatedResult = @"";
-            if (resultDic){
-                [resultDic enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-                    formatedResult = [formatedResult stringByAppendingString:[NSString stringWithFormat:@"%@ : %@ \n\n", key, value]];
-                }];
-            }
-            [[self resultLabel] setText:formatedResult];
-        } else {
-            [[self resultLabel] setText:@"No classification..yet"];
-        }
-        */
-        
         NSInteger resultY = 0;
-        NSInteger resultWidth = 400;
-        NSInteger resultHeight = 100;
+        NSInteger resultWidth = self.resultsArea.bounds.size.width;
+        NSInteger resultHeight = 30;
         NSSet *results = [_specimen results];
         if (results != nil){
             for (BLEFResult *result in results) {
-                BLEFresultLabel *resultLabel = [[BLEFresultLabel alloc] initWithFrame:CGRectMake(0, resultY, resultWidth, resultHeight)];
+                BLEFresultLabel *resultLabel = [[BLEFresultLabel alloc] initWithFrame:CGRectMake(0, resultY, resultWidth, resultHeight)
+                                                                           confidence:[result confidence]];
                 [resultLabel setText:[result name]];
-                [resultLabel setProgress:0.5];
                 resultY = resultY + resultHeight;
                 [_resultsArea addSubview:resultLabel];
             }

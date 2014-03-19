@@ -16,11 +16,11 @@
 
 @implementation BLEFresultLabel
 
-- (id)initWithFrame:(CGRect)frame
+- (id)initWithFrame:(CGRect)frame confidence:(CGFloat)level
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // custom init
+        _beleafLevel = level;
     }
     return self;
 }
@@ -29,17 +29,21 @@
 // An empty implementation adversely affects performance during animation.
 - (void)drawRect:(CGRect)rect
 {
-    _beleafDisplay = [[DACircularProgressView alloc] initWithFrame:CGRectMake(self.frame.size.width-25, 0, 25, 25)];
-    [_beleafDisplay setTrackTintColor:[UIColor colorWithRed:0.0 green:0.0 blue:1.0 alpha:1.0]];
-    _beleafLevel = 0;
-    [self addSubview:_beleafDisplay];
+    if (_beleafDisplay == nil){
+        _beleafDisplay = [[DACircularProgressView alloc] initWithFrame:CGRectMake(self.frame.size.width-25, 0, 25, 25)];
+        [_beleafDisplay setProgressTintColor:[UIColor blueColor]];
+        [_beleafDisplay setTrackTintColor:[UIColor colorWithWhite:0.7 alpha:0.7]];
+        [_beleafDisplay setThicknessRatio:1.0f];
+        [_beleafDisplay setProgress:_beleafLevel];
+        [self addSubview:_beleafDisplay];
+    }
     [super drawRect:rect];
 }
 
 - (void)setProgress:(CGFloat)newProgress
 {
     _beleafLevel = newProgress;
-    [_beleafDisplay setProgress:newProgress];
+    //[_beleafDisplay setProgress:newProgress];
 }
 
 - (void)animate

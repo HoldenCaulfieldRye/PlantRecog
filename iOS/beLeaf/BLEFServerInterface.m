@@ -316,15 +316,20 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 #pragma mark Update Handlers
 - (BOOL) updateSpecimen:(NSManagedObjectID *)specimenID usingData:(NSData *)data andError:(NSError *)error;
 {
-    NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+    NSDictionary *classification;
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
     if (json){
+        classification = json[@"classification"];
+    }
+    if (classification){
         BLEFSpecimen *specimen = (BLEFSpecimen *)[_database fetchObjectWithID:specimenID];
         if (specimen != nil){
-            [json enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
+            [classification enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
                 NSLog(@"%@ : %@", key, value);
                 BLEFResult *result = [_database addNewResultToSpecimen:specimen];
                 [result setName:key];
-                [result setConfidence:0.5];
+                [result setConfidence:[value floatValue]];
+                NSLog(@"Confidence: %f", [result confidence]);
             }];
             return true;
         }

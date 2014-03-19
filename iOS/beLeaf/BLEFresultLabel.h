@@ -14,6 +14,6 @@
 @property (strong, nonatomic) DACircularProgressView *beleafDisplay;
 - (void)setProgress:(CGFloat)newProgress;
 - (void)animate;
-
+- (id)initWithFrame:(CGRect)frame confidence:(CGFloat)level;
 
 @end

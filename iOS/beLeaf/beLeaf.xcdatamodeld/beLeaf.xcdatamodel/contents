@@ -8,7 +8,7 @@
         <relationship name="specimen" maxCount="1" deletionRule="Nullify" destinationEntity="Specimen" inverseName="observations" inverseEntity="Specimen" syncable="YES"/>
     </entity>
     <entity name="Result" representedClassName="BLEFResult" syncable="YES">
-        <attribute name="confidence" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="confidence" optional="YES" attributeType="Float" defaultValueString="0" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="shortdesc" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="specimen" maxCount="1" deletionRule="Nullify" destinationEntity="Specimen" inverseName="results" inverseEntity="Specimen" syncable="YES"/>
@@ -26,7 +26,7 @@
     </entity>
     <elements>
         <element name="Observation" positionX="0" positionY="0" width="128" height="120"/>
-        <element name="Result" positionX="0" positionY="0" width="128" height="105"/>
+        <element name="Result" positionX="0" positionY="0" width="128" height="28"/>
         <element name="Specimen" positionX="0" positionY="0" width="128" height="180"/>
     </elements>
 </model>
