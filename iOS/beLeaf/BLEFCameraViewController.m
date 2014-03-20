@@ -121,56 +121,76 @@
 
 #pragma mark - UI Methods
 
+void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
+{
+    if ([NSThread isMainThread])
+    {
+        codeblock();
+    }
+    else
+    {
+        dispatch_sync(dispatch_get_main_queue(), codeblock);
+    }
+}
+
 - (void)UI_cameraMode
 {
-    [[self activityIndicator] stopAnimating];
-    [[self cancelButton] setEnabled:true];
-    [[self CameraButton] setEnabled:true];
-    [[self retakeButton] setEnabled:false];
-    [[self retakeButton] setTitle:@""];
-    if ([[self captureBuffer] completeCount] > 0){
-        [[self FinishButton] setEnabled:true];
-    } else {
-        [[self FinishButton] setEnabled:false];
-    }
+    runOnMainQueueWithoutDeadlocking(^{
+        [[self activityIndicator] stopAnimating];
+        [[self cancelButton] setEnabled:true];
+        [[self CameraButton] setEnabled:true];
+        [[self retakeButton] setEnabled:false];
+        [[self retakeButton] setTitle:@""];
+        if ([[self captureBuffer] completeCount] > 0){
+            [[self FinishButton] setEnabled:true];
+        } else {
+            [[self FinishButton] setEnabled:false];
+        }
+    });
 }
 
 - (void)UI_reTakeMode
 {
-    [[self activityIndicator] stopAnimating];
-    [[self cancelButton] setEnabled:true];
-    [[self CameraButton] setEnabled:false];
-    [[self retakeButton] setEnabled:true];
-    [[self retakeButton] setTitle:@"Retake"];
-    if ([[self captureBuffer] completeCount] > 0){
-        [[self FinishButton] setEnabled:true];
-    } else {
-        [[self FinishButton] setEnabled:false];
-    }
+    runOnMainQueueWithoutDeadlocking(^{
+        [[self activityIndicator] stopAnimating];
+        [[self cancelButton] setEnabled:true];
+        [[self CameraButton] setEnabled:false];
+        [[self retakeButton] setEnabled:true];
+        [[self retakeButton] setTitle:@"Retake"];
+        if ([[self captureBuffer] completeCount] > 0){
+            [[self FinishButton] setEnabled:true];
+        } else {
+            [[self FinishButton] setEnabled:false];
+        }
+    });
 }
 
 - (void)UI_reviewMode
 {
-    [[self activityIndicator] stopAnimating];
-    [[self cancelButton] setEnabled:true];
-    [[self CameraButton] setEnabled:false];
-    [[self retakeButton] setEnabled:false];
-    [[self retakeButton] setTitle:@""];
-    if ([[self captureBuffer] completeCount] > 0){
-        [[self FinishButton] setEnabled:true];
-    } else {
-        [[self FinishButton] setEnabled:false];
-    }
+    runOnMainQueueWithoutDeadlocking(^{
+        [[self activityIndicator] stopAnimating];
+        [[self cancelButton] setEnabled:true];
+        [[self CameraButton] setEnabled:false];
+        [[self retakeButton] setEnabled:false];
+        [[self retakeButton] setTitle:@""];
+        if ([[self captureBuffer] completeCount] > 0){
+            [[self FinishButton] setEnabled:true];
+        } else {
+            [[self FinishButton] setEnabled:false];
+        }
+    });
 }
 
 - (void)UI_busyMode
 {
-    [[self activityIndicator] startAnimating];
-    [[self cancelButton] setEnabled:false];
-    [[self CameraButton] setEnabled:false];
-    [[self retakeButton] setEnabled:false];
-    [[self retakeButton] setTitle:@""];
-    [[self FinishButton] setEnabled:false];
+    runOnMainQueueWithoutDeadlocking(^{
+        [[self activityIndicator] startAnimating];
+        [[self cancelButton] setEnabled:false];
+        [[self CameraButton] setEnabled:false];
+        [[self retakeButton] setEnabled:false];
+        [[self retakeButton] setTitle:@""];
+        [[self FinishButton] setEnabled:false];
+    });
 }
 
 - (NSString *)currentSegmentSelection

@@ -49,7 +49,11 @@
         NSInteger resultHeight = 30;
         NSSet *results = [_specimen results];
         if (results != nil){
-            for (BLEFResult *result in results) {
+            NSArray *unsortedResults = [results allObjects];
+            NSArray *sortedResults = [unsortedResults sortedArrayUsingComparator:^NSComparisonResult(BLEFResult *result1, BLEFResult *result2) {
+                return ([result1 confidence] < [result2 confidence]);
+            }];
+            for (BLEFResult *result in sortedResults) {
                 BLEFresultLabel *resultLabel = [[BLEFresultLabel alloc] initWithFrame:CGRectMake(0, resultY, resultWidth, resultHeight)
                                                                            confidence:[result confidence]];
                 [resultLabel setText:[result name]];
@@ -90,9 +94,6 @@
             self.pageControl.hidden = true;
         }
     }
-    //self.mainScrollView.frame = self.view.frame;
-    //self.mainScrollView.autoresizesSubviews = NO;
-    //self.mainScrollView.contentSize = CGSizeMake(self.view.frame.size.width, 2000);
 }
 
 - (void)didReceiveMemoryWarning

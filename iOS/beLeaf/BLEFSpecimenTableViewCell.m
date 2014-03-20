@@ -37,7 +37,11 @@
         if ([specimen.results count] == 0){
             [self.textLabel setText:@"Proccessing..."];
         } else {
-            BLEFResult *result = [specimen.results anyObject];
+            NSArray *unsortedResults = [specimen.results allObjects];
+            NSArray *sortedResults = [unsortedResults sortedArrayUsingComparator:^NSComparisonResult(BLEFResult *result1, BLEFResult *result2) {
+                return ([result1 confidence] < [result2 confidence]);
+            }];
+            BLEFResult *result = [sortedResults firstObject];;
             [self.textLabel setText: [result name]];
         }
         
