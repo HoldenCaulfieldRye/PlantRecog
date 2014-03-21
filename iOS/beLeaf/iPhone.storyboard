@@ -78,12 +78,12 @@
                                 <rect key="frame" x="0.0" y="377" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                 <items>
-                                    <barButtonItem title="Retake" id="506-xT-5j5">
+                                    <barButtonItem title="Retake" width="62" id="506-xT-5j5">
                                         <connections>
                                             <action selector="retakeButtonPressed:" destination="tXe-fC-WfM" id="cEm-Mi-jJw"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="3Fl-L8-Oox"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="glI-tC-5ug"/>
                                     <barButtonItem systemItem="camera" id="PVf-16-GhU">
                                         <connections>
                                             <action selector="takePhotoButtonPressed:" destination="tXe-fC-WfM" id="82J-6T-Bdt"/>

@@ -133,10 +133,32 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
     }
 }
 
+- (void)UI_segmentsToSave
+{
+    for (int i = 0; i < 4; i++) {
+        if (i != [_segmentSelection selectedSegmentIndex]){
+            [_segmentSelection setTitle:@"Save" forSegmentAtIndex:i];
+        } else {
+            [_segmentSelection setTitle:@"" forSegmentAtIndex:i];
+        }
+    }
+}
+
+- (void)UI_segmentsDefault
+{
+    [_segmentSelection setTitle:@"Entire" forSegmentAtIndex:0];
+    [_segmentSelection setTitle:@"Leaf" forSegmentAtIndex:1];
+    [_segmentSelection setTitle:@"Flower" forSegmentAtIndex:2];
+    [_segmentSelection setTitle:@"Fruit" forSegmentAtIndex:3];
+}
+
 - (void)UI_cameraMode
 {
     runOnMainQueueWithoutDeadlocking(^{
+
         [[self activityIndicator] stopAnimating];
+        [[self segmentSelection] setEnabled:true];
+        [self UI_segmentsDefault];
         [[self cancelButton] setEnabled:true];
         [[self CameraButton] setEnabled:true];
         [[self retakeButton] setEnabled:false];
@@ -153,6 +175,8 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
 {
     runOnMainQueueWithoutDeadlocking(^{
         [[self activityIndicator] stopAnimating];
+                [[self segmentSelection] setEnabled:true];
+        [self UI_segmentsToSave];
         [[self cancelButton] setEnabled:true];
         [[self CameraButton] setEnabled:false];
         [[self retakeButton] setEnabled:true];
@@ -169,6 +193,8 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
 {
     runOnMainQueueWithoutDeadlocking(^{
         [[self activityIndicator] stopAnimating];
+        [[self segmentSelection] setEnabled:true];
+        [self UI_segmentsDefault];
         [[self cancelButton] setEnabled:true];
         [[self CameraButton] setEnabled:false];
         [[self retakeButton] setEnabled:false];
@@ -190,6 +216,7 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
         [[self retakeButton] setEnabled:false];
         [[self retakeButton] setTitle:@""];
         [[self FinishButton] setEnabled:false];
+        [[self segmentSelection] setEnabled:false];
     });
 }
 
@@ -283,13 +310,15 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
 
 - (void)segmentSelectionChanged:(id)sender
 {
+    [_segmentSelection setTitle:@">>>" forSegmentAtIndex:_selectionIndexBuffer];
     [_captureBuffer completeSlotNamed:[_segments objectAtIndex:_selectionIndexBuffer] completion:^(BOOL success){
-        [[_captureBuffer database] saveChanges];
         if (success){
-            [_segmentSelection setTitle:@"" forSegmentAtIndex:_selectionIndexBuffer];
+            [[_captureBuffer database] saveChanges];
         }
-        _selectionIndexBuffer = [_segmentSelection selectedSegmentIndex];
     }];
+    
+    _selectionIndexBuffer = [[self segmentSelection] selectedSegmentIndex];
+    
     
     UIImage *image = [_captureBuffer imageForSlotNamed:[self currentSegmentSelection]];
     if (image != nil){
