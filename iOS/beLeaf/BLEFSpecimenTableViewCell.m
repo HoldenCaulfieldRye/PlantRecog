@@ -35,8 +35,10 @@
 {
     if (specimen != nil){
         if ([specimen.results count] == 0){
-            [self.textLabel setText:@"Processing..."];
+            [self.textLabel setText:@"..."];
+            [_processingIndicator startAnimating];
         } else {
+            [_processingIndicator stopAnimating];
             NSArray *unsortedResults = [specimen.results allObjects];
             NSArray *sortedResults = [unsortedResults sortedArrayUsingComparator:^NSComparisonResult(BLEFResult *result1, BLEFResult *result2) {
                 return ([result1 confidence] < [result2 confidence]);
