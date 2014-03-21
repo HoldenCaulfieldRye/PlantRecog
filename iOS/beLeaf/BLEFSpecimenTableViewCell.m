@@ -35,7 +35,7 @@
 {
     if (specimen != nil){
         if ([specimen.results count] == 0){
-            [self.textLabel setText:@"Proccessing..."];
+            [self.textLabel setText:@"Processing..."];
         } else {
             NSArray *unsortedResults = [specimen.results allObjects];
             NSArray *sortedResults = [unsortedResults sortedArrayUsingComparator:^NSComparisonResult(BLEFResult *result1, BLEFResult *result2) {
