@@ -13,5 +13,6 @@
 @interface BLEFSpecimenTableViewCell : UITableViewCell
 
 - (void)styleCellWithSpecimen:(BLEFSpecimen *)specimen;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *processingIndicator;
 
 @end

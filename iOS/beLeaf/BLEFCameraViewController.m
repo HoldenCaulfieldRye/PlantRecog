@@ -121,56 +121,81 @@
 
 #pragma mark - UI Methods
 
+void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
+{
+    if ([NSThread isMainThread])
+    {
+        codeblock();
+    }
+    else
+    {
+        dispatch_sync(dispatch_get_main_queue(), codeblock);
+    }
+}
+
 - (void)UI_cameraMode
 {
-    [[self activityIndicator] stopAnimating];
-    [[self cancelButton] setEnabled:true];
-    [[self CameraButton] setEnabled:true];
-    [[self retakeButton] setEnabled:false];
-    [[self retakeButton] setTitle:@""];
-    if ([[self captureBuffer] completeCount] > 0){
-        [[self FinishButton] setEnabled:true];
-    } else {
-        [[self FinishButton] setEnabled:false];
-    }
+    runOnMainQueueWithoutDeadlocking(^{
+
+        [[self activityIndicator] stopAnimating];
+        [[self segmentSelection] setEnabled:true];
+        [[self cancelButton] setEnabled:true];
+        [[self CameraButton] setEnabled:true];
+        [[self retakeButton] setEnabled:false];
+        [[self retakeButton] setTitle:@""];
+        if (([_segmentSelection selectedSegmentIndex] < [_segmentSelection numberOfSegments]) || ([[self captureBuffer] completeCount] > 0)){
+            [[self FinishButton] setEnabled:true];
+        } else {
+            [[self FinishButton] setEnabled:false];
+        }
+    });
 }
 
 - (void)UI_reTakeMode
 {
-    [[self activityIndicator] stopAnimating];
-    [[self cancelButton] setEnabled:true];
-    [[self CameraButton] setEnabled:false];
-    [[self retakeButton] setEnabled:true];
-    [[self retakeButton] setTitle:@"Retake"];
-    if ([[self captureBuffer] completeCount] > 0){
-        [[self FinishButton] setEnabled:true];
-    } else {
-        [[self FinishButton] setEnabled:false];
-    }
+    runOnMainQueueWithoutDeadlocking(^{
+        [[self activityIndicator] stopAnimating];
+        [[self segmentSelection] setEnabled:true];
+        [[self cancelButton] setEnabled:true];
+        [[self CameraButton] setEnabled:false];
+        [[self retakeButton] setEnabled:true];
+        [[self retakeButton] setTitle:@"Retake"];
+        if (([_segmentSelection selectedSegmentIndex] < [_segmentSelection numberOfSegments]) || ([[self captureBuffer] completeCount] > 0)){
+            [[self FinishButton] setEnabled:true];
+        } else {
+            [[self FinishButton] setEnabled:false];
+        }
+    });
 }
 
 - (void)UI_reviewMode
 {
-    [[self activityIndicator] stopAnimating];
-    [[self cancelButton] setEnabled:true];
-    [[self CameraButton] setEnabled:false];
-    [[self retakeButton] setEnabled:false];
-    [[self retakeButton] setTitle:@""];
-    if ([[self captureBuffer] completeCount] > 0){
-        [[self FinishButton] setEnabled:true];
-    } else {
-        [[self FinishButton] setEnabled:false];
-    }
+    runOnMainQueueWithoutDeadlocking(^{
+        [[self activityIndicator] stopAnimating];
+        [[self segmentSelection] setEnabled:true];
+        [[self cancelButton] setEnabled:true];
+        [[self CameraButton] setEnabled:false];
+        [[self retakeButton] setEnabled:false];
+        [[self retakeButton] setTitle:@""];
+        if (([_segmentSelection selectedSegmentIndex] < [_segmentSelection numberOfSegments]) || ([[self captureBuffer] completeCount] > 0)){
+            [[self FinishButton] setEnabled:true];
+        } else {
+            [[self FinishButton] setEnabled:false];
+        }
+    });
 }
 
 - (void)UI_busyMode
 {
-    [[self activityIndicator] startAnimating];
-    [[self cancelButton] setEnabled:false];
-    [[self CameraButton] setEnabled:false];
-    [[self retakeButton] setEnabled:false];
-    [[self retakeButton] setTitle:@""];
-    [[self FinishButton] setEnabled:false];
+    runOnMainQueueWithoutDeadlocking(^{
+        [[self activityIndicator] startAnimating];
+        [[self cancelButton] setEnabled:false];
+        [[self CameraButton] setEnabled:false];
+        [[self retakeButton] setEnabled:false];
+        [[self retakeButton] setTitle:@""];
+        [[self FinishButton] setEnabled:false];
+        [[self segmentSelection] setEnabled:false];
+    });
 }
 
 - (NSString *)currentSegmentSelection
@@ -193,16 +218,18 @@
 
 - (IBAction)finishedSessionButtonPressed:(id)sender
 {
-    // Disable Button
-    UIButton *button = (UIButton *)sender;
-    button.enabled = false;
+    bool finish = ([_segmentSelection selectedSegmentIndex] == ([_segmentSelection numberOfSegments] - 1));
     
-    // Save current segment
-    [_captureBuffer completeSlotNamed:[self currentSegmentSelection] completion:^(BOOL success) {
-        [_captureBuffer completeCapture];
-        [[_captureBuffer database] saveChanges];
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }];
+    if (finish){
+        [_captureBuffer completeSlotNamed:[self currentSegmentSelection] completion:^(BOOL success) {
+            [_captureBuffer completeCapture];
+            [[_captureBuffer database] saveChanges];
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }];
+    } else {
+        [_segmentSelection setSelectedSegmentIndex:([_segmentSelection selectedSegmentIndex] + 1)];
+        [self segmentSelectionChanged:nil];
+    }
 }
 
 - (IBAction)cancelButtonPressed:(id)sender {
@@ -264,12 +291,13 @@
 - (void)segmentSelectionChanged:(id)sender
 {
     [_captureBuffer completeSlotNamed:[_segments objectAtIndex:_selectionIndexBuffer] completion:^(BOOL success){
-        [[_captureBuffer database] saveChanges];
         if (success){
-            [_segmentSelection setTitle:@"" forSegmentAtIndex:_selectionIndexBuffer];
+            [[_captureBuffer database] saveChanges];
         }
-        _selectionIndexBuffer = [_segmentSelection selectedSegmentIndex];
     }];
+    
+    _selectionIndexBuffer = [[self segmentSelection] selectedSegmentIndex];
+    
     
     UIImage *image = [_captureBuffer imageForSlotNamed:[self currentSegmentSelection]];
     if (image != nil){
