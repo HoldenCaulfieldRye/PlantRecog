@@ -185,7 +185,7 @@ exports.upload = function(db, configArgs) {
                         group_id = new BSON.ObjectID(fields.group_id);
                         /* Store objectID in doc to be inserted */
                         segment_document.group_id = group_id;
-                        
+
                         /* Increment the number of images in group */
                         groups_col.update(
                             {_id : group_id },
@@ -305,3 +305,70 @@ exports.upload = function(db, configArgs) {
 
     };
 };
+
+function objectIdWithTimestamp(secondsAgo)
+{
+    // Convert string date to Date object (otherwise assume timestamp is a date)
+    timestamp = new Date();
+
+    // Convert date object to hex seconds since Unix epoch
+    var hexSeconds = Math.floor((timestamp/1000)-secondsAgo).toString(16);
+
+    // Create an ObjectId with that hex timestamp
+    var constructedObjectId = BSON.ObjectID(hexSeconds + "0000000000000000");
+
+    return constructedObjectId
+}
+
+exports.forceOld = function(db) {
+
+    return function(req, res) {
+
+        var groups_col= db.collection('groups');
+        var segment_col = db.collection('segment_images');
+        var groupsUpdated = [];
+
+        /* Get the time five minutes ago */
+        var fiveMinutesAgo = objectIdWithTimestamp(300);
+
+
+        try{
+            /* reset documents with no classification created > 5 minutes ago */
+            groups_col.find({'classification': {'$exists' : false}, '_id' : {$lt : fiveMinutesAgo} }, 
+                {'fields': {'_id':1,'group_status':2}}).toArray(
+                function(err, docs) {
+                    /* for each result, set count to zero and reset segments */
+                    for (var i=0;i < docs.length; i++){
+                        
+                        /* Only update the groups for those that are complete */
+                        groups_col.update({'_id' : docs[i]._id}, {$set : {'classified_count' :0}}, {'w':1}, function(err, numberUpdated) {
+                            if(err){
+                                console.log("Error updating classification count on " + docs[i]._id);
+                                throw err;
+                            }
+                            else{
+                            }
+                        });
+
+                        /* put the updated group on the array */
+                        groupsUpdated.push(docs[i]._id + " : " + docs[i].group_status)
+
+                        segment_col.update({'group_id' : docs[i]._id}, {$set : {'submission_state' : 'File received by graphic'}}, {'w' : 1, 'multi' : true}, function(err, numberUpdated){
+                            if(err){
+                                console.log("Error updating submission state on document.");
+                                throw err;
+                            }
+                        });
+                    }
+                    /* send response */
+                    res.json(groupsUpdated);
+
+                });
+        }
+        catch(err){
+            console.log(err);
+            res.send("Error " + err);
+        }
+
+    }
+}
