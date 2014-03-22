@@ -33,10 +33,12 @@
 
 - (void)styleCellWithSpecimen:(BLEFSpecimen *)specimen
 {
+
     if (specimen != nil){
         if ([specimen.results count] == 0){
             [self.textLabel setText:@"..."];
             [_processingIndicator startAnimating];
+
         } else {
             [_processingIndicator stopAnimating];
             NSArray *unsortedResults = [specimen.results allObjects];
@@ -52,6 +54,7 @@
             [[self imageView] setImage:thumb];
         }
     }
+        [[self contentView] bringSubviewToFront:_processingIndicator];
 }
 
 @end

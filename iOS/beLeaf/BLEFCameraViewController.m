@@ -133,37 +133,17 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
     }
 }
 
-- (void)UI_segmentsToSave
-{
-    for (int i = 0; i < 4; i++) {
-        if (i != [_segmentSelection selectedSegmentIndex]){
-            [_segmentSelection setTitle:@"Save" forSegmentAtIndex:i];
-        } else {
-            [_segmentSelection setTitle:@"" forSegmentAtIndex:i];
-        }
-    }
-}
-
-- (void)UI_segmentsDefault
-{
-    [_segmentSelection setTitle:@"Entire" forSegmentAtIndex:0];
-    [_segmentSelection setTitle:@"Leaf" forSegmentAtIndex:1];
-    [_segmentSelection setTitle:@"Flower" forSegmentAtIndex:2];
-    [_segmentSelection setTitle:@"Fruit" forSegmentAtIndex:3];
-}
-
 - (void)UI_cameraMode
 {
     runOnMainQueueWithoutDeadlocking(^{
 
         [[self activityIndicator] stopAnimating];
         [[self segmentSelection] setEnabled:true];
-        [self UI_segmentsDefault];
         [[self cancelButton] setEnabled:true];
         [[self CameraButton] setEnabled:true];
         [[self retakeButton] setEnabled:false];
         [[self retakeButton] setTitle:@""];
-        if ([[self captureBuffer] completeCount] > 0){
+        if (([_segmentSelection selectedSegmentIndex] < [_segmentSelection numberOfSegments]) || ([[self captureBuffer] completeCount] > 0)){
             [[self FinishButton] setEnabled:true];
         } else {
             [[self FinishButton] setEnabled:false];
@@ -175,13 +155,12 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
 {
     runOnMainQueueWithoutDeadlocking(^{
         [[self activityIndicator] stopAnimating];
-                [[self segmentSelection] setEnabled:true];
-        [self UI_segmentsToSave];
+        [[self segmentSelection] setEnabled:true];
         [[self cancelButton] setEnabled:true];
         [[self CameraButton] setEnabled:false];
         [[self retakeButton] setEnabled:true];
         [[self retakeButton] setTitle:@"Retake"];
-        if ([[self captureBuffer] completeCount] > 0){
+        if (([_segmentSelection selectedSegmentIndex] < [_segmentSelection numberOfSegments]) || ([[self captureBuffer] completeCount] > 0)){
             [[self FinishButton] setEnabled:true];
         } else {
             [[self FinishButton] setEnabled:false];
@@ -194,12 +173,11 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
     runOnMainQueueWithoutDeadlocking(^{
         [[self activityIndicator] stopAnimating];
         [[self segmentSelection] setEnabled:true];
-        [self UI_segmentsDefault];
         [[self cancelButton] setEnabled:true];
         [[self CameraButton] setEnabled:false];
         [[self retakeButton] setEnabled:false];
         [[self retakeButton] setTitle:@""];
-        if ([[self captureBuffer] completeCount] > 0){
+        if (([_segmentSelection selectedSegmentIndex] < [_segmentSelection numberOfSegments]) || ([[self captureBuffer] completeCount] > 0)){
             [[self FinishButton] setEnabled:true];
         } else {
             [[self FinishButton] setEnabled:false];
@@ -240,16 +218,18 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
 
 - (IBAction)finishedSessionButtonPressed:(id)sender
 {
-    // Disable Button
-    UIButton *button = (UIButton *)sender;
-    button.enabled = false;
+    bool finish = ([_segmentSelection selectedSegmentIndex] == ([_segmentSelection numberOfSegments] - 1));
     
-    // Save current segment
-    [_captureBuffer completeSlotNamed:[self currentSegmentSelection] completion:^(BOOL success) {
-        [_captureBuffer completeCapture];
-        [[_captureBuffer database] saveChanges];
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }];
+    if (finish){
+        [_captureBuffer completeSlotNamed:[self currentSegmentSelection] completion:^(BOOL success) {
+            [_captureBuffer completeCapture];
+            [[_captureBuffer database] saveChanges];
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }];
+    } else {
+        [_segmentSelection setSelectedSegmentIndex:([_segmentSelection selectedSegmentIndex] + 1)];
+        [self segmentSelectionChanged:nil];
+    }
 }
 
 - (IBAction)cancelButtonPressed:(id)sender {
@@ -310,7 +290,6 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
 
 - (void)segmentSelectionChanged:(id)sender
 {
-    [_segmentSelection setTitle:@">>>" forSegmentAtIndex:_selectionIndexBuffer];
     [_captureBuffer completeSlotNamed:[_segments objectAtIndex:_selectionIndexBuffer] completion:^(BOOL success){
         if (success){
             [[_captureBuffer database] saveChanges];
