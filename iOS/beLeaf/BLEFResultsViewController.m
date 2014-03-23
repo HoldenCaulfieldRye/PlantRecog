@@ -9,10 +9,10 @@
 #import "BLEFResultsViewController.h"
 #import "BLEFDatabase.h"
 #import "BLEFresultLabel.h"
+#import "BLEFLookUpViewController.h"
 
 @interface BLEFResultsViewController ()
 
-@property (weak, nonatomic) IBOutlet UILabel *resultLabel;
 @property (weak, nonatomic) IBOutlet UIPageControl *pageControl;
 @property (weak, nonatomic) IBOutlet UIScrollView *imageScrollView;
 
@@ -59,6 +59,10 @@
                 [resultLabel setText:[result name]];
                 resultY = resultY + resultHeight;
                 [_resultsArea addSubview:resultLabel];
+                UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(lookupFrom:)];
+                singleTap.numberOfTapsRequired = 1;
+                [resultLabel addGestureRecognizer:singleTap];
+                [resultLabel setUserInteractionEnabled:true];
             }
         }        
         
@@ -100,6 +104,25 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)lookupFrom:(UITapGestureRecognizer *)sender
+{
+    id object = sender.view;
+    if ([object isKindOfClass:[BLEFresultLabel class]]){
+        BLEFresultLabel *label = (BLEFresultLabel*)object;
+        NSString *result = [label text];
+        [self performSegueWithIdentifier:@"RESULTtoLOOKUP" sender:result];
+    }
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([[segue identifier] isEqualToString:@"RESULTtoLOOKUP"]) {
+        BLEFLookUpViewController *destination = [segue destinationViewController];
+        NSString *lookup = (NSString *)sender;
+        [destination setLookup:lookup];
+    }
 }
 
 #pragma mark - Image ScrollView Delegate Methods

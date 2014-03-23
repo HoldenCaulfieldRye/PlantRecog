@@ -237,11 +237,61 @@
                         <outlet property="mainScrollView" destination="TGE-4E-RGX" id="d2d-0m-ewJ"/>
                         <outlet property="pageControl" destination="ZJs-2K-T4Y" id="5u3-vr-aav"/>
                         <outlet property="resultsArea" destination="SGT-Di-JpY" id="bwb-Wh-ucc"/>
+                        <segue destination="hPC-mb-LBp" kind="modal" identifier="RESULTtoLOOKUP" id="HwY-g0-F6Z"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jGM-Ym-FsV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="885" y="231"/>
+        </scene>
+        <!--Look Up View Controller-->
+        <scene sceneID="i89-a0-msa">
+            <objects>
+                <viewController id="hPC-mb-LBp" customClass="BLEFLookUpViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="fb3-GE-gTQ"/>
+                        <viewControllerLayoutGuide type="bottom" id="1RT-t7-xDE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="qTt-pH-kJ4">
+                        <rect key="frame" x="0.0" y="0.0" width="330" height="589"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="F3W-Mj-ybs">
+                                <rect key="frame" x="0.0" y="545" width="330" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                <items>
+                                    <barButtonItem systemItem="done" id="vSs-Ha-hg3">
+                                        <connections>
+                                            <action selector="doneButtonPressed:" destination="hPC-mb-LBp" id="wkd-me-Rlr"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
+                            <webView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LkF-c8-PQb">
+                                <rect key="frame" x="0.0" y="0.0" width="330" height="545"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            </webView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="LkF-c8-PQb" firstAttribute="top" secondItem="qTt-pH-kJ4" secondAttribute="top" id="FIK-od-d5d"/>
+                            <constraint firstItem="F3W-Mj-ybs" firstAttribute="top" secondItem="LkF-c8-PQb" secondAttribute="bottom" id="Muw-Ac-B7i"/>
+                            <constraint firstAttribute="bottom" secondItem="F3W-Mj-ybs" secondAttribute="bottom" id="P20-9t-9Ko"/>
+                            <constraint firstItem="LkF-c8-PQb" firstAttribute="trailing" secondItem="F3W-Mj-ybs" secondAttribute="trailing" id="gm1-3S-8m4"/>
+                            <constraint firstAttribute="trailing" secondItem="LkF-c8-PQb" secondAttribute="trailing" id="ruh-fg-juv"/>
+                            <constraint firstItem="LkF-c8-PQb" firstAttribute="leading" secondItem="F3W-Mj-ybs" secondAttribute="leading" id="trU-fw-OWO"/>
+                            <constraint firstItem="LkF-c8-PQb" firstAttribute="leading" secondItem="qTt-pH-kJ4" secondAttribute="leading" id="xyN-wU-SqF"/>
+                        </constraints>
+                    </view>
+                    <size key="freeformSize" width="320" height="549"/>
+                    <connections>
+                        <outlet property="webView" destination="LkF-c8-PQb" id="UZu-8L-Nrb"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iki-6l-w0d" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1333" y="231"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Kky-bn-Re6">
