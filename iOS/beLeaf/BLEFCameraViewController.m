@@ -143,10 +143,15 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
         [[self CameraButton] setEnabled:true];
         [[self retakeButton] setEnabled:false];
         [[self retakeButton] setTitle:@""];
-        if (([_segmentSelection selectedSegmentIndex] < [_segmentSelection numberOfSegments]) || ([[self captureBuffer] completeCount] > 0)){
+        if ([_segmentSelection selectedSegmentIndex] < ([_segmentSelection numberOfSegments] -1)){
             [[self FinishButton] setEnabled:true];
+            [[self FinishButton] setTitle:@"Skip"];
+        } else if ([[self captureBuffer] completeCount] > 0){
+            [[self FinishButton] setEnabled:true];
+            [[self FinishButton] setTitle:@"GO"];
         } else {
             [[self FinishButton] setEnabled:false];
+            [[self FinishButton] setTitle:@"GO"];
         }
     });
 }
@@ -160,10 +165,15 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
         [[self CameraButton] setEnabled:false];
         [[self retakeButton] setEnabled:true];
         [[self retakeButton] setTitle:@"Retake"];
-        if (([_segmentSelection selectedSegmentIndex] < [_segmentSelection numberOfSegments]) || ([[self captureBuffer] completeCount] > 0)){
+        if ([_segmentSelection selectedSegmentIndex] < ([_segmentSelection numberOfSegments] -1)){
             [[self FinishButton] setEnabled:true];
+            [[self FinishButton] setTitle:@"Next"];
+        } else if ([[self captureBuffer] completeCount] > 0){
+            [[self FinishButton] setEnabled:true];
+            [[self FinishButton] setTitle:@"GO"];
         } else {
             [[self FinishButton] setEnabled:false];
+            [[self FinishButton] setTitle:@"GO"];
         }
     });
 }
@@ -177,10 +187,15 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
         [[self CameraButton] setEnabled:false];
         [[self retakeButton] setEnabled:false];
         [[self retakeButton] setTitle:@""];
-        if (([_segmentSelection selectedSegmentIndex] < [_segmentSelection numberOfSegments]) || ([[self captureBuffer] completeCount] > 0)){
+        if ([_segmentSelection selectedSegmentIndex] < ([_segmentSelection numberOfSegments] -1)){
             [[self FinishButton] setEnabled:true];
+            [[self FinishButton] setTitle:@"Next"];
+        } else if ([[self captureBuffer] completeCount] > 0){
+            [[self FinishButton] setEnabled:true];
+            [[self FinishButton] setTitle:@"GO"];
         } else {
             [[self FinishButton] setEnabled:false];
+            [[self FinishButton] setTitle:@"GO"];
         }
     });
 }
