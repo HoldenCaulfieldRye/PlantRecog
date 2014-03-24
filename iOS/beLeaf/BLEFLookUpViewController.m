@@ -26,11 +26,12 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [_webView setDelegate:self];
     NSURL *url;
     if ([self lookup] == nil){
         url = [NSURL URLWithString:@"http://www.google.co.uk"];
     } else {
-        NSString *urlAsString = [NSString stringWithFormat:@"https://www.google.com/search?tbm=isch&q=plant %@", _lookup];
+        NSString *urlAsString = [NSString stringWithFormat:@"https://www.google.com/search?tbm=isch&q=%@ (plant/tree)", _lookup];
         urlAsString = [urlAsString stringByReplacingOccurrencesOfString:@" " withString:@"%20"];
         url = [NSURL URLWithString:urlAsString];
     }
@@ -63,6 +64,16 @@
 - (IBAction)doneButtonPressed:(id)sender {
     [[self webView] stopLoading];
     [self dismissViewControllerAnimated:true completion:nil];
+}
+
+- (void)webViewDidStartLoad:(UIWebView *)webView
+{
+    [_activityIndicator startAnimating];
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView
+{
+    [_activityIndicator stopAnimating];
 }
 
 @end
