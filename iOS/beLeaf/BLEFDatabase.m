@@ -114,6 +114,7 @@
     }
     
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Specimen"];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"(forDeletion == FALSE)"]];
     request.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO]];
     
     return [[NSFetchedResultsController alloc] initWithFetchRequest:request
@@ -216,7 +217,7 @@
 - (void)cleanup
 {
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Specimen"];
-    [request setPredicate:[NSPredicate predicateWithFormat: @"complete == FALSE"]];
+    [request setPredicate:[NSPredicate predicateWithFormat: @"(complete == FALSE) OR (forDeletion == TRUE)"]];
     
     [request setSortDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES]]];
     

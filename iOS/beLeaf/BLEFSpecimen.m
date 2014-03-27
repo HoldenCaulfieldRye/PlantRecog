@@ -19,7 +19,7 @@
 @dynamic latitude;
 @dynamic longitude;
 @dynamic notified;
-@dynamic updatePolling;
+@dynamic forDeletion;
 
 @dynamic observations;
 @dynamic results;

@@ -19,7 +19,7 @@
 @property (nonatomic) double latitude;
 @property (nonatomic) double longitude;
 @property (nonatomic) BOOL notified;
-@property (nonatomic) BOOL updatePolling;
+@property (nonatomic) BOOL forDeletion;
 @property (nonatomic, retain) NSSet * observations;
 @property (nonatomic, retain) NSSet * results;
 @end
