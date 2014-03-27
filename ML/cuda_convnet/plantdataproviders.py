@@ -163,7 +163,11 @@ class AugmentLeafDataProvider(LabeledDataProvider):
                 patch = y[:, startY:endY, startX:endX, c] # 1st dimension is ':' because take all 3 RGB channels
                 if flip == 1:
                     patch = patch[:,:,::-1]
-                target[:,c] = patch.reshape((self.get_data_dims(),)) # typo?
+                try:
+                    target[:,c] = patch.reshape((self.get_data_dims(),)) # typo?
+                except:
+                    print 'flattening image %i failed. its dimensions are %s, tried reshaping to %s' % (c, patch.shape, self.get_data_dims())
+                    exit
             target = augment_illumination(target)
                  
             if flip == 1:
