@@ -76,7 +76,7 @@ class AugmentLeafDataProvider(LabeledDataProvider):
             batch_range = DataProvider.get_batch_nums(data_dir)
         self.data_mean = self.batch_meta['data_mean']
         self.num_colors = 3
-        # patch_idx: x coordinate of patch, y coordinate of patch, flip image no/yes
+        # patch_idx: y coordinate of patch, x coordinate of patch, flip image no/yes
         self.patch_idx = [0,0,0]
         self.inner_size = 224
         # border_size: such that central patch edge is border_size pixels away from original img edge (expect 16)
@@ -121,8 +121,16 @@ class AugmentLeafDataProvider(LabeledDataProvider):
     def advance_batch(self):
         self.batch_idx = self.get_next_batch_idx()
         self.curr_batchnum = self.batch_range[self.batch_idx]
-        if self.batch_idx == 0 and self.patch_idx == [0,0,0]: # patch_idx needs to be back at 0,0,0 too
+        if self.batch_idx == 0: 
             self.curr_epoch += 1    
+            if self.patch_idx == [self.border_size-1, self.border_size-1, 1]: 
+                self.patch_idx = [0,0,0]
+            elif self.patch_idx[1:] == [self.border_size-1, 1]:
+                self.patch_idx = [self.patch_idx[0]+1, 0, 0]
+            elif self.patch_idx[2] == 1:                                     
+                self.patch_idx = [self.patch_idx[0], self.patch_idx[1]+1, 0]
+            else:
+                self.patch_idx[2] += 1
 
     def crop_batch(self):
         # print 'initialising cropped to a (%i, %i)-dimensional array' % (self.get_data_dims(), self.data_dic['data'].shape[1])
@@ -155,35 +163,36 @@ class AugmentLeafDataProvider(LabeledDataProvider):
                 target[:,:] = pic.reshape((self.get_data_dims(), x.shape[1])) # pragma: no cover
    
         else:
+            print 'cropping batch with patchidx:', self.patch_idx
             for c in xrange(x.shape[1]): # think c is image
                 startY, startX, flip = self.patch_idx[0], self.patch_idx[1], self.patch_idx[2] # patch coordinates, and whether or not to flip
                 # print 'startY, startX:', startY, startX
+                if startY + self.inner_size > 255: 
+                    print 'startY incremented too far (%i), self.inner_size changed (%i), self.border_size changed (%i)?' % (startY, self.inner_size, self.border_size) 
+                if startX + self.inner_size > 255: 
+                    print 'startX incremented too far: %i. inner_size: %i, border_size:%i' % (startX, self.inner_size, self.border_size) 
                 endY, endX = startY + self.inner_size, startX + self.inner_size
-                maxX, maxY = self.border_size*2, self.border_size*2
                 patch = y[:, startY:endY, startX:endX, c] # 1st dimension is ':' because take all 3 RGB channels
                 if flip == 1:
-                    patch = patch[:,:,::-1]
+                    patch = patch[:,:,::-1] # faster: assign to patch directly in flipped order
                 try:
                     target[:,c] = patch.reshape((self.get_data_dims(),)) # typo?
                 except:
                     print 'flattening image %i failed. its dimensions are %s, tried reshaping to %s' % (c, patch.shape, self.get_data_dims())
+                    print 'patch_idx: %s, startX: %i, startY: %i, inner_size: %i, border_size: %i' % (self.patch_idx, startX, startY, self.inner_size, self.border_size)  
                     exit
             target = augment_illumination(target)
-                 
-            if flip == 1:
-                if self.patch_idx[1] == maxY:
-                    if self.patch_idx[0] == maxX:
-                        self.patch_idx[1] = 0
-                        self.patch_idx[0] = 0
-                        self.patch_idx[2] = 0
-                    else:
-                        self.patch_idx[1] = 0
-                        self.patch_idx[0] += 1
-                        self.patch_idx[2] = 0
-                else:
-                    self.patch_idx[1] += 1
-                    self.patch_idx[2] = 0
+
+            if self.patch_idx == [self.border_size-1, self.border_size-1, 1]: 
+                self.patch_idx = [0,0,0]
+
+            elif self.patch_idx[1:] == [self.border_size-1, 1]:
+                self.patch_idx = [self.patch_idx[0]+1, 0, 0]
+
+            elif self.patch_idx[2] == 1:                                     
+                self.patch_idx = [self.patch_idx[0], self.patch_idx[1]+1, 0]
+
             else:
-                self.patch_idx[2] = 1
+                self.patch_idx[2] += 1
 
 
