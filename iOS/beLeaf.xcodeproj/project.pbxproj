@@ -113,6 +113,7 @@
 		5E2AD5941863B6DA00595828 /* beLeafTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "beLeafTests-Info.plist"; sourceTree = "<group>"; };
 		5E2AD5961863B6DA00595828 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5E2AD5A21863BB5A00595828 /* iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = iPhone.storyboard; sourceTree = "<group>"; };
+		5E5F527418E4778D00DC20DF /* beLeaf1.2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = beLeaf1.2.xcdatamodel; sourceTree = "<group>"; };
 		5E94AB3018D7231B0005C36F /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		9B5FD93065DA4C2E89495E05 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
 		A64737D915944062A1EA1E51 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -797,9 +798,10 @@
 		5E2AD5811863B6DA00595828 /* beLeaf.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				5E5F527418E4778D00DC20DF /* beLeaf1.2.xcdatamodel */,
 				5E2AD5821863B6DA00595828 /* beLeaf.xcdatamodel */,
 			);
-			currentVersion = 5E2AD5821863B6DA00595828 /* beLeaf.xcdatamodel */;
+			currentVersion = 5E5F527418E4778D00DC20DF /* beLeaf1.2.xcdatamodel */;
 			path = beLeaf.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
