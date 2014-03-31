@@ -182,17 +182,3 @@ class AugmentLeafDataProvider(LabeledDataProvider):
                     print 'patch_idx: %s, startX: %i, startY: %i, inner_size: %i, border_size: %i' % (self.patch_idx, startX, startY, self.inner_size, self.border_size)  
                     exit
             target = augment_illumination(target)
-
-            if self.patch_idx == [self.border_size-1, self.border_size-1, 1]: 
-                self.patch_idx = [0,0,0]
-
-            elif self.patch_idx[1:] == [self.border_size-1, 1]:
-                self.patch_idx = [self.patch_idx[0]+1, 0, 0]
-
-            elif self.patch_idx[2] == 1:                                     
-                self.patch_idx = [self.patch_idx[0], self.patch_idx[1]+1, 0]
-
-            else:
-                self.patch_idx[2] += 1
-
-
