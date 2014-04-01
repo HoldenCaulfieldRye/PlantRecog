@@ -70,13 +70,14 @@ def augment_illumination(data,channels=3):  # pragma: no cover
 # (image resizing (eg to get all 256x256) is done in nocnn/dataset.py)
 
 class AugmentLeafDataProvider(LabeledDataProvider):
-    def __init__(self, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, dp_params={'crop_border': 16, 'multiview_test': False}, test=False):
+    def __init__(self, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, dp_params={'crop_step': 1, 'crop_border': 32, 'multiview_test': False}, test=False):
         LabeledDataProvider.__init__(self, data_dir, batch_range, init_epoch, init_batchnum, dp_params, test)
         if batch_range == None:
             batch_range = DataProvider.get_batch_nums(data_dir)
         self.data_mean = self.batch_meta['data_mean']
         self.num_colors = 3
         # patch_idx: y coordinate of patch, x coordinate of patch, flip image no/yes
+        self.crop_step = dp_params['crop_step']
         self.patch_idx = [0,0,0]
         self.inner_size = 224
         # border_size: such that central patch edge is border_size pixels away from original img edge (expect 16)
@@ -123,14 +124,14 @@ class AugmentLeafDataProvider(LabeledDataProvider):
         self.curr_batchnum = self.batch_range[self.batch_idx]
         if self.batch_idx == 0: 
             self.curr_epoch += 1    
-            if self.patch_idx == [self.border_size-1, self.border_size-1, 1]: 
-                self.patch_idx = [0,0,0]
-            elif self.patch_idx[1:] == [self.border_size-1, 1]:
-                self.patch_idx = [self.patch_idx[0]+1, 0, 0]
-            elif self.patch_idx[2] == 1:                                     
-                self.patch_idx = [self.patch_idx[0], self.patch_idx[1]+1, 0]
-            else:
-                self.patch_idx[2] += 1
+            # if self.patch_idx == [self.border_size-1, self.border_size-1, 1]: 
+            #     self.patch_idx = [0,0,0]
+            # elif self.patch_idx[1:] == [self.border_size-1, 1]:
+            #     self.patch_idx = [(self.patch_idx[0] + self.crop_step) % self.border_size, 0, 0]
+            # elif self.patch_idx[2] == 1:                                     
+            #     self.patch_idx = [self.patch_idx[0], (self.patch_idx[1] + self.crop_step) % self.border_size, 0]
+            # else:
+            #     self.patch_idx[2] += 1
 
     def crop_batch(self):
         # print 'initialising cropped to a (%i, %i)-dimensional array' % (self.get_data_dims(), self.data_dic['data'].shape[1])
@@ -182,3 +183,13 @@ class AugmentLeafDataProvider(LabeledDataProvider):
                     print 'patch_idx: %s, startX: %i, startY: %i, inner_size: %i, border_size: %i' % (self.patch_idx, startX, startY, self.inner_size, self.border_size)  
                     exit
             target = augment_illumination(target)
+
+            if self.patch_idx == [self.border_size-1, self.border_size-1, 1]: 
+                self.patch_idx = [0,0,0]
+            elif self.patch_idx[1:] == [self.border_size-1, 1]:
+                self.patch_idx = [(self.patch_idx[0] + self.crop_step) % self.border_size, 0, 0]
+            elif self.patch_idx[2] == 1:                                     
+                self.patch_idx = [self.patch_idx[0], (self.patch_idx[1] + self.crop_step) % self.border_size, 0]
+            else:
+                self.patch_idx[2] += 1
+            
