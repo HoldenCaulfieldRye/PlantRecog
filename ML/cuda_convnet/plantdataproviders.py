@@ -70,14 +70,17 @@ def augment_illumination(data,channels=3):  # pragma: no cover
 # (image resizing (eg to get all 256x256) is done in nocnn/dataset.py)
 
 class AugmentLeafDataProvider(LabeledDataProvider):
-    def __init__(self, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, dp_params={'crop_step': 1, 'crop_border': 32, 'multiview_test': False}, test=False):
+    def __init__(self, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, dp_params={'crop_step': 8, 'crop_border': 32, 'multiview_test': False}, test=False):
         LabeledDataProvider.__init__(self, data_dir, batch_range, init_epoch, init_batchnum, dp_params, test)
         if batch_range == None:
             batch_range = DataProvider.get_batch_nums(data_dir)
         self.data_mean = self.batch_meta['data_mean']
         self.num_colors = 3
         # patch_idx: y coordinate of patch, x coordinate of patch, flip image no/yes
-        self.crop_step = dp_params['crop_step']
+        try:
+            self.crop_step = dp_params['crop_step']
+        except:
+            self.crop_step = 8
         self.patch_idx = [0,0,0]
         self.inner_size = 224
         # border_size: such that central patch edge is border_size pixels away from original img edge (expect 16)
