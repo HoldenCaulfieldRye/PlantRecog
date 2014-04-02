@@ -189,10 +189,19 @@ class AugmentLeafDataProvider(LabeledDataProvider):
 
             if self.patch_idx == [self.border_size-1, self.border_size-1, 1]: 
                 self.patch_idx = [0,0,0]
+
             elif self.patch_idx[1:] == [self.border_size-1, 1]:
                 self.patch_idx = [(self.patch_idx[0] + self.crop_step) % self.border_size, 0, 0]
+
+            elif self.patch_idx[0] == self.patch_idx[1] >= self.border_size - self.crop_step and self.patch_idx[2] == 1: 
+                self.patch_idx = [self.border_size-1, self.border_size-1, 0]
+
+            elif self.patch_idx[1] >= self.border_size - self.crop_step and self.patch_idx[2] == 1:
+                self.patch_idx = [self.patch_idx[0], self.border_size-1, 0]
+
             elif self.patch_idx[2] == 1:                                     
-                self.patch_idx = [self.patch_idx[0], (self.patch_idx[1] + self.crop_step) % self.border_size, 0]
+                self.patch_idx = [self.patch_idx[0], self.patch_idx[1] + self.crop_step, 0]
+
             else:
                 self.patch_idx[2] += 1
             
