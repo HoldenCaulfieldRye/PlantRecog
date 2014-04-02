@@ -435,7 +435,12 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/completion/%@", serverURL ,[specimen groupid]]];
         NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
         [mutableRequest setHTTPMethod:@"PUT"];
-        NSDictionary *params = @{@"completion": @"true"};
+        NSDictionary *params = nil;
+        if ([specimen forDeletion]){
+            params = @{@"completion": @"false"};
+        } else {
+            params = @{@"completion": @"true"};
+        }
         [mutableRequest setHTTPBody:[self createHTTPBodyDataWithFields:params andFileData:nil]];
         return (NSURLRequest *)mutableRequest;
     }
