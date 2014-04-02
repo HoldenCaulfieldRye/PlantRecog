@@ -27,7 +27,7 @@
 {
     // Register Settings
     NSDictionary *appDefaults = @{@"serverURL": @"http://theplant.guru:55580",
-                                  @"localServerURL": @"http://192.178.70:5000",
+                                  @"localServerURL": @"http://192.168.1.78:5000",
                                   @"useLocal": @NO};
     [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
     
