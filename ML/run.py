@@ -34,6 +34,12 @@ COULD_NOT_START_CONVNET = 2
 COULD_NOT_SAVE_OUTPUT_FILE = 3
 INVALID_COMMAND_ARGS = 4
 
+class MyError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
 
 # Accepts an image filename, and number of channels,
 # processes the image into a 1D numpy array, of the
@@ -47,7 +53,7 @@ def _process_tag_item(size,channels,name):
         im_data = im_data.astype(np.single)
         return im_data
     except:
-        sys.exit(COULD_NOT_OPEN_IMAGE_FILE)
+        raise MyError(COULD_NOT_OPEN_IMAGE_FILE)
 
 
 # Yields chunks of a specified size n of a list until it
@@ -92,7 +98,7 @@ class ImageRecogniser(object):
                        for filename in filenames)
             data = np.vstack([r for r in rows if r is not None]).T
             if data.shape[0] < len(filenames):    
-                sys.exit(COULD_NOT_OPEN_IMAGE_FILE)
+                raise MyError(COULD_NOT_OPEN_IMAGE_FILE)
             if data.shape[1] == 1:
                 mean = np.mean(data)
             elif data.shape[1] > 1:
@@ -110,8 +116,10 @@ class ImageRecogniser(object):
                 else:
                     pass
             except:
-                sys.exit(COULD_NOT_SAVE_OUTPUT_FILE)
+                raise MyError(COULD_NOT_SAVE_OUTPUT_FILE)
             batch_num += 1
+        return NO_ERROR    
+        
         
 
 # The wrapper class for the convnet which has already been
@@ -187,30 +195,13 @@ class PlantConvNet(convnet.ConvNet):
         return op
 
 
-# The console interpreter.  It checks whether the arguments
-# are valid, and also parses the configuration files.
-def console(config_file = None):
-    if len(sys.argv) < 3:
-        print 'Must give a component type and valid image file as arguments'
-        sys.exit(INVALID_COMMAND_ARGS)
-    if config_file is None:    
-        cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
-    else:
-        cfg = get_options(config_file, 'run')
-    valid_args = cfg.get('valid_args','entire,stem,branch,leaf,fruit,flower').split(',')
-    if sys.argv[1] not in valid_args:
-        print 'First argument must be one of: [',
-        for arg in valid_args:
-            print arg + ' ',
-        print ']'
-        sys.exit(INVALID_COMMAND_ARGS)
-    cfg_options_file = cfg.get(sys.argv[1],'Type classification not found')
+def get_recogniser(cfg,component):
+    cfg_options_file = cfg.get(component,'Type classification not found')
     cfg_data_options = get_options(cfg_options_file, 'dataset')
     try:
         conv_model = make_model(PlantConvNet,'run',cfg_options_file)
     except:
-        print 'Error'
-        sys.exit(COULD_NOT_START_CONVNET)
+        raise MyError(COULD_NOT_START_CONVNET)
     run = ImageRecogniser(
         batch_size=int(cfg.get('batch-size', 128)),
         channels=int(cfg_data_options.get('channels', 3)),
@@ -218,6 +209,23 @@ def console(config_file = None):
         model=conv_model,
         threshold=float(cfg.get('threshold',0.0)),
         )
+    return run
+
+# The console interpreter.  It checks whether the arguments
+# are valid, and also parses the configuration files.
+def console(config_file = None):
+    if len(args) < 3:
+        print 'Must give a component type and valid image file as arguments'
+        raise MyError(INVALID_COMMAND_ARGS)
+    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
+    valid_args = cfg.get('valid_args','entire,stem,branch,leaf,fruit,flower').split(',')
+    if sys.argv[1] not in valid_args:
+        print 'First argument must be one of: [',
+        for arg in valid_args:
+            print arg + ' ',
+        print ']'
+        raise MyError(INVALID_COMMAND_ARGS)
+    run = get_recogniser(cfg,sys.argv[1])
     run(sys.argv[2:])
 
 

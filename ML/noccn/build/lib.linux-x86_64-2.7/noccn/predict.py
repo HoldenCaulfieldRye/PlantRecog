@@ -61,7 +61,8 @@ class PredictConvNet(convnet.ConvNet):
                 if index < 10 and index >= 0:    
                     self.performance_dict[classes[label]]['top-10']+=1
                 result_row += 1
-            print "%i/%i:\tPredicted %s cases in %.2f seconds."%(batch_index,num_batches,len(labels[0]),time.time()-t0)
+            print "%i/%i:\tPredicted %s cases in %.2f seconds."%(batch_index+1,num_batches,len(labels[0]),time.time()-t0)
+            sys.stdout.flush()
         return self.performance_dict
 
 
