@@ -13,10 +13,10 @@ CFG = os.path.dirname(os.path.abspath(__file__))+'/run.cfg'
 # Recogniser Host Task
 class HostTask(object):
     def __init__(self):
-        self.cfg = get_options(CFG, 'run')
-        self.recogniser = run.get_recogniser(cfg,'all')
+        self.cfg = run.get_options(CFG, 'run')
+        self.recogniser = run.get_recogniser(self.cfg,'all')
 
-    def run_task(args):    
+    def run_task(self,args):    
         try:
             if len(args) < 3:
                 raise run.MyError(run.INVALID_COMMAND_ARGS)
@@ -49,7 +49,9 @@ def recv_size(the_socket):
     return ''.join(total_data)
 
 
-# Main server
+# Main server accepts a stream socket for AF_UNIX, using a 
+# /tmp/file and processed tasks according to hosttask class
+# replies with the result of the task
 def host_server():
     # Setup the host task
     task = HostTask()
@@ -66,7 +68,7 @@ def host_server():
        data = recv_size(conn)
        parsed_data = pickle.loads(data)
        result = task.run_task(parsed_data)
-       conn.send(result)
+       conn.send(str(result))
        conn.close()
 
 

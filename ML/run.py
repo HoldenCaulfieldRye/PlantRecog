@@ -214,7 +214,7 @@ def get_recogniser(cfg,component):
 # The console interpreter.  It checks whether the arguments
 # are valid, and also parses the configuration files.
 def console(config_file = None):
-    if len(args) < 3:
+    if len(sys.argv) < 3:
         print 'Must give a component type and valid image file as arguments'
         raise MyError(INVALID_COMMAND_ARGS)
     cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
