@@ -165,7 +165,7 @@ class BatchCreator(object):
                 continue
             labels = np.array([labels_sorted.index(label) for ((name, label), row) 
                           in zip(names_and_labels, rows) if row is not None]).reshape((1,-1))
-            batch = {'data': data.T, 'labels':labels, 'metadata': []}
+            batch = {'data': data.T, 'labels':labels, 'metadata': []}                         # data.T!! so dims are get_data_dimsxbatchSize
             self.take_batch_mean(batch_num,batch['data'])
             with open(os.path.join(self.output_path,'data_batch_%s'%batch_num),'wb') as f:
                 pickle.dump(batch, f, -1)
@@ -285,9 +285,10 @@ def console():
         filenames_and_labels = collector(cfg)
     else:
         images, labels = mongoHelperFunctions.bucketing(
-                                 int(cfg.get('class_image_thres',1000)),
-                                 cfg.get('limit_by_component',None),
-                                 float(cfg.get('component_prob_thres',0.0)))
+                             threshold=int(cfg.get('class_image_thres',1000)),
+                             component=cfg.get('limit_by_component',None),
+                             componentProb=cfg.get('component_prob_thres',0.0),
+                             )
         output_path=cfg.get('output-path', '/tmp/noccn-dataset')
         filter_component=str(cfg.get('limit_by_component',None)).lower()
         write_stats_to_file(output_path,labels)
@@ -308,4 +309,3 @@ def console():
 # Boilerplate for running the appropriate function.
 if __name__ == "__main__":
     console()
-

@@ -183,6 +183,7 @@ def console(config_file = None):
     try:
         conv_model = make_model(PlantConvNet,'run',cfg_options_file)
     except:
+        print 'Error'
         sys.exit(COULD_NOT_START_CONVNET)
     run = ImageRecogniser(
         batch_size=int(cfg.get('batch-size', 128)),

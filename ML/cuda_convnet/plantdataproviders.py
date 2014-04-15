@@ -68,23 +68,15 @@ def augment_illumination(data,channels=3):  # pragma: no cover
 # Note command line crop_border arg expected! (and if --test-only provided, --multiview-test is optional)
 # Might be better to have inner_size as command line arg in case 224x224 patches are too low def for fine grained classification
 # (image resizing (eg to get all 256x256) is done in nocnn/dataset.py)
-
 class AugmentLeafDataProvider(LabeledDataProvider):
-    def __init__(self, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, dp_params={'crop_step': 8, 'crop_border': 32, 'multiview_test': False}, test=False):
+    def __init__(self, data_dir, batch_range=None, init_epoch=1, init_batchnum=None, dp_params={'crop_border': 16, 'multiview_test': False}, test=False):
         LabeledDataProvider.__init__(self, data_dir, batch_range, init_epoch, init_batchnum, dp_params, test)
         if batch_range == None:
             batch_range = DataProvider.get_batch_nums(data_dir)
         self.data_mean = self.batch_meta['data_mean']
         self.num_colors = 3
-        # patch_idx: y coordinate of patch, x coordinate of patch, flip image no/yes
-        try:
-            self.crop_step = dp_params['crop_step']
-        except:
-            self.crop_step = 8
-        self.patch_idx = [0,0,0]
-        self.inner_size = 224
-        # border_size: such that central patch edge is border_size pixels away from original img edge (expect 16)
-        self.border_size = dp_params['crop_border'] 
+        self.border_size = 16 #dp_params['crop_border'] 
+        self.inner_size = 224 #256 - self.border_size*2
         # multiview: to compute test error averaged over top left, bottom left, central, top right, bottom right patches (use all info in img)
         self.multiview = dp_params['multiview_test'] and test 
         self.num_views = 5*2
@@ -96,16 +88,16 @@ class AugmentLeafDataProvider(LabeledDataProvider):
     def get_next_batch(self):
         if self.data_dic is None or len(self.batch_range) > 1:
             self.data_dic = self.get_batch(self.curr_batchnum)
-        # print 'just got a batch. data shape is %s, labels shape is %s' % (self.data_dic['data'].shape, self.data_dic['labels'].shape)
         epoch, batchnum = self.curr_epoch, self.curr_batchnum
-        cropped = self.crop_batch()
         self.advance_batch()
+        self.data_dic['labels'] = n.require(self.data_dic['labels'].reshape((1,self.data_dic['data'].shape[1])), dtype=n.single, requirements='C')
+        cropped = self.crop_batch()
         # Subtract the mean from the data and make sure that both data and
         # labels are in single-precision floating point.
         # This converts the data matrix to single precision and makes sure that it is C-ordered
         cropped = n.require((cropped - self.data_mean), dtype=n.single, requirements='C')
-        self.data_dic['labels'] = n.require(self.data_dic['labels'].reshape((1,cropped.shape[1])), dtype=n.single, requirements='C')
-        
+        if not self.test:
+            cropped = augment_illumination(cropped)
         return epoch, batchnum, [cropped, self.data_dic['labels']]
 
 
@@ -127,14 +119,7 @@ class AugmentLeafDataProvider(LabeledDataProvider):
         self.curr_batchnum = self.batch_range[self.batch_idx]
         if self.batch_idx == 0: 
             self.curr_epoch += 1    
-            # if self.patch_idx == [self.border_size-1, self.border_size-1, 1]: 
-            #     self.patch_idx = [0,0,0]
-            # elif self.patch_idx[1:] == [self.border_size-1, 1]:
-            #     self.patch_idx = [(self.patch_idx[0] + self.crop_step) % self.border_size, 0, 0]
-            # elif self.patch_idx[2] == 1:                                     
-            #     self.patch_idx = [self.patch_idx[0], (self.patch_idx[1] + self.crop_step) % self.border_size, 0]
-            # else:
-            #     self.patch_idx[2] += 1
+
 
     def crop_batch(self):
         # print 'initialising cropped to a (%i, %i)-dimensional array' % (self.get_data_dims(), self.data_dic['data'].shape[1])
@@ -165,43 +150,10 @@ class AugmentLeafDataProvider(LabeledDataProvider):
                 # select only central patch in image
                 pic = y[:,self.border_size:self.border_size+self.inner_size,self.border_size:self.border_size+self.inner_size, :] # pragma: no cover
                 target[:,:] = pic.reshape((self.get_data_dims(), x.shape[1])) # pragma: no cover
-   
         else:
-            print 'cropping batch with patchidx:', self.patch_idx
-            for c in xrange(x.shape[1]): # think c is image
-                startY, startX, flip = self.patch_idx[0], self.patch_idx[1], self.patch_idx[2] # patch coordinates, and whether or not to flip
-                # print 'startY, startX:', startY, startX
-                if startY + self.inner_size > 255: 
-                    print 'startY incremented too far (%i), self.inner_size changed (%i), self.border_size changed (%i)?' % (startY, self.inner_size, self.border_size) 
-                if startX + self.inner_size > 255: 
-                    print 'startX incremented too far: %i. inner_size: %i, border_size:%i' % (startX, self.inner_size, self.border_size) 
-                endY, endX = startY + self.inner_size, startX + self.inner_size
-                patch = y[:, startY:endY, startX:endX, c] # 1st dimension is ':' because take all 3 RGB channels
-                if flip == 1:
-                    patch = patch[:,:,::-1] # faster: assign to patch directly in flipped order
-                try:
-                    target[:,c] = patch.reshape((self.get_data_dims(),)) # typo?
-                except:
-                    print 'flattening image %i failed. its dimensions are %s, tried reshaping to %s' % (c, patch.shape, self.get_data_dims())
-                    print 'patch_idx: %s, startX: %i, startY: %i, inner_size: %i, border_size: %i' % (self.patch_idx, startX, startY, self.inner_size, self.border_size)  
-                    exit
-            target = augment_illumination(target)
-
-            if self.patch_idx == [self.border_size-1, self.border_size-1, 1]: 
-                self.patch_idx = [0,0,0]
-
-            elif self.patch_idx[1:] == [self.border_size-1, 1]:
-                self.patch_idx = [(self.patch_idx[0] + self.crop_step) % self.border_size, 0, 0]
-
-            elif self.patch_idx[0] == self.patch_idx[1] >= self.border_size - self.crop_step and self.patch_idx[2] == 1: 
-                self.patch_idx = [self.border_size-1, self.border_size-1, 0]
-
-            elif self.patch_idx[1] >= self.border_size - self.crop_step and self.patch_idx[2] == 1:
-                self.patch_idx = [self.patch_idx[0], self.border_size-1, 0]
-
-            elif self.patch_idx[2] == 1:                                     
-                self.patch_idx = [self.patch_idx[0], self.patch_idx[1] + self.crop_step, 0]
-
-            else:
-                self.patch_idx[2] += 1
-            
+            startY, startX = nr.randint(0,self.border_size*2 + 1), nr.randint(0,self.border_size*2 + 1)
+            endY, endX = startY + self.inner_size, startX + self.inner_size
+            pic = y[:,startY:endY,startX:endX,:]
+            if nr.randint(2) == 0: # also flip the image with 50% probability
+                pic = pic[:,:,::-1,:]
+            target[:,:] = pic.reshape((self.get_data_dims(),x.shape[1]))
