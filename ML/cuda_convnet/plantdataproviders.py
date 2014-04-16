@@ -41,14 +41,13 @@ import random as r
 from joblib import Parallel, delayed
 
 
-
 def augment_image(image, random_gaussian): # pragma: no cover
     ''' Image here is a single row numpy array, with all of the channels in sequential
     order (i.e. goes column by column then row by row for red, then same for green
     then same for blue). '''
     eigenvalue, eigenvector = n.linalg.eig(n.cov(image))  # pragma: no cover
     addition = n.dot(eigenvector,n.sqrt(eigenvalue).T * random_gaussian)  # pragma: no cover
-    return n.clip(n.add(image.T,addition),0,255).reshape(-1)  # pragma: no cover
+    return n.clip(n.add(image.T,addition),0.0,255.0).reshape(-1)  # pragma: no cover
 
 
 def augment_illumination(data,channels=3):  # pragma: no cover
@@ -95,9 +94,9 @@ class AugmentLeafDataProvider(LabeledDataProvider):
         # Subtract the mean from the data and make sure that both data and
         # labels are in single-precision floating point.
         # This converts the data matrix to single precision and makes sure that it is C-ordered
-        cropped = n.require((cropped - self.data_mean), dtype=n.single, requirements='C')
         if not self.test:
             cropped = augment_illumination(cropped)
+        cropped = n.require((cropped - self.data_mean), dtype=n.single, requirements='C')
         return epoch, batchnum, [cropped, self.data_dic['labels']]
 
 

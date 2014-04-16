@@ -223,15 +223,18 @@ class IGPUModel:
         next_data = self.get_next_batch(train=False)
         test_outputs = []
         number_tested = 0
+        print ""
         while True:
             data = next_data
             self.start_batch(data, train=False)
-            load_next = (not self.test_one and data[1] < self.test_batch_range[-1]) or (self.test_one and self.test_many < number_tested)
+            load_next = (not self.test_one and data[1] < self.test_batch_range[-1]) or (number_tested < self.test_many)
             if load_next: # load next batch
                 next_data = self.get_next_batch(train=False)
                 number_tested += 1
             test_outputs += [self.finish_batch()]
-            if self.test_only or True: # Print the individual batch results for safety
+            if self.test_only or self.test_many > 0: # Print the individual batch results for safety
+                if self.test_many > 0:
+                    print "%i/%i\t"%(number_tested+1,self.test_many),
                 print "batch %d: %s" % (data[1], str(test_outputs[-1]))
             if not load_next:
                 break
@@ -295,7 +298,7 @@ class IGPUModel:
         op.add_option("test-only", "test_only", BooleanOptionParser, "Test and quit?", default=0)
         op.add_option("zip-save", "zip_save", BooleanOptionParser, "Compress checkpoints?", default=0)
         op.add_option("test-one", "test_one", BooleanOptionParser, "Test on one batch at a time?", default=1)
-        op.add_option("test-many", "test_many", IntegerOptionParser, "Test on more than one batch at a time?", default=0)
+        op.add_option("test-many", "test_many", IntegerOptionParser, "Test on more than one batch at a time?", default=-1)
         op.add_option("gpu", "gpu", ListOptionParser(IntegerOptionParser), "GPU override", default=OptionExpression("[-1] * num_gpus"))
         return op
 
