@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5053" systemVersion="13C64" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="JmE-gP-4g1">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5056" systemVersion="13C64" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="JmE-gP-4g1">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
@@ -8,17 +8,19 @@
         <!--Specimen Table View Controller - whatPlant?-->
         <scene sceneID="vnp-Nu-Px0">
             <objects>
-                <tableViewController id="Iii-zz-q5U" customClass="BLEFSpecimenTableViewController" sceneMemberID="viewController">
-                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="Enb-2P-9Wc">
+                <tableViewController extendedLayoutIncludesOpaqueBars="YES" id="Iii-zz-q5U" customClass="BLEFSpecimenTableViewController" sceneMemberID="viewController">
+                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="Enb-2P-9Wc">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="0.8901960784313725" green="0.92941176470588238" blue="0.83137254901960778" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="tintColor" red="0.40000000000000002" green="0.43529411764705883" blue="0.29411764705882354" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="sectionIndexBackgroundColor" red="0.89019607840000003" green="0.92941176469999998" blue="0.83137254900000002" alpha="1" colorSpace="calibratedRGB"/>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" id="Cff-Ca-qdZ" customClass="BLEFSpecimenTableViewCell">
                                 <rect key="frame" x="0.0" y="86" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Cff-Ca-qdZ" id="BCp-N8-diX">
-                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <activityIndicatorView opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="NjX-v9-Uxp">
@@ -28,6 +30,7 @@
                                         </activityIndicatorView>
                                     </subviews>
                                 </tableViewCellContentView>
+                                <color key="backgroundColor" red="0.89019607840000003" green="0.92941176469999998" blue="0.83137254900000002" alpha="1" colorSpace="calibratedRGB"/>
                                 <connections>
                                     <outlet property="processingIndicator" destination="NjX-v9-Uxp" id="Azx-y4-XuN"/>
                                 </connections>
@@ -40,6 +43,7 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="whatPlant?" id="px2-Rd-yIB">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="5q1-gb-TCh">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <connections>
                                 <action selector="addButtonPressed:" destination="Iii-zz-q5U" id="8QA-MN-IUc"/>
                             </connections>
@@ -85,30 +89,35 @@
                                     <constraint firstAttribute="width" secondItem="o2d-d6-qaI" secondAttribute="height" multiplier="1:1" id="rJ5-2f-ug2"/>
                                 </constraints>
                             </view>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TrO-Ps-uog">
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TrO-Ps-uog">
                                 <rect key="frame" x="0.0" y="461" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                <color key="backgroundColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
                                 <items>
                                     <barButtonItem width="15" style="plain" systemItem="fixedSpace" id="gU8-9U-GHj"/>
                                     <barButtonItem title="Retake" width="62" id="506-xT-5j5">
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <connections>
                                             <action selector="retakeButtonPressed:" destination="tXe-fC-WfM" id="cEm-Mi-jJw"/>
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="glI-tC-5ug"/>
                                     <barButtonItem systemItem="camera" id="PVf-16-GhU">
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <connections>
                                             <action selector="takePhotoButtonPressed:" destination="tXe-fC-WfM" id="82J-6T-Bdt"/>
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="cBZ-t8-awI"/>
                                     <barButtonItem title="Go" id="7fE-xf-1jO">
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <connections>
                                             <action selector="finishedSessionButtonPressed:" destination="tXe-fC-WfM" id="9ZI-De-vF7"/>
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem width="15" style="plain" systemItem="fixedSpace" id="CjP-0j-D70"/>
                                 </items>
+                                <color key="barTintColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
                             </toolbar>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="vju-5v-PRd">
                                 <rect key="frame" x="20" y="383" width="280" height="29"/>
@@ -131,7 +140,8 @@
                                 </connections>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="centerX" secondItem="o2d-d6-qaI" secondAttribute="centerX" id="1dT-5w-sAu"/>
                             <constraint firstItem="2KQ-Q9-OKc" firstAttribute="top" secondItem="PQ6-ZG-icQ" secondAttribute="bottom" constant="2" id="5Xe-Aw-1FM"/>
@@ -197,18 +207,18 @@
                                     <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="6" translatesAutoresizingMaskIntoConstraints="NO" id="ZJs-2K-T4Y">
                                         <rect key="frame" x="86" y="260" width="159" height="37"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <color key="pageIndicatorTintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                        <color key="currentPageIndicatorTintColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                        <color key="pageIndicatorTintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <color key="currentPageIndicatorTintColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
                                     </pageControl>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SGT-Di-JpY">
                                         <rect key="frame" x="25" y="291" width="280" height="230"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="230" id="Dem-m0-O5E"/>
                                         </constraints>
                                     </view>
                                 </subviews>
+                                <color key="backgroundColor" red="0.89019607840000003" green="0.92941176469999998" blue="0.83137254900000002" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstItem="SGT-Di-JpY" firstAttribute="top" secondItem="dqE-MH-RSf" secondAttribute="bottom" constant="31" id="310-EX-4as"/>
                                     <constraint firstItem="ZJs-2K-T4Y" firstAttribute="top" secondItem="dqE-MH-RSf" secondAttribute="bottom" id="4Mh-r7-atF"/>
@@ -224,7 +234,8 @@
                                 </constraints>
                             </scrollView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="0.89019607840000003" green="0.92941176469999998" blue="0.83137254900000002" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="tintColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="TGE-4E-RGX" secondAttribute="trailing" id="4Qe-So-4Pm"/>
                             <constraint firstItem="TGE-4E-RGX" firstAttribute="leading" secondItem="dfW-eH-1Zw" secondAttribute="leading" id="Xcc-Vr-Oeu"/>
@@ -311,6 +322,11 @@
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="fN0-vj-HDC">
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="barTintColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
+                        <textAttributes key="titleTextAttributes">
+                            <color key="textColor" red="0.96862745100000003" green="0.96862745100000003" blue="0.96862745100000003" alpha="1" colorSpace="calibratedRGB"/>
+                        </textAttributes>
                     </navigationBar>
                     <connections>
                         <segue destination="Iii-zz-q5U" kind="relationship" relationship="rootViewController" id="mFb-gV-ofB"/>
