@@ -31,7 +31,7 @@
     if ([self lookup] == nil){
         url = [NSURL URLWithString:@"http://www.google.co.uk"];
     } else {
-        NSString *urlAsString = [NSString stringWithFormat:@"https://www.google.com/search?tbm=isch&q=%@ (plant/tree)", _lookup];
+        NSString *urlAsString = [NSString stringWithFormat:@"https://www.google.com/search?tbm=isch&q=%@ (plant)", _lookup];
         urlAsString = [urlAsString stringByReplacingOccurrencesOfString:@" " withString:@"%20"];
         url = [NSURL URLWithString:urlAsString];
     }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5056" systemVersion="13C64" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="JmE-gP-4g1">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5056" systemVersion="13C1021" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="JmE-gP-4g1">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
@@ -26,7 +26,7 @@
                                         <activityIndicatorView opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="NjX-v9-Uxp">
                                             <rect key="frame" x="280" y="13" width="20" height="20"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <color key="color" red="0.0" green="0.50196081399917603" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="color" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
                                         </activityIndicatorView>
                                     </subviews>
                                 </tableViewCellContentView>
@@ -79,6 +79,7 @@
                                     <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="xQp-9N-dmC">
                                         <rect key="frame" x="142" y="150" width="37" height="37"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <color key="color" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </activityIndicatorView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
@@ -92,7 +93,7 @@
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TrO-Ps-uog">
                                 <rect key="frame" x="0.0" y="461" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                <color key="backgroundColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="backgroundColor" red="0.54938357019999995" green="0.59893002719999999" blue="0.39983515650000001" alpha="1" colorSpace="calibratedRGB"/>
                                 <items>
                                     <barButtonItem width="15" style="plain" systemItem="fixedSpace" id="gU8-9U-GHj"/>
                                     <barButtonItem title="Retake" width="62" id="506-xT-5j5">
@@ -117,7 +118,7 @@
                                     </barButtonItem>
                                     <barButtonItem width="15" style="plain" systemItem="fixedSpace" id="CjP-0j-D70"/>
                                 </items>
-                                <color key="barTintColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="barTintColor" red="0.54938357019999995" green="0.59893002719999999" blue="0.39983515650000001" alpha="1" colorSpace="calibratedRGB"/>
                             </toolbar>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="vju-5v-PRd">
                                 <rect key="frame" x="20" y="383" width="280" height="29"/>
@@ -140,7 +141,7 @@
                                 </connections>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" red="0.54938357019999995" green="0.59893002719999999" blue="0.39983515650000001" alpha="1" colorSpace="calibratedRGB"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="centerX" secondItem="o2d-d6-qaI" secondAttribute="centerX" id="1dT-5w-sAu"/>
@@ -199,19 +200,20 @@
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="240" id="aVv-Y3-UJY"/>
+                                            <constraint firstAttribute="width" constant="240" id="gAL-Xg-OpW"/>
                                         </constraints>
                                         <connections>
                                             <outlet property="delegate" destination="w9r-h4-lCJ" id="wo1-6l-fh9"/>
                                         </connections>
                                     </scrollView>
                                     <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="6" translatesAutoresizingMaskIntoConstraints="NO" id="ZJs-2K-T4Y">
-                                        <rect key="frame" x="86" y="260" width="159" height="37"/>
+                                        <rect key="frame" x="86" y="260" width="158" height="37"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <color key="pageIndicatorTintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <color key="currentPageIndicatorTintColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
                                     </pageControl>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SGT-Di-JpY">
-                                        <rect key="frame" x="25" y="291" width="280" height="230"/>
+                                        <rect key="frame" x="25" y="291" width="279" height="230"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="230" id="Dem-m0-O5E"/>
@@ -224,7 +226,7 @@
                                     <constraint firstItem="ZJs-2K-T4Y" firstAttribute="top" secondItem="dqE-MH-RSf" secondAttribute="bottom" id="4Mh-r7-atF"/>
                                     <constraint firstItem="SGT-Di-JpY" firstAttribute="leading" secondItem="TGE-4E-RGX" secondAttribute="leading" constant="25" id="GfC-IG-t3f"/>
                                     <constraint firstAttribute="trailing" secondItem="SGT-Di-JpY" secondAttribute="trailing" constant="25" id="Hqu-JN-9kv"/>
-                                    <constraint firstItem="dqE-MH-RSf" firstAttribute="leading" secondItem="TGE-4E-RGX" secondAttribute="leading" constant="45" id="I3p-q8-VEq"/>
+                                    <constraint firstItem="dqE-MH-RSf" firstAttribute="centerX" secondItem="TGE-4E-RGX" secondAttribute="centerX" id="I3p-q8-VEq"/>
                                     <constraint firstItem="ZJs-2K-T4Y" firstAttribute="leading" secondItem="TGE-4E-RGX" secondAttribute="leading" constant="86" id="J2D-8L-GwD"/>
                                     <constraint firstItem="dqE-MH-RSf" firstAttribute="top" secondItem="TGE-4E-RGX" secondAttribute="top" constant="20" symbolic="YES" id="JKr-Qi-reb"/>
                                     <constraint firstItem="SGT-Di-JpY" firstAttribute="centerX" secondItem="ZJs-2K-T4Y" secondAttribute="centerX" id="LzU-NO-zR8"/>
@@ -323,9 +325,9 @@
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="fN0-vj-HDC">
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <color key="barTintColor" red="0.40000000000000002" green="0.43529411759999997" blue="0.29411764709999999" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="barTintColor" red="0.54938357019999995" green="0.59893002719999999" blue="0.39983515650000001" alpha="1" colorSpace="calibratedRGB"/>
                         <textAttributes key="titleTextAttributes">
-                            <color key="textColor" red="0.96862745100000003" green="0.96862745100000003" blue="0.96862745100000003" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="textColor" red="0.89019607840000003" green="0.92941176469999998" blue="0.83137254900000002" alpha="1" colorSpace="calibratedRGB"/>
                         </textAttributes>
                     </navigationBar>
                     <connections>

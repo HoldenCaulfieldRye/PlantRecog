@@ -346,6 +346,8 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
     //Add Input Device to Capture Session
     if ( [_captureSession canAddInput:deviceInput] ){
         [_captureSession addInput:deviceInput];
+    } else {
+        return;
     }
     
     //Setup Output
@@ -365,7 +367,9 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
 }
 
 - (void) startCaptureSession {
-    [_captureSession startRunning];
+    if ([[_captureSession inputs] count] > 0){
+        [_captureSession startRunning];
+    }
 }
 
 - (void) stopCaptureSession {
