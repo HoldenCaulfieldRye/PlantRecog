@@ -41,7 +41,9 @@ class ConvNet(IGPUModel):
     def __init__(self, op, load_dic, dp_params={}):
         filename_options = []
         dp_params['multiview_test'] = op.get_value('multiview_test')
+
         dp_params['crop_border'] = op.get_value('crop_border')
+
         IGPUModel.__init__(self, "ConvNet", op, load_dic, filename_options, dp_params=dp_params)
         
     def import_model(self):

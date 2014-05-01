@@ -72,6 +72,7 @@ class IGPUModel:
             self.model_state["epoch"] = 1
             self.model_state["batchnum"] = self.train_batch_range[0]
 
+
         self.init_data_providers()
         if load_dic: 
             self.train_data_provider.advance_batch()

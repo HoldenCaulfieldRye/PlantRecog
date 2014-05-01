@@ -146,11 +146,11 @@ class PlantConvNet(convnet.ConvNet):
     def start_predictions(self, data):
         # If multiview take patches
         if self.multiview_test:
-            data_dim = data.shape[0]
+            data_dim = 150528
             border_size = 16
             inner_size = 224
             num_views = 5*2
-            target = np.zeros((data.shape[0],data.shape[1]*num_views),dtype=n.single)
+            target = np.zeros((data_dim,data.shape[1]*num_views),dtype=np.single)
             y = data.reshape(3, 256, 256, data.shape[1])
             start_positions = [(0,0),  (0, border_size*2), (border_size, border_size), (border_size*2, 0), (border_size*2, border_size*2)] 
             end_positions = [(sy+inner_size, sx+inner_size) for (sy,sx) in start_positions]
@@ -173,8 +173,8 @@ class PlantConvNet(convnet.ConvNet):
         self.finish_batch()
         # Combine results for multiview test
         if self.multiview_test:
-            num_views = self.test_data_provider.num_views
-            num_images = self.b_labels.shape[0]/num_views
+            num_views = 5*2
+            num_images = self.b_labels.shape[1]/num_views
             processed_preds = np.zeros((num_images,len(self.tag_names)))
             for image in range(0,num_images):
                 tmp_preds = self.b_preds[image::num_images]
