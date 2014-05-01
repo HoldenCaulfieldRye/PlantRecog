@@ -31,7 +31,7 @@
 {
     if (_beleafDisplay == nil){
         _beleafDisplay = [[DACircularProgressView alloc] initWithFrame:CGRectMake(self.frame.size.width-25, 0, 25, 25)];
-        [_beleafDisplay setProgressTintColor:[UIColor blueColor]];
+        [_beleafDisplay setProgressTintColor:[UIColor colorWithRed:0.4 green:0.4353 blue:0.29412 alpha:1.0]];
         [_beleafDisplay setTrackTintColor:[UIColor colorWithWhite:0.7 alpha:0.7]];
         [_beleafDisplay setThicknessRatio:1.0f];
         [_beleafDisplay setProgress:_beleafLevel];
