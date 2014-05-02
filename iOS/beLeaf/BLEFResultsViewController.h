@@ -12,7 +12,9 @@
 
 @interface BLEFResultsViewController : UIViewController <UIScrollViewDelegate>
 
+@property (weak, nonatomic) IBOutlet UIScrollView *mainScrollView;
 @property (strong, nonatomic) BLEFSpecimen *specimen;
 @property (strong, nonatomic) BLEFDatabase * database;
+@property (weak, nonatomic) IBOutlet UIView *resultsArea;
 
 @end

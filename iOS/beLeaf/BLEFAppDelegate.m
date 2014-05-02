@@ -26,7 +26,9 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Register Settings
-    NSDictionary *appDefaults = @{@"serverURL": @"http://plantrecogniser.no-ip.biz:55580"};
+    NSDictionary *appDefaults = @{@"serverURL": @"http://theplant.guru:55580",
+                                  @"localServerURL": @"http://192.168.1.78:5000",
+                                  @"useLocal": @NO};
     [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
     
     [self serverInterfaceInit];
@@ -99,7 +101,7 @@
     
     NSError *error = nil;
     _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
-    if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error]) {
+    if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:@{NSMigratePersistentStoresAutomaticallyOption:@YES, NSInferMappingModelAutomaticallyOption:@YES} error:&error]) {
         /*
          Replace this implementation with code to handle the error appropriately.
          

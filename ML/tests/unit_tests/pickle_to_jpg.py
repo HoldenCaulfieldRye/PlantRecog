@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # unflatten
     print 'batch[\'data\'] needs to have shape', batch['data'].shape
-    batch['data'] = batch['data'].reshape(batch['data'].shape[1], 256, 256, 3)
+    batch['data'] = batch['data'].reshape(batch['data'].shape[1], 256, 256, 3) # shape[1]?
     batch['data'] = np.require(batch['data'], dtype=np.uint8, requirements='W')
 
     # get first image, save it, to know what original looks like

@@ -4,8 +4,9 @@ from   pymongo import MongoClient
 
 
 # MongoDB connection details
-client = MongoClient('localhost', 57127)
-db = client['qa']
+client_name = 'localhost'
+client_num = 57127
+db_clientid = 'qa'
 
 
 # a list of valid tag names
@@ -14,6 +15,8 @@ valid_tags = [ 'Leaf', 'Fruit', 'Flower', 'Entire', 'Branch', 'Stem' ]
 
 
 def bucketing(threshold, component=None, componentProb=0.0):
+    client = MongoClient(client_name, client_num)
+    db = client[db_clientid]
     images = list()
     species = list()
     
@@ -55,6 +58,8 @@ def bucketing(threshold, component=None, componentProb=0.0):
 //////////////////////////////////////////////////////////////////
 '''
 def get_buckets(threshold, component, componentProb):
+    client = MongoClient(client_name, client_num)
+    db = client[db_clientid]
     results = list()
     exclude_buckets = db.plants.find({'Exclude':True},{'Bucket':True,'_id':False}).distinct('Bucket')
     if component is None:
@@ -74,6 +79,8 @@ def get_buckets(threshold, component, componentProb):
 ///////////////////////////////////////////////////////////////
 '''
 def exclude_synset(name):
+    client = MongoClient(client_name, client_num)
+    db = client[db_clientid]
     synset = None
     data = db.wordnet.find({'name': name},{'wnid':True, '_id':False})
     for i in data:

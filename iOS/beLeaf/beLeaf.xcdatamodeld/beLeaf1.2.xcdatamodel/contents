@@ -16,11 +16,11 @@
     <entity name="Specimen" representedClassName="BLEFSpecimen" syncable="YES">
         <attribute name="complete" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <attribute name="created" attributeType="Date" syncable="YES"/>
+        <attribute name="forDeletion" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <attribute name="groupid" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="latitude" attributeType="Double" minValueString="-90" maxValueString="90" defaultValueString="0.0" syncable="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Double" minValueString="-180" maxValueString="180" defaultValueString="0.0" syncable="YES"/>
         <attribute name="notified" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
-        <attribute name="updatePolling" transient="YES" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <relationship name="observations" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Observation" inverseName="specimen" inverseEntity="Observation" syncable="YES"/>
         <relationship name="results" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Result" inverseName="specimen" inverseEntity="Result" syncable="YES"/>
     </entity>

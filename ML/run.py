@@ -34,6 +34,12 @@ COULD_NOT_START_CONVNET = 2
 COULD_NOT_SAVE_OUTPUT_FILE = 3
 INVALID_COMMAND_ARGS = 4
 
+class MyError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
 
 # Accepts an image filename, and number of channels,
 # processes the image into a 1D numpy array, of the
@@ -47,7 +53,7 @@ def _process_tag_item(size,channels,name):
         im_data = im_data.astype(np.single)
         return im_data
     except:
-        sys.exit(COULD_NOT_OPEN_IMAGE_FILE)
+        raise MyError(COULD_NOT_OPEN_IMAGE_FILE)
 
 
 # Yields chunks of a specified size n of a list until it
@@ -92,7 +98,7 @@ class ImageRecogniser(object):
                        for filename in filenames)
             data = np.vstack([r for r in rows if r is not None]).T
             if data.shape[0] < len(filenames):    
-                sys.exit(COULD_NOT_OPEN_IMAGE_FILE)
+                raise MyError(COULD_NOT_OPEN_IMAGE_FILE)
             if data.shape[1] == 1:
                 mean = np.mean(data)
             elif data.shape[1] > 1:
@@ -110,8 +116,10 @@ class ImageRecogniser(object):
                 else:
                     pass
             except:
-                sys.exit(COULD_NOT_SAVE_OUTPUT_FILE)
+                raise MyError(COULD_NOT_SAVE_OUTPUT_FILE)
             batch_num += 1
+        return NO_ERROR    
+        
         
 
 # The wrapper class for the convnet which has already been
@@ -136,6 +144,23 @@ class PlantConvNet(convnet.ConvNet):
 
 
     def start_predictions(self, data):
+        # If multiview take patches
+        if self.multiview_test:
+            data_dim = 150528
+            border_size = 16
+            inner_size = 224
+            num_views = 5*2
+            target = np.zeros((data_dim,data.shape[1]*num_views),dtype=np.single)
+            y = data.reshape(3, 256, 256, data.shape[1])
+            start_positions = [(0,0),  (0, border_size*2), (border_size, border_size), (border_size*2, 0), (border_size*2, border_size*2)] 
+            end_positions = [(sy+inner_size, sx+inner_size) for (sy,sx) in start_positions]
+            for i in xrange(num_views/2): 
+                pic = y[:,start_positions[i][0]:end_positions[i][0], 
+                        start_positions[i][1]:end_positions[i][1],:]
+                target[:,i * data.shape[1]:(i+1)* data.shape[1]] = pic.reshape((data_dim,data.shape[1])) 
+                target[:,(num_views/2 + i) * data.shape[1]:(num_views/2 +i+1)* data.shape[1]] = pic[:,:,::-1,:].reshape((data_dim,data.shape[1])) 
+            data = target    
+
         # Run the batch through the model
         self.b_data = np.require(data, requirements='C')
         self.b_labels = np.zeros((1, data.shape[1]), dtype=np.single)
@@ -146,6 +171,15 @@ class PlantConvNet(convnet.ConvNet):
     def finish_predictions(self, filenames):
         # Finish the batch
         self.finish_batch()
+        # Combine results for multiview test
+        if self.multiview_test:
+            num_views = 5*2
+            num_images = self.b_labels.shape[1]/num_views
+            processed_preds = np.zeros((num_images,len(self.tag_names)))
+            for image in range(0,num_images):
+                tmp_preds = self.b_preds[image::num_images]
+                processed_preds[image] = tmp_preds.T.mean(axis=1).reshape(tmp_preds.T.shape[0],-1).T
+            self.b_preds = processed_preds    
         for filename,row in zip(filenames,self.b_preds):
             file_storage = open(os.path.splitext(filename)[0] + '.pickle','wb')
             pickle.dump(np.array(row),file_storage)
@@ -161,29 +195,13 @@ class PlantConvNet(convnet.ConvNet):
         return op
 
 
-# The console interpreter.  It checks whether the arguments
-# are valid, and also parses the configuration files.
-def console(config_file = None):
-    if len(sys.argv) < 3:
-        print 'Must give a component type and valid image file as arguments'
-        sys.exit(INVALID_COMMAND_ARGS)
-    if config_file is None:    
-        cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
-    else:
-        cfg = get_options(config_file, 'run')
-    valid_args = cfg.get('valid_args','entire,stem,branch,leaf,fruit,flower').split(',')
-    if sys.argv[1] not in valid_args:
-        print 'First argument must be one of: [',
-        for arg in valid_args:
-            print arg + ' ',
-        print ']'
-        sys.exit(INVALID_COMMAND_ARGS)
-    cfg_options_file = cfg.get(sys.argv[1],'Type classification not found')
+def get_recogniser(cfg,component):
+    cfg_options_file = cfg.get(component,'Type classification not found')
     cfg_data_options = get_options(cfg_options_file, 'dataset')
     try:
         conv_model = make_model(PlantConvNet,'run',cfg_options_file)
     except:
-        sys.exit(COULD_NOT_START_CONVNET)
+        raise MyError(COULD_NOT_START_CONVNET)
     run = ImageRecogniser(
         batch_size=int(cfg.get('batch-size', 128)),
         channels=int(cfg_data_options.get('channels', 3)),
@@ -191,6 +209,23 @@ def console(config_file = None):
         model=conv_model,
         threshold=float(cfg.get('threshold',0.0)),
         )
+    return run
+
+# The console interpreter.  It checks whether the arguments
+# are valid, and also parses the configuration files.
+def console(config_file = None):
+    if len(sys.argv) < 3:
+        print 'Must give a component type and valid image file as arguments'
+        raise MyError(INVALID_COMMAND_ARGS)
+    cfg = get_options(os.path.dirname(os.path.abspath(__file__))+'/run.cfg', 'run')
+    valid_args = cfg.get('valid_args','entire,stem,branch,leaf,fruit,flower').split(',')
+    if sys.argv[1] not in valid_args:
+        print 'First argument must be one of: [',
+        for arg in valid_args:
+            print arg + ' ',
+        print ']'
+        raise MyError(INVALID_COMMAND_ARGS)
+    run = get_recogniser(cfg,sys.argv[1])
     run(sys.argv[2:])
 
 

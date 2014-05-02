@@ -1,0 +1,259 @@
+acacia
+achillea
+aconite
+African daisy
+agave, century plant, American aloe
+ageratum
+agrimonia, agrimony
+ailanthus
+albizzia, albizia
+alder, alder tree
+allamanda
+almond tree
+althea, althaea, hollyhock
+anchusa
+anemone, windflower
+anthurium, tailflower, tail-flower
+apple tree
+apricot, apricot tree
+araucaria
+arborvitae
+arum, aroid
+ash, ash tree
+aspen
+aster
+astilbe
+astrantia, masterwort
+avens
+banana, banana tree
+baneberry, cohosh, herb Christopher
+bean tree
+bearded iris
+beardless iris
+bedstraw
+beech, beech tree
+begonia
+bellwort, merry bells, wild oats
+bindweed
+birch, birch tree
+bird cherry, bird cherry tree
+blackwood, blackwood tree
+blazing star, button snakeroot, gayfeather, gay-feather, snakeroot
+blueberry, blueberry bush
+bottle-tree, bottle tree
+box elder, ash-leaved maple, Acer negundo
+buckthorn
+bugle, bugleweed
+bulbous plant
+buttercup, butterflower, butter-flower, crowfoot, goldcup, kingcup
+butterfly orchid
+calendula
+calla lily, calla, arum lily, Zantedeschia aethiopica
+camas, camass, quamash, camosh, camash
+campanula, bellflower
+carline thistle
+cassia
+casuarina
+cedar, cedar tree
+cedar, cedar tree, true cedar
+cereal, cereal grass
+cherry, cherry tree
+chestnut oak
+chestnut, chestnut tree
+china pink, rainbow pink, Dianthus chinensis
+chrysanthemum
+citrus, citrus tree
+clover, trefoil
+club moss, club-moss, lycopod
+coffee, coffee tree
+coleus, flame nettle
+columbine, aquilegia, aquilege
+coneflower
+conifer, coniferous tree
+coral tree, erythrina
+coreopsis, tickseed, tickweed, tick-weed
+cotton grass, cotton rush
+cottonwood
+crab apple, crabapple, cultivated crab apple
+cranberry
+cranesbill, crane's bill
+cress, cress plant
+crownbeard, crown-beard, crown beard
+crucifer, cruciferous plant
+custard apple, custard apple tree
+cycad
+cypress, cypress tree
+daffodil, Narcissus pseudonarcissus
+daisy
+dandelion, blowball
+dead nettle
+delphinium
+dicot, dicotyledon, magnoliopsid, exogen
+dogtooth violet, dogtooth, dog's-tooth violet
+dogwood, dogwood tree, cornel
+douglas fir
+echinocactus, barrel cactus
+elm, elm tree
+eucalyptus, eucalypt, eucalyptus tree
+evening primrose
+everlasting, everlasting flower
+fan palm
+feather palm
+fern
+fig marigold, pebble plant
+fig tree
+fleabane
+flowering cherry
+flowering fern, osmund
+four o'clock
+foxglove, digitalis
+foxtail, foxtail grass
+fringed orchis, fringed orchid
+fritillary, checkered lily
+gazania
+gentian
+geranium
+ginger
+goldenrod
+gourd, gourd vine
+gramineous plant, graminaceous plant
+grape hyacinth
+hackberry, nettle tree
+hazelnut, hazel, hazelnut tree
+heath
+helleborine
+hemlock, hemlock tree
+hickory, hickory tree
+holly
+hollyhock
+honeysuckle
+hornbeam
+horsetail
+houseplant
+incense tree
+Indian paintbrush, painted cup
+iridaceous plant
+jasmine
+kalmia
+kauri pine, dammar pine
+knapweed
+ladies' tresses, lady's tresses
+lady palm
+lady's slipper, lady-slipper, ladies' slipper, slipper orchid
+larch, larch tree
+laurel
+liana
+lilac
+liliaceous plant
+linden, linden tree, basswood, lime, lime tree
+liquidambar
+live oak
+locust tree, locust
+loosestrife
+lupine, lupin
+lychnis, catchfly
+magnolia
+maidenhair, maidenhair fern
+mallow
+mandarin, mandarin orange, mandarin orange tree, Citrus reticulata
+maple
+marigold
+marsh plant, bog plant, swamp plant
+medic, medick, trefoil
+milkweed, silkweed
+millet
+monarda, wild bergamot
+mountain ash
+mouse-ear chickweed, mouse eared chickweed, mouse ear, clammy chickweed, chickweed
+mugwort
+mulberry, mulberry tree
+mustard
+nasturtium
+nemophila
+nettle
+nigella
+nut tree
+oak, oak tree
+olive tree
+orange, orange tree
+orchid, orchidaceous plant
+orchis
+osier
+palm, palm tree
+palmetto
+parnassia, grass-of-Parnassus
+persimmon, persimmon tree
+petunia
+philadelphus
+phlox
+pimpernel
+pine, pine tree, true pine
+pink, garden pink
+pitcher plant
+plane tree, sycamore, platan
+plum, plum tree
+plume thistle, plumed thistle
+poker plant, Kniphofia uvaria
+polypody
+poplar, poplar tree
+poppy
+prickly pear, prickly pear cactus
+primrose, primula
+protea
+radish plant, radish
+raspberry, raspberry bush
+red oak
+reed grass
+rein orchid, rein orchis
+rhododendron
+rhubarb, rhubarb plant
+rockrose, rock rose
+rose, rosebush
+rye grass, ryegrass
+sago palm
+sand verbena
+sandwort
+sansevieria, bowstring hemp
+saxifrage, breakstone, rockfoil
+scabious, scabiosa
+scorpionweed, scorpion weed, phacelia
+sedum
+shield fern, buckler fern
+silene, campion, catchfly
+silver fir
+southern beech, evergreen beech
+spider orchid
+spirea, spiraea
+spleenwort
+spruce
+spurge
+stock, gillyflower
+St John's wort
+sumac, sumach, shumac
+summer squash, summer squash vine, Cucurbita pepo melopepo
+sunflower, helianthus
+sweet melon, muskmelon, sweet melon vine, Cucumis melo
+teasel, teazel, teasle
+thistle
+thyme
+toadflax, butter-and-eggs, wild snapdragon, devil's flax, Linaria vulgaris
+tulip
+valerian
+vanda
+veronica, speedwell
+vinifera, vinifera grape, common grape vine, Vitis vinifera
+viola
+violet
+walnut, walnut tree
+wattle
+white oak
+white pine
+wild apple, crab apple, crabapple
+wild plum, wild plum tree
+willow, willow tree
+willowherb
+winter squash, winter squash plant
+wood fern, wood-fern, woodfern
+yellow lady's slipper, yellow lady-slipper, Cypripedium calceolus, Cypripedium parviflorum
+yellow pine
+yew

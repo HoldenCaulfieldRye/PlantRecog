@@ -92,7 +92,8 @@
 - (NSArray*)getSpecimenNeedingUpdate
 {
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Specimen"];
-    [request setPredicate:[NSPredicate predicateWithFormat: @"(NONE observations.uploaded == FALSE) AND (groupid != NULL)"]];
+    [request setPredicate:[NSPredicate predicateWithFormat: @"((NONE observations.uploaded == FALSE) AND (groupid != NULL)) OR"
+                                                                        "((forDeletion == TRUE) AND (groupid != NULL))"]];
     
     [request setSortDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES]]];
 
@@ -101,7 +102,7 @@
     NSArray *array = [context executeFetchRequest:request error:&error];
     if (!error){
         return [array filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:
-                                                   @"(results.@count == 0) AND (complete == TRUE)"]];
+                                                   @"(results.@count == 0) AND ((complete == TRUE) OR ((forDeletion == TRUE) AND (notified == FALSE)))"]];
     }
     return nil;
 }
@@ -114,6 +115,7 @@
     }
     
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Specimen"];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"(forDeletion == FALSE)"]];
     request.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO]];
     
     return [[NSFetchedResultsController alloc] initWithFetchRequest:request
@@ -134,7 +136,7 @@
 - (NSArray*)getObservationsNeedingUploading
 {
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Observation"];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"(uploaded != TRUE) AND (filename != NULL)"]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"(uploaded != TRUE) AND (filename != NULL) AND (specimen.forDeletion == FALSE)"]];
     
     
     request.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"filename" ascending:YES]];
@@ -216,7 +218,7 @@
 - (void)cleanup
 {
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"Specimen"];
-    [request setPredicate:[NSPredicate predicateWithFormat: @"complete == FALSE"]];
+    [request setPredicate:[NSPredicate predicateWithFormat: @"(complete == FALSE) OR (forDeletion == TRUE)"]];
     
     [request setSortDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES]]];
     

@@ -99,6 +99,9 @@ else{
   app.get('/job/:group_id', routes.getJob(db));
   app.get('/job', routes.getJob(db));
 
+  /* Force old entries to be reclassified */
+  app.get('/forceold', routes.forceOld(db));
+
 
   /* Enable upload function via post at /upload url */
   app.post('/upload', routes.upload(db,configArgs));

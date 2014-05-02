@@ -8,10 +8,11 @@
 
 #import "BLEFResultsViewController.h"
 #import "BLEFDatabase.h"
+#import "BLEFresultLabel.h"
+#import "BLEFLookUpViewController.h"
 
 @interface BLEFResultsViewController ()
 
-@property (weak, nonatomic) IBOutlet UILabel *resultLabel;
 @property (weak, nonatomic) IBOutlet UIPageControl *pageControl;
 @property (weak, nonatomic) IBOutlet UIScrollView *imageScrollView;
 
@@ -23,8 +24,15 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+        // Custom Init
     }
+    return self;
+}
+
+- (id)init
+{
+    self = [super init];
+    NSLog(@"INIT");
     return self;
 }
 
@@ -32,41 +40,34 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-
+    
     if (_specimen){
 
         
-        /*
-        // JSON PARSE
-         NSString *result = nil;
-        if (result){
-            NSDictionary* resultDic = [NSJSONSerialization JSONObjectWithData:[result dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:nil];
-            __block NSString *formatedResult = @"";
-            if (resultDic){
-                [resultDic enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-                    formatedResult = [formatedResult stringByAppendingString:[NSString stringWithFormat:@"%@ : %@ \n\n", key, value]];
-                }];
-            }
-            [[self resultLabel] setText:formatedResult];
-        } else {
-            [[self resultLabel] setText:@"No classification..yet"];
-        }
-        */
-        
-        [[self resultLabel] setText:@"No classification..yet"];
-        
+        NSInteger resultY = 0;
+        NSInteger resultWidth = self.resultsArea.bounds.size.width;
+        NSInteger resultHeight = 30;
         NSSet *results = [_specimen results];
         if (results != nil){
-            BLEFResult *result = (BLEFResult *)[results anyObject];
-            if (result != nil){
-                if (result.name != nil)
-                    [[self resultLabel] setText:result.name];
+            NSArray *unsortedResults = [results allObjects];
+            NSArray *sortedResults = [unsortedResults sortedArrayUsingComparator:^NSComparisonResult(BLEFResult *result1, BLEFResult *result2) {
+                return ([result1 confidence] < [result2 confidence]);
+            }];
+            for (BLEFResult *result in sortedResults) {
+                BLEFresultLabel *resultLabel = [[BLEFresultLabel alloc] initWithFrame:CGRectMake(0, resultY, resultWidth, resultHeight)
+                                                                           confidence:[result confidence]];
+                [resultLabel setText:[result name]];
+                resultY = resultY + resultHeight;
+                [_resultsArea addSubview:resultLabel];
+                UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(lookupFrom:)];
+                singleTap.numberOfTapsRequired = 1;
+                [resultLabel addGestureRecognizer:singleTap];
+                [resultLabel setUserInteractionEnabled:true];
             }
         }        
         
         // Images
         
-        // TODO : Get images for specimen
         
         NSArray *observations = [_database getObservationsFromSpecimen:_specimen];
         NSMutableArray *images = [[NSMutableArray alloc] init];
@@ -91,7 +92,11 @@
         }
         //Set the content size of our scrollview according to the total width of our imageView objects.
         self.imageScrollView.contentSize = CGSizeMake(self.imageScrollView.frame.size.width * [imageArray count], self.imageScrollView.frame.size.height);
-        self.pageControl.numberOfPages = [imageArray count];
+        if ([imageArray count] > 1){
+            self.pageControl.numberOfPages = [imageArray count];
+        } else {
+            self.pageControl.hidden = true;
+        }
     }
 }
 
@@ -99,6 +104,25 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)lookupFrom:(UITapGestureRecognizer *)sender
+{
+    id object = sender.view;
+    if ([object isKindOfClass:[BLEFresultLabel class]]){
+        BLEFresultLabel *label = (BLEFresultLabel*)object;
+        NSString *result = [label text];
+        [self performSegueWithIdentifier:@"RESULTtoLOOKUP" sender:result];
+    }
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([[segue identifier] isEqualToString:@"RESULTtoLOOKUP"]) {
+        BLEFLookUpViewController *destination = [segue destinationViewController];
+        NSString *lookup = (NSString *)sender;
+        [destination setLookup:lookup];
+    }
 }
 
 #pragma mark - Image ScrollView Delegate Methods

@@ -33,11 +33,19 @@
 
 - (void)styleCellWithSpecimen:(BLEFSpecimen *)specimen
 {
+
     if (specimen != nil){
         if ([specimen.results count] == 0){
-            [self.textLabel setText:@"Proccessing..."];
+            [self.textLabel setText:@"..."];
+            [_processingIndicator startAnimating];
+
         } else {
-            BLEFResult *result = [specimen.results anyObject];
+            [_processingIndicator stopAnimating];
+            NSArray *unsortedResults = [specimen.results allObjects];
+            NSArray *sortedResults = [unsortedResults sortedArrayUsingComparator:^NSComparisonResult(BLEFResult *result1, BLEFResult *result2) {
+                return ([result1 confidence] < [result2 confidence]);
+            }];
+            BLEFResult *result = [sortedResults firstObject];;
             [self.textLabel setText: [result name]];
         }
         
@@ -46,6 +54,7 @@
             [[self imageView] setImage:thumb];
         }
     }
+        [[self contentView] bringSubviewToFront:_processingIndicator];
 }
 
 @end

@@ -72,6 +72,7 @@ class IGPUModel:
             self.model_state["epoch"] = 1
             self.model_state["batchnum"] = self.train_batch_range[0]
 
+
         self.init_data_providers()
         if load_dic: 
             self.train_data_provider.advance_batch()
@@ -148,15 +149,17 @@ class IGPUModel:
             batch_output = self.finish_batch()
             self.train_outputs += [batch_output]
             self.print_train_results()
+            self.print_train_time(time() - compute_time_py)
 
             if self.get_num_batches_done() % self.testing_freq == 0:
+                compute_time_py = time()
                 self.sync_with_host()
                 self.test_outputs += [self.get_test_error()]
                 self.print_test_results()
                 self.print_test_status()
                 self.conditional_save()
+                self.print_train_time(time() - compute_time_py)
             
-            self.print_train_time(time() - compute_time_py)
         self.cleanup()
     
     def cleanup(self):
@@ -195,7 +198,7 @@ class IGPUModel:
     def print_train_results(self):
         batch_error = self.train_outputs[-1][0]
         if not (batch_error > 0 and batch_error < 2e20):
-            print "Crazy train error: %.6f" % batch_error
+            print "Train error: %.6f" % batch_error
             self.cleanup()
 
         print "Train error: %.6f " % (batch_error),
@@ -222,19 +225,29 @@ class IGPUModel:
     def get_test_error(self):
         next_data = self.get_next_batch(train=False)
         test_outputs = []
+        number_tested = 0
+        print "========================="
+        if self.test_many > 0:
+            print "Testing %i batches"%(self.test_many)
+        elif self.test_one:    
+            print "Testing 1 batch"
+        else:
+            print "Testing all batches"
         while True:
             data = next_data
             self.start_batch(data, train=False)
-            load_next = not self.test_one and data[1] < self.test_batch_range[-1]
+            load_next = not self.test_one and ((self.test_many < 0 and data[1] < self.test_batch_range[-1]) or (number_tested < self.test_many))
             if load_next: # load next batch
                 next_data = self.get_next_batch(train=False)
+                number_tested += 1
             test_outputs += [self.finish_batch()]
-            if self.test_only: # Print the individual batch results for safety
+            if self.test_only or not self.test_one: # Print the individual batch results for safety
+                if self.test_many > 0:
+                    print "%i/%i\t"%(number_tested,self.test_many),
                 print "batch %d: %s" % (data[1], str(test_outputs[-1]))
             if not load_next:
                 break
             sys.stdout.flush()
-            
         return self.aggregate_test_outputs(test_outputs)
     
     def set_var(self, var_name, var_val):
@@ -293,6 +306,7 @@ class IGPUModel:
         op.add_option("test-only", "test_only", BooleanOptionParser, "Test and quit?", default=0)
         op.add_option("zip-save", "zip_save", BooleanOptionParser, "Compress checkpoints?", default=0)
         op.add_option("test-one", "test_one", BooleanOptionParser, "Test on one batch at a time?", default=1)
+        op.add_option("test-many", "test_many", IntegerOptionParser, "Test on more than one batch at a time?", default=-1)
         op.add_option("gpu", "gpu", ListOptionParser(IntegerOptionParser), "GPU override", default=OptionExpression("[-1] * num_gpus"))
         return op
 

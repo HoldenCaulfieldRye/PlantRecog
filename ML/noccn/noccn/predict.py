@@ -4,6 +4,7 @@ import sys
 import time
 
 import numpy as np
+import cPickle as pickle
 
 from ccn import convnet
 from ccn import options
@@ -14,115 +15,90 @@ from script import run_model
 def make_predictions(net, data, labels, num_classes):
     data = np.require(data, requirements='C')
     labels = np.require(labels, requirements='C')
-
     preds = np.zeros((data.shape[1], num_classes), dtype=np.single)
+    labels_stub = np.zeros((1, data.shape[1]), dtype=np.single)
     softmax_idx = net.get_layer_idx('probs', check_type='softmax')
-
-    t0 = time.time()
-    net.libmodel.startFeatureWriter(
-        [data, labels, preds], softmax_idx)
+    net.libmodel.startFeatureWriter( [data, labels_stub, preds], softmax_idx)
     net.finish_batch()
-    print "Predicted %s cases in %.2f seconds." % (
-        labels.shape[1], time.time() - t0)
-
     if net.multiview_test:
-        #  We have to deal with num_samples * num_views
-        #  predictions.
         num_views = net.test_data_provider.num_views
-        num_samples = labels.shape[1] / num_views
-        split_sections = range(
-            num_samples, num_samples * num_views, num_samples)
-        preds = np.split(preds, split_sections, axis=0)
-        labels = np.split(labels, split_sections, axis=1)
-        preds = reduce(np.add, preds)
-        labels = labels[0]
-
+        processed_preds = np.zeros((labels.shape[1],num_classes))
+        for image in range(0,labels.shape[1]):
+            tmp_preds = preds[image::labels.shape[1]]
+            processed_preds[image] = tmp_preds.T.mean(axis=1).reshape(tmp_preds.T.shape[0],-1).T
+        preds = processed_preds    
     return preds, labels
 
 
 class PredictConvNet(convnet.ConvNet):
     _predictions = None
     _option_parser = None
-
     csv_fieldnames = ''
 
     def make_predictions(self):
-        if self._predictions is not None:
-            return self._predictions
-
         num_classes = self.test_data_provider.get_num_classes()
-        all_preds = np.zeros((0, num_classes), dtype=np.single)
-        all_labels = np.zeros((0, 1), dtype=np.single)
-        all_metadata = []
         num_batches = len(self.test_data_provider.batch_range)
-        db = self.test_data_provider.batch_meta.get('metadata', {})
-
+        classes = self.test_data_provider.batch_meta['label_names']
+        self.performance_dict = dict((_class,{'top-1':0,'top-5':0,'top-10':0,'total':0}) for _class in classes)
         for batch_index in range(num_batches):
+            t0 = time.time()
             epoch, batchnum, (data, labels) = self.get_next_batch(train=False)
-            if data.shape[1] != labels.shape[1]:
-                data = data[:, :labels.shape[1]]
             preds, labels = make_predictions(self, data, labels, num_classes)
-            all_preds = np.vstack([all_preds, preds])
-            all_labels = np.vstack([all_labels, labels.T])
-            # A temporary change due to the lack of ids in our db
-            #if db:
-                #ids = self.test_data_provider.get_batch(batchnum).get('ids')
-                #all_metadata.extend([db[id] for id in ids])
+            top_results = np.argsort(preds,axis=1).T[::-1].T[:,:10]
+            result_row = 0
+            for label in labels[0]:
+                label = int(label)
+                top = list(top_results[result_row])
+                try:
+                    index = top.index(label)
+                except:
+                    index = -1
+                self.performance_dict[classes[label]]['total']+=1
+                if index == 0:
+                    self.performance_dict[classes[label]]['top-1']+=1
+                if index < 5 and index >= 0:    
+                    self.performance_dict[classes[label]]['top-5']+=1
+                if index < 10 and index >= 0:    
+                    self.performance_dict[classes[label]]['top-10']+=1
+                result_row += 1
+            print "%i/%i:\tPredicted %s cases in %.2f seconds."%(batch_index+1,num_batches,len(labels[0]),time.time()-t0)
+            sys.stdout.flush()
+        return self.performance_dict
 
-        self._predictions = all_preds, all_labels, all_metadata
-        return self._predictions
-
-    def write_predictions(self):
-        preds, labels, md = self.make_predictions()
-        preds = preds.reshape(preds.shape[0], -1)
-
-        print "Predicted true: %.4f" % (
-            np.where(preds > preds.max() / 2)[0].shape[0] /
-            float(preds.shape[0]))
-
-        fieldnames = [
-            str(i) for i in range(self.test_data_provider.get_num_classes())]
-        fieldnames_extra = (self.csv_fieldnames or 'name').split(',')
-        fieldnames += fieldnames_extra
-
-        with open(self.op_write_predictions_file, 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            for pred, label, m in zip(preds, labels, md):
-                record = dict(zip([str(i) for i in range(len(pred))], pred))
-                record.update(m)
-                writer.writerow(record)
 
     def report(self):
-        from sklearn.metrics import roc_auc_score
-        from sklearn.metrics import classification_report
-        from sklearn.metrics import confusion_matrix
-        from sklearn.metrics import f1_score
-        from sklearn.metrics import precision_recall_curve
+        print 'Class Name;Num Correct Top-1;Num Correct Top-5;Num Total',
+        print ';Top-1 Error Rate;Top-5 Error Rate'
+        total_top1 = 0.0
+        total_top5 = 0.0
+        total_total = 0.0
+        for key in self.performance_dict:
+            t1 = self.performance_dict[key]['top-1']
+            t5 = self.performance_dict[key]['top-5']
+            tot = self.performance_dict[key]['total']
+            total_top1+=t1
+            total_top5+=t5
+            total_total+=tot
+            if tot > 0:
+                err1 = (tot-t1)/float(tot)
+                err5 = (tot-t5)/float(tot)
+                print '%s;%i;%i;%i;%.05f;%.05f'%(key,t1,t5,tot,err1,err5)
+            else:
+                print '%s;%i;%i;%i;N/A;N/A'%(key,t1,t5,tot)
+        if total_total > 0:
+            err1 = (total_total-total_top1)/float(total_total)
+            err5 = (total_total-total_top5)/float(total_total)
+            print 'Total;%i;%i;%i;%.05f;%.05f'%(total_top1,total_top5,total_total,err1,err5)
+        else:
+            print 'Total;%i;%i;%i;N/A;N/A'%(total_top1,total_top5,total_total)
 
-        y_pred_probas, y_true, md = self.make_predictions()
-        y_pred = y_pred_probas.argmax(1)
-        y_pred_probas = y_pred_probas[:, 1]
-        print y_true
-        y_true = y_true.reshape(-1)
-        print y_true
-
-        print
-        print "AUC score:", roc_auc_score(y_true, y_pred_probas)
-        print "AUC score (binary):", roc_auc_score(y_true, y_pred)
-        print
-
-        print "Classification report:"
-        print classification_report(y_true, y_pred)
-        print
-
-        print "Confusion matrix:"
-        print confusion_matrix(y_true, y_pred)
-        print
 
     def start(self):
         self.op.print_values()
-        if self.op_write_predictions_file:
-            self.write_predictions()
+        self.make_predictions()
+        save_file = open(self.op_write_predictions_file,'wb')
+        pickle.dump(self.performance_dict,save_file)
+        save_file.close()
         if self.op_report:
             self.report()
         sys.exit(0)

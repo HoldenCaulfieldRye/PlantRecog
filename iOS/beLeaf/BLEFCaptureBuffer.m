@@ -159,7 +159,8 @@
 - (void)deleteSession
 {
     BLEFSpecimen *specimen = [self specimen];
-    [[_database managedObjectContext] deleteObject:specimen];
+    [specimen setForDeletion:true];
+    [_database saveChanges];
 }
 
 #pragma mark - Location Delegate Methods
