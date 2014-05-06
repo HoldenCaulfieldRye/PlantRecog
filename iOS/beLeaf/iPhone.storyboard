@@ -143,6 +143,7 @@
                         </subviews>
                         <color key="backgroundColor" red="0.54938357019999995" green="0.59893002719999999" blue="0.39983515650000001" alpha="1" colorSpace="calibratedRGB"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstAttribute="centerX" secondItem="o2d-d6-qaI" secondAttribute="centerX" id="1dT-5w-sAu"/>
                             <constraint firstItem="2KQ-Q9-OKc" firstAttribute="top" secondItem="PQ6-ZG-icQ" secondAttribute="bottom" constant="2" id="5Xe-Aw-1FM"/>
@@ -156,6 +157,10 @@
                             <constraint firstItem="TrO-Ps-uog" firstAttribute="leading" secondItem="o2d-d6-qaI" secondAttribute="leading" id="vSc-VQ-llK"/>
                             <constraint firstItem="2KQ-Q9-OKc" firstAttribute="leading" secondItem="9ne-2L-ZFy" secondAttribute="leading" constant="20" id="z4j-xG-WEO"/>
                         </constraints>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="mim-Nj-ujr" appends="YES" id="FMG-sa-sT8"/>
+                            <outletCollection property="gestureRecognizers" destination="lvV-u4-bg2" appends="YES" id="k37-qP-L9E"/>
+                        </connections>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
                     <toolbarItems/>
@@ -176,6 +181,16 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lud-hi-Fng" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <swipeGestureRecognizer direction="left" id="lvV-u4-bg2">
+                    <connections>
+                        <action selector="swipeLeft:" destination="tXe-fC-WfM" id="RGN-t3-ZeG"/>
+                    </connections>
+                </swipeGestureRecognizer>
+                <swipeGestureRecognizer direction="right" id="mim-Nj-ujr">
+                    <connections>
+                        <action selector="swipeRight:" destination="tXe-fC-WfM" id="Vzd-Nr-pDb"/>
+                    </connections>
+                </swipeGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="885" y="-461"/>
         </scene>
