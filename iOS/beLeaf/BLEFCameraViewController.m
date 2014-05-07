@@ -266,6 +266,24 @@ void runOnMainQueueWithoutDeadlocking(void (^codeblock)(void))
     }
 }
 
+- (IBAction)swipeLeft:(id)sender {
+    if ([_segmentSelection isEnabled]){
+        if ([_segmentSelection selectedSegmentIndex] > 0){
+            [_segmentSelection setSelectedSegmentIndex:[_segmentSelection selectedSegmentIndex] -1];
+            [self segmentSelectionChanged:nil];
+        }
+    }
+}
+
+- (IBAction)swipeRight:(id)sender {
+    if ([_segmentSelection isEnabled]){
+        if ([_segmentSelection selectedSegmentIndex] < [_segmentSelection numberOfSegments]){
+            [_segmentSelection setSelectedSegmentIndex:[_segmentSelection selectedSegmentIndex] +1];
+            [self segmentSelectionChanged:nil];
+        }
+    }
+}
+
 - (void)processImageData:(NSData *)imageData
 {
     UIImage *largerImage = [UIImage imageWithData:imageData];
