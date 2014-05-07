@@ -155,7 +155,7 @@ NSString * boundary = @"---------------------------14737809831466499882746641449
         if (index < [[self specimenForUpdating] count]){
             BLEFSpecimen *specimen = (BLEFSpecimen *)[_specimenForUpdating objectAtIndex:index];
             if (specimen != nil){
-                if ([specimen notified]){
+                if ([specimen notified] && ![specimen forDeletion]){
                     NSURLSessionDataTask *task = [self createUpdateTaskForSpecimen:specimen completion:^(BOOL updated) {
                         if (updated){
                             [_database saveChanges];
@@ -319,6 +319,7 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
     NSDictionary *classification;
     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
     if (json){
+        NSLog(@"%@", json);
         NSString *classificationSTR = json[@"classification"];
         if ((classificationSTR != nil) && [classificationSTR length] > 2){
             NSData *classificationDATA = [classificationSTR dataUsingEncoding:NSUTF8StringEncoding];
@@ -336,7 +337,6 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
                 BLEFResult *result = [_database addNewResultToSpecimen:specimen];
                 [result setName:key];
                 [result setConfidence:[value floatValue]];
-                NSLog(@"Confidence: %f", [result confidence]);
             }];
             return true;
         }
