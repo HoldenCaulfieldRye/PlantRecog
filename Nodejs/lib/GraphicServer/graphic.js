@@ -14,6 +14,7 @@ var mongo = require('mongodb');
 var parse = require('./config_parser');
 var async = require('async');
 var child = require('child_process');
+var exec = require('child_process').exec;
 
 var app = express();
 
@@ -91,21 +92,33 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-/* Start polling mongo */
-//routes.groupClassify(db,configArgs,function(){});
-var poll = child.fork('./Nodejs/lib/GraphicServer/poll.js',[configArgs.db_host,configArgs.db_port,configArgs.db_database])
+console.log('About to launch the server');
+/* Launch the graphic02 server script */
+exec('python ./ML/runserver.py &', function(err,stdout,stderr){
+    console.log("Launching runserver.py");
+    if(err != null ){console.log("error: " + error)};
+    console.log("stdout: " + stdout);
+    console.log("stderr: " + stderr);
+
+});
+
+setTimeout(function(){
+    /* Start polling mongo */
+    var poll = child.fork('./Nodejs/lib/GraphicServer/poll.js',[configArgs.db_host,configArgs.db_port,configArgs.db_database])
 
 
-/* Enable classify function via post at /classify url */
-//app.post('/classify', routes.classify(db));
+    /* Enable classify function via post at /classify url */
+    //app.post('/classify', routes.classify(db));
 
-app.post('/classify', routes.classify(db,configArgs));
+    app.post('/classify', routes.classify(db,configArgs));
 
-// If we are the top module (ie, not testing) then start the app.
-/* istanbul ignore if */
-/* Ignored for coverage because we only launch app in production */
-if (!module.parent) {
-  http.createServer(app).listen(app.get('port'), function(){
-    console.log('Express server listening on port ' + app.get('port'));
-  });
-}
+    // If we are the top module (ie, not testing) then start the app.
+    /* istanbul ignore if */
+    /* Ignored for coverage because we only launch app in production */
+    if (!module.parent) {
+	http.createServer(app).listen(app.get('port'), function(){
+	    console.log('Express server listening on port ' + app.get('port'));
+	});
+    }
+}, 5000);
+
