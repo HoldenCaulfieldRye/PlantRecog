@@ -64,6 +64,7 @@ def host_server():
     s.listen(5)
     # Start the server
     while True:
+       print 'Server Up'
        conn, addr = s.accept()
        data = recv_size(conn)
        parsed_data = pickle.loads(data)
