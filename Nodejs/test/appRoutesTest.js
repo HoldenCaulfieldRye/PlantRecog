@@ -128,10 +128,10 @@ describe('Application_server',function(){
 
 	    // Actual document in Database.
 	    var returnedObject = {
-	    	"_id" : "531b2f165fa89cca1be0cd0b",
-	    	"classified_count" : 0,
-			"image_count" : 1,	
-	    	"group_status" : "uploading"
+	    	_id : '531b2f165fa89cca1be0cd0b',
+	    	classified_count : 0,
+			image_count : 1,	
+	    	group_status : 'uploading'
 	    }
 
 	    request(app)
