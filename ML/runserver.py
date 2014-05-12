@@ -64,6 +64,7 @@ def host_server():
     s.listen(5)
     # Start the server
     while True:
+       print 'Server Up'
        conn, addr = s.accept()
        try:
            data = recv_size(conn)

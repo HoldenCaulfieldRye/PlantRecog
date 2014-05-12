@@ -38,5 +38,8 @@
 - (IBAction)cancelButtonPressed:(id)sender;
 - (IBAction)retakeButtonPressed:(id)sender;
 
+- (IBAction)swipeLeft:(id)sender;
+- (IBAction)swipeRight:(id)sender;
+
 
 @end

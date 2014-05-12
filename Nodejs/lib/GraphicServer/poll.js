@@ -35,6 +35,7 @@ try{
                             				    if(docs[count].graphic_filepath){
                             					     str = str + " " + docs[count].graphic_filepath;
                             				    }
+							    console.log("graphic filepath: " + docs[count].graphic_filepath);
 							    count = count + 1;
                             				    setImmediate(callback);
                             				},
@@ -42,7 +43,7 @@ try{
 							    console.log('str: ' + str);
 							    
 		              // Note: this is nested in the first async.whilst				    
-                              exec('python ./ML/run.py ' + components[i] + ' ' + str, function(error, stdout, stderr){
+                              exec('python ./ML/runclient.py ' + components[i] + ' ' + str, function(error, stdout, stderr){
                               console.log('stdout: ' + stdout);
                               console.log('stderr: ' + stderr);
                               if(error != null){
@@ -54,45 +55,51 @@ try{
 		              var count2 = 0;
                               async.whilst( function(){ return count2 < docs.length },
                                             function(callback){
+						  //console.log("we think the group_id is: " + docs[count2].group_id)
                                                   if(docs[count2].graphic_filepath){
-                                                     db.collection('groups').update({"_id" : new BSON.ObjectID(docs[count2].group_id)},{ $inc : { "classified_count": 1} },function(err,result){ 
+                                                     db.collection('groups').update({"_id" : new BSON.ObjectID(String(docs[count2].group_id))},{ $inc : { "classified_count": 1} },function(err,result){ 
 							 if (err) throw err;
-							 console.log("result: " + result);
-						     })
+					             })
                                                      console.log("Updated group: " + docs[count2].group_id)
-                                                  }
+                                                     db.collection('segment_images').update({"_id" : docs[count2]._id}, { $set : {"submission_state": "File analysed by net" } }, function(err,rez){
+							 if (err) throw err;
+						     })						     
+						  }
 						  count2 = count2 + 1;
-                                                  setImmediate(callback);
+                                                  setTimeout(callback,1000);
                                                  },
                                             function(err){
-			      var count3 = 0;  
-	                      //var result_set = ''
+	                      
 			      // Iterate through groups whose images we have analysed and check whether images_count = classified_count 
+			      var count3 = 0;
 			      async.whilst(function(){ return count3 < docs.length },			  
 			     		   function(callback){
 					        if(docs[count3].graphic_filepath){
 						    console.log("docs.length: " + docs.length);
 					            console.log("docs[count3].group_id: " + docs[count3].group_id )
-						    db.collection('groups').find({"_id" : new BSON.ObjectID(docs[count3].group_id)}).toArray(function(err,results){
-							//console.log("got here!")
-							//console.log("results.length: " + results.length)
+						    //console.log("results[0].image_count: " + result)
+						    //console.log("")
+						    //console.log("")
+						    db.collection('groups').find({"_id" : new BSON.ObjectID(String(docs[count3].group_id))}).toArray(function(err,results){
+							
 							if(!err && results.length == 1){
-							if(results[0].image_count == results[0].classified_count){	  
+							if(results[0].image_count == results[0].classified_count && results[0].group_status == "Complete"){	  
 				
-							    var result_set = ''
+							    var result_set = '' 
 							    if(results[0].leaf)   result_set = result_set + ' leaf '   + results[0].leaf 
 							    if(results[0].flower) result_set = result_set + ' flower ' + results[0].flower 
 							    if(results[0].fruit)  result_set = result_set + ' fruit '  + results[0].fruit
 							    if(results[0].entire) result_set = result_set + ' entire ' + results[0].entire 
 							    
-							    console.log("time to exec the combine.py script")
+							    console.log("Time to exec the combine.py script.")
+							    console.log("Passing this string to combine.py:" + result_set)
 							    exec("python ./ML/combine.py " + result_set, function(err,stdout,stderro){
 								console.log(stdout);
 								console.log("group id: " + results[0]._id);
 								if(!err){
-								db.collection('groups').update({"_id": results[0]._id},{$set: {"classification": stdout, "group_status": "classified" }}, function(err,res){
+								    db.collection('groups').update({"_id": results[0]._id},{$set: {"classification": stdout, "group_status": "Classified" }}, function(err,res){
 								       console.log("Classification added to group: " + results[0]._id)
-								})
+								       	})
 								}
 							     })	  
 							}
@@ -103,10 +110,13 @@ try{
 						    })
 						}
 					        count3 = count3+1;
-					        setTimeout(callback,5000);
+					        
+					       setTimeout(callback,5000);
+					
+					        	   
 					  },
 					  function(err){  
-			                  // update the relevant groups with a 'classification' fiel
+			                 
                                });
 			     });
                           }});
