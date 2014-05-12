@@ -357,7 +357,7 @@ describe('Application_server',function(){
 
 		it('should accept a completion request and respond with the same objectID and status', function(done){
 			this.timeout(4000);
-			g_id = "531b4461aa4b00752588b5d7";
+			g_id = "5329bda4ec1ac97a1820fafd";
 		    request(app)
 			.put('/completion/' + g_id)
 			.field("completion", true)
@@ -378,7 +378,7 @@ describe('Application_server',function(){
 
 		it('should say record was now updated', function(done){
 			this.timeout(4000);
-			g_id = "531b4461aa4b00752588b5d7";
+			g_id = "5329bda4ec1ac97a1820fafd";
 		    request(app)
 			.put('/completion/' + g_id)
 			.field("completion", false)
@@ -400,7 +400,7 @@ describe('Application_server',function(){
 
 		it('should show record not updated', function(done){
 			this.timeout(4000);
-			g_id = "531b4461aa4b00752588b5d7";
+			g_id = "5329bda4ec1ac97a1820fafd";
 		    request(app)
 			.put('/completion/' + g_id)
 			.field("completion", false)
