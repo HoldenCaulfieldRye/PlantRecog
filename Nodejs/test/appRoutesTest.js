@@ -33,7 +33,7 @@ describe('Application_server',function(){
     configArgs.db_port = "55517";
     configArgs.db_host = "theplant.guru";
     configArgs.db_database = "development";
-    configArgs.classifier_host = "theplant.guru";
+    configArgs.classifier_host = "graphic02.doc.ic.ac.uk";
     configArgs.classifier_port = "55581";
     configArgs.appServer_port = "55580";
 
@@ -128,14 +128,16 @@ describe('Application_server',function(){
 
 	    // Actual document in Database.
 	    var returnedObject = {
-	    	"group_status" : "uploading",
-	    	"image_count" : 1,
-	    	"classified_count" : 0,
-	    	"_id" : "531b2f165fa89cca1be0cd0b"
+  			"_id": "5329bda4ec1ac97a1820fafd",
+  			"classification": "{ \"crucifer\":0.326, \"sweet melon\":0.188, \"magnolia\":0.094, \"summer squash\":0.037, \"citrus\":0.026, }\n",
+		    "classified_count": 9,
+  			"entire": "/homes/sd3112/GroupProject/group-project-master/Nodejs/lib/GraphicServer/uploads/development/5329bda4ec1ac97a1820fafd/73be1f6bfa9a670b12a72f2e870e9208.jpg",
+  			"group_status": "Cancelled",
+		    "image_count": 1
 	    }
 
 	    request(app)
-		.get('/job/531b2f165fa89cca1be0cd0b')
+		.get('/job/5329bda4ec1ac97a1820fafd')
 		.expect(200, returnedObject)
 		.end(function(err,res){
 		    if(err){
@@ -357,7 +359,7 @@ describe('Application_server',function(){
 
 		it('should accept a completion request and respond with the same objectID and status', function(done){
 			this.timeout(4000);
-			g_id = "531b4461aa4b00752588b5d7";
+			g_id = "5329bda4ec1ac97a1820fafd";
 		    request(app)
 			.put('/completion/' + g_id)
 			.field("completion", true)
@@ -378,7 +380,7 @@ describe('Application_server',function(){
 
 		it('should say record was now updated', function(done){
 			this.timeout(4000);
-			g_id = "531b4461aa4b00752588b5d7";
+			g_id = "5329bda4ec1ac97a1820fafd";
 		    request(app)
 			.put('/completion/' + g_id)
 			.field("completion", false)
@@ -400,7 +402,7 @@ describe('Application_server',function(){
 
 		it('should show record not updated', function(done){
 			this.timeout(4000);
-			g_id = "531b4461aa4b00752588b5d7";
+			g_id = "5329bda4ec1ac97a1820fafd";
 		    request(app)
 			.put('/completion/' + g_id)
 			.field("completion", false)

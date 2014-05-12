@@ -22,8 +22,8 @@ describe('Graphic_server',function(){
 			configArgs = parseConfig('../env/graphic_dev_env.conf');
 			assert.equal(configArgs.db_database,'development');
 			assert.equal(configArgs.db_port,'55517');
-			assert.equal(configArgs.db_host,'plantrecogniser.no-ip.biz');
-			assert.equal(configArgs.classifier_host,'146.169.49.11');
+			assert.equal(configArgs.db_host,'theplant.guru');
+			assert.equal(configArgs.classifier_host,'graphic02.doc.ic.ac.uk');
 			assert.equal(configArgs.classifier_port,'55581');
 			assert.equal(configArgs.appServer_port,'55580');
 		});

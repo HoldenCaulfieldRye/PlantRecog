@@ -33,6 +33,7 @@ COULD_NOT_OPEN_IMAGE_FILE = 1
 COULD_NOT_START_CONVNET = 2
 COULD_NOT_SAVE_OUTPUT_FILE = 3
 INVALID_COMMAND_ARGS = 4
+SERVER_ERROR = 5
 
 class MyError(Exception):
     def __init__(self, value):
