@@ -128,14 +128,16 @@ describe('Application_server',function(){
 
 	    // Actual document in Database.
 	    var returnedObject = {
-	    	_id : '531b2f165fa89cca1be0cd0b',
-	    	classified_count : 0,
-			image_count : 1,	
-	    	group_status : 'uploading'
+  			"_id": "5329bda4ec1ac97a1820fafd",
+  			"classification": "{ \"crucifer\":0.326, \"sweet melon\":0.188, \"magnolia\":0.094, \"summer squash\":0.037, \"citrus\":0.026, }\n",
+		    "classified_count": 9,
+  			"entire": "/homes/sd3112/GroupProject/group-project-master/Nodejs/lib/GraphicServer/uploads/development/5329bda4ec1ac97a1820fafd/73be1f6bfa9a670b12a72f2e870e9208.jpg",
+  			"group_status": "Cancelled",
+		    "image_count": 1
 	    }
 
 	    request(app)
-		.get('/job/531b2f165fa89cca1be0cd0b')
+		.get('/job/5329bda4ec1ac97a1820fafd')
 		.expect(200, returnedObject)
 		.end(function(err,res){
 		    if(err){
