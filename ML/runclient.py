@@ -17,7 +17,8 @@ def process_images(command_list):
         # Receive response
         data = s.recv(1024)               
         print data
-        s.close()                          
+        s.close()
+        sys.exit(1)                          
     else:
         print 'Socket not open, please ensure server is running'
 
