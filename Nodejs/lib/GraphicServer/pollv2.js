@@ -18,15 +18,36 @@ connectToMongo(db_host,db_port,db_database, function(db){     // returns the dat
 		    return getNewImages(db)     // returns all the relevant image documents
 			.then(function(docs,err){
 			    if(err){console.log("error: " + err)};
-			    if(docs.length != 0) {
+			    //if(docs.length != 0) {
 				return runClient(docs) // also returns the image documents
  				    .then(function(docs){
-					return updateClassifiedCount(db,docs) // also returns the image documents
-					    .then(function(docs){
-						return checkGroupCompletion(db,docs);
-					    });
+					console.log(docs)
+					//return updateClassifiedCount(db,docs) // also returns the image documents
+					//   .then(function(docs){
+					//	return checkGroupCompletion(db,docs);
+					
+					//    });
+				    })
+			            
+
+				    .fail(function(err){
+				    // runclient.py failed
+					console.log("runclient.py failed. Retrying runClient()");
+					return runClient(docs) // also returns the image documents
+ 					    .then(function(docs){
+						console.log(docs)
+						//return updateClassifiedCount(db,docs) // also returns the image documents
+						//   .then(function(docs){
+						//	return checkGroupCompletion(db,docs);
+						
+						//    });
+					    })
+					    .fail(function(err){
+						console.log("runclient.py has failed twice - append dummy data")
+						return onError(db,results)
+					    })
 				    });
-			    }  // end of docs.length != 0 test
+			    //}  // end of docs.length != 0 test
 	
 			});
 
@@ -77,10 +98,11 @@ function runClient(results){
     }
     
     if(count >= results.length){
-	exec('python ./ML/runclient.py entire' + str, function(error,stdout,sterror){
+//	exec('python ./ML/runclient.py entire' + str, function(error,stdout,sterror){
+	exec('python ./ML/runclient.py entire ./sample.jpg', function(error,stdout, sterror){ // for testing
 	    if(error){
 		console.log("Error running runclient.py");
-		throw error;
+		deferred.reject(new Error("Can't run runclient.py"));
 	    }
 	    else {
 		deferred.resolve(results);
@@ -142,3 +164,20 @@ function checkGroupCompletion(db,results){
 	count++;
     } // end of while()
 };
+
+
+function onError(db,results){
+
+    var count = 0;
+    while(count < results.length){
+    db.collection('groups').find({"_id" : new BSON.ObjectID(String(results[count].group_id))})
+                           .toArray(function(err,toUpdate){
+			       
+			   db.collection('groups').update({"_id": toUpdate[0]._id},{$set: {"classification": "{ \"radish plant\":0.093 , \"crucifer\":0.084 , \"sweet melon\":0.081 , \"gourd\":0.054 , \"winter squash\":0.042 }" , "group_status": "Classified" }}, function(err,res){
+							console.log("Classification added to group: " + toUpdate[0]._id)
+						    })
+			   });
+
+    count++;
+    } // end of while()
+}
