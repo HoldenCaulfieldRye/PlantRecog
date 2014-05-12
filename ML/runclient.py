@@ -7,6 +7,12 @@ import run
 
 SOCKET = "/tmp/ipc_imageproc"
 
+# Checks whether a proper int returned
+def isInt_try(v):
+    try:     i = int(v)
+    except:  return False
+    return True
+
 
 def process_images(command_list):
     if os.path.exists( SOCKET ):
@@ -16,12 +22,11 @@ def process_images(command_list):
         data = pickle.dumps(command_list)
         s.sendall(struct.pack('>i', len(data))+data) 
         # Receive response
-        try:
-            data = s.recv(1024)               
-            s.close()                          
+        data = s.recv(1024)               
+        s.close()                          
+        if isInt_try(data):
             sys.exit(int(data))
-        except:
-            s.close()
+        else:
             sys.exit(run.SERVER_ERROR)
     else:
         print 'Socket not open, please ensure server is running'
