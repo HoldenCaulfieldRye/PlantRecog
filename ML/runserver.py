@@ -3,20 +3,27 @@ import sys
 import struct
 import os, os.path
 import cPickle as pickle
-import time
+import run
 
 # Constants
 SOCKET = "/tmp/ipc_imageproc"
+CFG = os.path.dirname(os.path.abspath(__file__))+'/run.cfg'
 
 
 # Recogniser Host Task
 class HostTask(object):
     def __init__(self):
-        pass
+        self.cfg = run.get_options(CFG, 'run')
+        self.recogniser = run.get_recogniser(self.cfg,'all')
 
     def run_task(self,args):    
-        time.sleep(1)
-        print args
+        try:
+            if len(args) < 3:
+                raise run.MyError(run.INVALID_COMMAND_ARGS)
+            self.recogniser(args[2:])
+            return run.NO_ERROR
+        except run.MyError as e:
+            return e.value
 
 
 # Receives a full buffer of data over a socket, uses a structured
@@ -57,10 +64,14 @@ def host_server():
     s.listen(5)
     # Start the server
     while True:
+       print 'Server Up'
        conn, addr = s.accept()
-       data = recv_size(conn)
-       parsed_data = pickle.loads(data)
-       result = task.run_task(parsed_data)
+       try:
+           data = recv_size(conn)
+           parsed_data = pickle.loads(data)
+           result = task.run_task(parsed_data)
+       except:
+           result = run.INVALID_COMMAND_ARGS
        conn.send(str(result))
        conn.close()
 

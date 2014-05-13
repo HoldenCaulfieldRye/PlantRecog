@@ -104,7 +104,7 @@ exec('python ./ML/runserver.py &', function(err,stdout,stderr){
 
 setTimeout(function(){
     /* Start polling mongo */
-    var poll = child.fork('./Nodejs/lib/GraphicServer/poll.js',[configArgs.db_host,configArgs.db_port,configArgs.db_database])
+    var poll = child.fork('./Nodejs/lib/GraphicServer/pollv2.js',[configArgs.db_host,configArgs.db_port,configArgs.db_database])
 
 
     /* Enable classify function via post at /classify url */

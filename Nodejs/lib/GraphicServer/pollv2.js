@@ -4,7 +4,6 @@ var exec = require('child_process').exec;
 var async = require('async');
 var Q = require('q');
 
-
 var db_host = process.argv[2];
 var db_port = process.argv[3];
 var db_database = process.argv[4];
@@ -16,7 +15,7 @@ connectToMongo(db_host,db_port,db_database, function(db){     // returns the dat
                 /* Query for new images every 2 seconds*/
 	        setInterval(function(){
 		
-		    return getNewImages(db)     // returns all the relevant image documents
+		    Q.fcall(getNewImages(db))     // returns all the relevant image documents
 			.then(function(docs,err){
 			    if(err){console.log("error: " + err)};
 			    if(docs.length != 0) {
@@ -24,12 +23,10 @@ connectToMongo(db_host,db_port,db_database, function(db){     // returns the dat
  				    .then(function(docs){
 					console.log(docs)
 					return updateClassifiedCount(db,docs) // also returns the image documents
-					//   .then(function(docs){
-					//	return checkGroupCompletion(db,docs);
-					
-					//    });
+//					   .then(function(docs){
+//					    });
 				    })
-			            
+			  
 
 				    .fail(function(err){
 				    // runclient.py failed
@@ -37,11 +34,11 @@ connectToMongo(db_host,db_port,db_database, function(db){     // returns the dat
 					return runClient(docs) // also returns the image documents
  					    .then(function(docs){
 						console.log(docs)
-						//return updateClassifiedCount(db,docs) // also returns the image documents
-						//   .then(function(docs){
-						//	return checkGroupCompletion(db,docs);
+						return updateClassifiedCount(db,docs) // also returns the image documents
+						   .then(function(docs){
+							return checkGroupCompletion(db,docs);
 						
-						//    });
+						    });
 					    })
 					    .fail(function(err){
 						console.log("runclient.py has failed twice - append dummy data")
@@ -51,6 +48,12 @@ connectToMongo(db_host,db_port,db_database, function(db){     // returns the dat
 			    }  // end of docs.length != 0 test
 	
 			});
+		    
+		    Q.fcall(checkGroupCompletion())
+		       .then(function(check){
+			   console.log("checked for group completion");
+		       });
+					
 
 		}, 2000) // end of setInterval()
 	});
@@ -70,8 +73,8 @@ function connectToMongo(host,port,database,callback){
 
 function getNewImages(db) {
 	var deferred = Q.defer();
-        console.log("1) Running getNewImages() ");
-	db.collection('segment_images').find({"submission_state" : "File received by graphicX"})
+        console.log("Running getNewImages() ");
+	db.collection('segment_images').find({"submission_state" : "File received by graphic"})
 				       .sort({"submission_time": -1})
 	                               .limit(128)
 				       .toArray(function(err,docs){
@@ -90,7 +93,7 @@ function getNewImages(db) {
 
 function runClient(results){
     var deferred = Q.defer();
-    console.log("2) Running runClient()");
+    console.log("Running runClient()");
     var count = 0;
     var str = "";
     while(count < results.length){
@@ -101,7 +104,6 @@ function runClient(results){
     if(count >= results.length){
 	console.log("python ./ML/runclient.py entire " + str)
 	exec('python ./ML/runclient.py entire' + str, function(error,stdout,sterror){
-//	exec('python ./ML/runclient.py entire ./sample.jpg', function(error,stdout, sterror){ // for testing
 	    if(error){
 		console.log("Error running runclient.py:" + error);
 		deferred.reject(new Error("Can't run runclient.py"));
@@ -117,7 +119,7 @@ function runClient(results){
 function updateClassifiedCount(db,results){
     var deferred = Q.defer();
     var count = 0;
-    console.log("3) Running updateClassifiedCount()");
+    console.log("Running updateClassifiedCount()");
     while(count < results.length){
 	db.collection('groups').update({"_id" : new BSON.ObjectID(String(results[count].group_id))},{ $inc : { "classified_count": 1} },
 				       function(err,result){ if (err) throw err; })
@@ -133,54 +135,71 @@ function updateClassifiedCount(db,results){
     return deferred.promise;
 };
 
-function checkGroupCompletion(db,results){
+function checkGroupCompletion(){
     var deferred = Q.defer();
-    console.log("4) Running checkGroupCompletion()");
-    var count = 0;
-    while(count < results.length){
+    console.log("Running checkGroupCompletion()");
+
 	 db.collection('groups').find({"group_status" : "Complete"})
 	               .toArray(function(err,toUpdate){
 
+//			   console.log("toUpdate.length = " + toUpdate.length);
+			   
 			   for(var j = 0; j < toUpdate.length; j++){
+			       
+			            //console.log("Group_id: " + toUpdate[j]._id + " image_count:  " + toUpdate[j].image_count + " classified_count: " + toUpdate[j].classified_count)
+			            //console.log("j = " + j);
 
 				    if(toUpdate[j].image_count == toUpdate[j].classified_count){ 
 					
-					return updateGroupWhenComplete(toUpdate[j])
+					Q.fcall(updateGroupWhenComplete(toUpdate[j]))
 					.then(function(classified) {
-					    console.log("Group classified");
-					})   
+					    if(j >= (toUpdate.length - 1) ) { deferred.resolve("Group classified");}
+					})
+					.fail(function(failed){
+//					    console.log("*** failed ***")
+//					    console.log("J = " + j);
+					    if(j >= (toUpdate.length - 1) ) { deferred.reject(new Error("error")) };
+					})
 				    
 				    }
 			   }// end of for loop
-		       });//end of toArray
-	count++;
-   } // end of while()
+	       });//end of toArray
+
+//   } // end of while()
+    return deferred.promise
 };
 
 
 function updateGroupWhenComplete(toUpdate){
+    console.log("Running updateGroupWhenComplete()");
     var deferred = Q.defer();
     var result_set = '';
-                                            if(toUpdate.leaf)   result_set = result_set + ' leaf '   + toUpdate.leaf
-                                            if(toUpdate.flower) result_set = result_set + ' flower ' + toUpdate.flower
-                                            if(toUpdate.fruit)  result_set = result_set + ' fruit '  + toUpdate.fruit
-                                            if(toUpdate.entire) result_set = result_set + ' entire ' + toUpdate.entire
+    if(toUpdate.leaf)   result_set = result_set + ' leaf '   + toUpdate.leaf
+    if(toUpdate.flower) result_set = result_set + ' flower ' + toUpdate.flower
+    if(toUpdate.fruit)  result_set = result_set + ' fruit '  + toUpdate.fruit
+    if(toUpdate.entire) result_set = result_set + ' entire ' + toUpdate.entire
 
-                                            console.log("Time to exec the combine.py script.")
+    console.log("Time to exec the combine.py script.")
+    //console.log("python ./ML/combine.py" + result_set)
 
-                                            exec("python ./ML/combine.py " + result_set, function(err,stdout,stderro){
+    //console.log("toUpdate: " + toUpdate._id);
 
-                                                if(!err){
-                                                    db.collection('groups').update({"_id": toUpdate._id},{$set: {"classification": stdout, "group_status": "Classified" }}, function(err,res){
-                                                        console.log("Classification added to group: " + toUpdate._id)
-							deferred.resolve("Gruop classified");
-						    })
-                                                }
-                                                else {
-                                                    console.log("Something went wrong with combine.py. Not updated group classification.");
-                                                    deferred.reject(new Error("error"));
-						}
-                                            }); // exec combine.py complete                                                                                                                                
+    exec("python ./ML/combine.py " + result_set, function(err,stdout,stderro){
+
+	if(!err){
+            db.collection('groups').update({"_id": new BSON.ObjectID(String(toUpdate._id))},{$set: {"classification": stdout, "group_status": "Classified" }}, function(err,res){
+		
+		console.log("** Classification added to group: " + toUpdate._id + " **")
+		deferred.resolve("Group classified");
+	    })
+         }
+         else {
+             console.log("Something went wrong with combine.py. Not updated group classification.");
+             deferred.reject(new Error("error"));
+	 }
+    }); // exec combine.py complete                                                         
+
+    return deferred.promise
 }
 
 
