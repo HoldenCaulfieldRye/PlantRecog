@@ -4,6 +4,7 @@ var exec = require('child_process').exec;
 var async = require('async');
 var Q = require('q');
 
+
 var db_host = process.argv[2];
 var db_port = process.argv[3];
 var db_database = process.argv[4];
