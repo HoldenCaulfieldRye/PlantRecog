@@ -12,74 +12,36 @@ console.log("db_host: " + db_host + ", db_port: " + db_port + ", db_database: " 
 
 connectToMongo(db_host,db_port,db_database, mainLoop);     // returns the database connection
 	
-                function mainLoop(db){
+/******************************* Main loop  ***********************************/
+
+function mainLoop(db){
 		    
-                     getNewImages(db)     // returns all the relevant image documents
-			.then(function(docs,err){
-			    return runClient(docs)
-			    .then(function(){
-				return updateClassifiedCount(db,docs)
+    getNewImages(db)     // returns all the relevant image documents
+	.then(function(docs){
+	    return runClient(docs)
+	    .then(function(){
+		return updateClassifiedCount(db,docs,docs.length-1)
+		.fail(function(){
+		    return checkGroupCompletion()
+			.then(function(check){
+			    return Q.delay(500)
 				.then(function(){
-				    return checkGroupCompletion()
-					.then(function(check){
-					    return Q.delay(500)
-						.then(function(){
-						    return mainLoop(db);
-				   		})
-					})
-				})
-			    })
+				    return mainLoop(db);
+		   		})
 			})
+		})
+	    })
+	})
+        .fail(function(err){
+	    console.log("getNewImages() failed: " + error);
+	    return Q.delay(1000)
+	        .then(function(){
+		    return mainLoop(db)
+		})
+	})
+}
 
-/*			    
-			    if(docs.length != 0) {
-				return runClient(docs) // also returns the image documents
- 				    .then(function(docs){
-					console.log(docs)
-					return updateClassifiedCount(db,docs) // also returns the image documents
-//					   .then(function(docs){
-//					    });
-				    })
-			  
-
-				    .fail(function(err){
-				    // runclient.py failed
-					console.log("runclient.py failed. Retrying runClient()");
-					return runClient(docs) // also returns the image documents
- 					    .then(function(docs){
-						console.log(docs)
-						return updateClassifiedCount(db,docs) // also returns the image documents
-					//	   .then(function(docs){
-					//		return checkGroupCompletion(db,docs);
-						
-					//	    });
-					    })
-					    .fail(function(err){
-						console.log("runclient.py has failed twice - append dummy data")
-						return onError(db,results)
-					    })
-				    });
-			    }  // end of docs.length != 0 test
-	
-			});
-
-		    .then(checkGroupCompletion())
-		       .then(function(check){
-			   console.log("checked for group completion");
-			   mainDeferred.resolve("done")
-		       });
-*/		
-		  //  return mainDeferred.promise;
-		  //  .then(function(foo){
-		//	mainLoop(db);
-			
-		  //  })
-		//setTimeout(mainLoop(db),2000);
-		}
-		//}, 2000) // end of setInterval(
-
-
-/******************** function definitions *************************/
+/******************** Additional function definitions *************************/
 
 	
 function connectToMongo(host,port,database,callback){
@@ -93,10 +55,9 @@ function connectToMongo(host,port,database,callback){
 
 function getNewImages(db) {
 	var deferred = Q.defer();
-        //console.log("Running getNewImages() ");
 	db.collection('segment_images').find({"submission_state" : "File received by graphic"})
 				       .sort({"submission_time": -1})
-	                               .limit(128)
+	                               .limit(30)
 				       .toArray(function(err,docs){
 					   if(docs.length > 0){
 					       var date = new Date();
@@ -106,27 +67,25 @@ function getNewImages(db) {
 					   if(err){
 					       deferred.reject(new Error(err))}
 					   else{
-					       //console.log("resolving promise")
-				               deferred.resolve(docs);
+					       deferred.resolve(docs);
 					   }
-					});
-
-    //console.log("Returning from getNewImages()")   
+					}); 
     return deferred.promise;
 
 };
 
 function runClient(results){
     var deferred = Q.defer();
-    //console.log("Running runClient()");
     var count = 0;
     var str = "";
     if(results.length != 0){
     while(count < results.length){
-	str += str + " " + results[count].graphic_filepath;
+	if(results[count].graphic_filepath){
+	    str +=  " " + results[count].graphic_filepath;    
+	}
 	count++;
     }
-    
+
     if(count >= results.length){
 	console.log("python ./ML/runclient.py entire " + str)
 	exec('python ./ML/runclient.py entire' + str, function(error,stdout,sterror){
@@ -143,36 +102,47 @@ function runClient(results){
     else{
 	deferred.resolve(results);
     }
-    return deferred.promise;
+  	
+  return deferred.promise;
 };
 
-function updateClassifiedCount(db,results){
+function updateClassifiedCount(db,results,i){
+    
     var deferred = Q.defer();
-    var count = 0; 
-    //console.log("Running updateClassifiedCount()");
-    if(results != 0){
-    while(count < results.length){
-	db.collection('groups').update({"_id" : new BSON.ObjectID(String(results[count].group_id))},{ $inc : { "classified_count": 1} },
-				       function(err,result){ if (err) throw err; })
-        console.log("Updated group: " + results[count].group_id)
-        db.collection('segment_images').update({"_id" : results[count]._id}, { $set : {"submission_state": "File analysed by net" } }, 
-				       function(err,rez){ if (err) throw err; })
-    count++;
+     
+    if(i >= 0 && i < results.length){
+    
+	db.collection('groups').update({"_id" : new BSON.ObjectID(String(results[i].group_id))},{ $inc : { "classified_count": 1} },
+				       function(err,result){ 
+					   if (err) {
+					       console.log("Error in updateClassifiedCount(): " + err)
+					   } 
+					   else { 
+					       console.log("Incremented classified count of group: " + results[i].group_id)
+				           }
+					   db.collection('segment_images').update({"_id" : results[i]._id}, { $set : {"submission_state": "File analysed by net" } }, 
+				                  
+					              function(err,rez){ 
+							  if (err) {
+							      console.log("Failed to update submission state: " + err)
+							  }
+						      
+							  deferred.resolve("resolved");
+                                            })     
+        })
     }
-    if(count >= results.length){
-	deferred.resolve(results);
+    else {
+	
+	deferred.reject("rejected")
     }
-    }
-    else{
-	deferred.resolve(results);
-    }
-    //console.log("Returning from updateClassifiedCount()");
-    return deferred.promise;
+     
+    return deferred.promise.then(function(){
+	return updateClassifiedCount(db,results,i-1)
+    });
 };
 
 function checkGroupCompletion(){
     var deferred = Q.defer();
-    //console.log("Running checkGroupCompletion()");
 
 	 db.collection('groups').find({"group_status" : "Complete"})
 	               .toArray(function(err,toUpdate){
@@ -180,16 +150,14 @@ function checkGroupCompletion(){
 			   if(toUpdate.length != 0){
 
 			       updateGroupWhenComplete(toUpdate,toUpdate.length-1)
-			       //.then(function(){
-			//	   deferred.resolve("resolved")
-			//       })
+
 			       .fail(function(){
 				   deferred.resolve("resolved")
 			       })
 			         
 			   }
 			   else{
-			       //console.log("no groups to update")
+			       
 			       deferred.resolve("resolved")
 			   }
 	       }); //end of toArray
@@ -200,15 +168,11 @@ function checkGroupCompletion(){
 
 
 function updateGroupWhenComplete(toUpdate,i){
-    
-    //console.log("Running updateGroupWhenComplete() " + i);
-    
+        
     var deferred = Q.defer();
     
     if(i >= 0 && i < toUpdate.length){
 	
-	//var deferred2 = Q.defer();
-
 	var result_set = '';
 	if(toUpdate[i].leaf)   result_set = result_set + ' leaf '   + toUpdate[i].leaf
 	if(toUpdate[i].flower) result_set = result_set + ' flower ' + toUpdate[i].flower
@@ -229,13 +193,11 @@ function updateGroupWhenComplete(toUpdate,i){
 		console.log("Something went wrong with combine.py. Not updated group classification.");
 		deferred.resolve("error");
 	    }
-	}); // exec combine.py complete                                                         
-	
+	}); // exec combine.py complete                                                         	
     }
     else{	
 	deferred.reject("rejected"); 	
     }
-
     return deferred.promise.then(function(){
 	return updateGroupWhenComplete(toUpdate,i-1);
     })
