@@ -10,14 +10,28 @@ var db_database = process.argv[4];
 
 console.log("db_host: " + db_host + ", db_port: " + db_port + ", db_database: " + db_database);
 
-connectToMongo(db_host,db_port,db_database, function(db){     // returns the database connection
-
-                /* Query for new images every 2 seconds*/
-	        setInterval(function(){
-		
-		    Q.fcall(getNewImages(db))     // returns all the relevant image documents
+connectToMongo(db_host,db_port,db_database, mainLoop);     // returns the database connection
+	
+                function mainLoop(db){
+		    
+                     getNewImages(db)     // returns all the relevant image documents
 			.then(function(docs,err){
-			    if(err){console.log("error: " + err)};
+			    return runClient(docs)
+			    .then(function(){
+				return updateClassifiedCount(db,docs)
+				.then(function(){
+				    return checkGroupCompletion()
+					.then(function(check){
+					    return Q.delay(500)
+						.then(function(){
+						    return mainLoop(db);
+				   		})
+					})
+				})
+			    })
+			})
+
+/*			    
 			    if(docs.length != 0) {
 				return runClient(docs) // also returns the image documents
  				    .then(function(docs){
@@ -35,10 +49,10 @@ connectToMongo(db_host,db_port,db_database, function(db){     // returns the dat
  					    .then(function(docs){
 						console.log(docs)
 						return updateClassifiedCount(db,docs) // also returns the image documents
-						   .then(function(docs){
-							return checkGroupCompletion(db,docs);
+					//	   .then(function(docs){
+					//		return checkGroupCompletion(db,docs);
 						
-						    });
+					//	    });
 					    })
 					    .fail(function(err){
 						console.log("runclient.py has failed twice - append dummy data")
@@ -48,54 +62,66 @@ connectToMongo(db_host,db_port,db_database, function(db){     // returns the dat
 			    }  // end of docs.length != 0 test
 	
 			});
-		    
-		    Q.fcall(checkGroupCompletion())
+
+		    .then(checkGroupCompletion())
 		       .then(function(check){
 			   console.log("checked for group completion");
+			   mainDeferred.resolve("done")
 		       });
-					
-
-		}, 2000) // end of setInterval()
-	});
+*/		
+		  //  return mainDeferred.promise;
+		  //  .then(function(foo){
+		//	mainLoop(db);
+			
+		  //  })
+		//setTimeout(mainLoop(db),2000);
+		}
+		//}, 2000) // end of setInterval(
 
 
 /******************** function definitions *************************/
 
 	
 function connectToMongo(host,port,database,callback){
-        console.log("0) Running connectToMongo()");
+        console.log("Running connectToMongo()");
   	mongoClient = new mongo.MongoClient(new mongo.Server(host, port), {native_parser: true});
   	mongoClient.open(function(err, mongoClient){
 		db = mongoClient.db(database);
-		callback(db);
+		callback(db)
 	});
 };
 
 function getNewImages(db) {
 	var deferred = Q.defer();
-        console.log("Running getNewImages() ");
+        //console.log("Running getNewImages() ");
 	db.collection('segment_images').find({"submission_state" : "File received by graphic"})
 				       .sort({"submission_time": -1})
 	                               .limit(128)
 				       .toArray(function(err,docs){
-					   var date = new Date();
-					   console.log(date);
-                      			   console.log("Return #" + docs.length + " documents.")
-                      			   if(err){
+					   if(docs.length > 0){
+					       var date = new Date();
+					       console.log(date);
+                      			       console.log("Return #" + docs.length + " documents.")
+                      			   }
+					   if(err){
 					       deferred.reject(new Error(err))}
 					   else{
+					       //console.log("resolving promise")
 				               deferred.resolve(docs);
 					   }
 					});
-       return deferred.promise;
+
+    //console.log("Returning from getNewImages()")   
+    return deferred.promise;
 
 };
 
 function runClient(results){
     var deferred = Q.defer();
-    console.log("Running runClient()");
+    //console.log("Running runClient()");
     var count = 0;
     var str = "";
+    if(results.length != 0){
     while(count < results.length){
 	str += str + " " + results[count].graphic_filepath;
 	count++;
@@ -113,13 +139,18 @@ function runClient(results){
 	    }
 	    });
     }
+    }
+    else{
+	deferred.resolve(results);
+    }
     return deferred.promise;
 };
 
 function updateClassifiedCount(db,results){
     var deferred = Q.defer();
-    var count = 0;
-    console.log("Running updateClassifiedCount()");
+    var count = 0; 
+    //console.log("Running updateClassifiedCount()");
+    if(results != 0){
     while(count < results.length){
 	db.collection('groups').update({"_id" : new BSON.ObjectID(String(results[count].group_id))},{ $inc : { "classified_count": 1} },
 				       function(err,result){ if (err) throw err; })
@@ -131,75 +162,84 @@ function updateClassifiedCount(db,results){
     if(count >= results.length){
 	deferred.resolve(results);
     }
-    console.log("Returning from updateClassifiedCount()");
+    }
+    else{
+	deferred.resolve(results);
+    }
+    //console.log("Returning from updateClassifiedCount()");
     return deferred.promise;
 };
 
 function checkGroupCompletion(){
     var deferred = Q.defer();
-    console.log("Running checkGroupCompletion()");
+    //console.log("Running checkGroupCompletion()");
 
 	 db.collection('groups').find({"group_status" : "Complete"})
 	               .toArray(function(err,toUpdate){
 
-//			   console.log("toUpdate.length = " + toUpdate.length);
-			   
-			   for(var j = 0; j < toUpdate.length; j++){
-			       
-			            //console.log("Group_id: " + toUpdate[j]._id + " image_count:  " + toUpdate[j].image_count + " classified_count: " + toUpdate[j].classified_count)
-			            //console.log("j = " + j);
+			   if(toUpdate.length != 0){
 
-				    if(toUpdate[j].image_count == toUpdate[j].classified_count){ 
-					
-					Q.fcall(updateGroupWhenComplete(toUpdate[j]))
-					.then(function(classified) {
-					    if(j >= (toUpdate.length - 1) ) { deferred.resolve("Group classified");}
-					})
-					.fail(function(failed){
-//					    console.log("*** failed ***")
-//					    console.log("J = " + j);
-					    if(j >= (toUpdate.length - 1) ) { deferred.reject(new Error("error")) };
-					})
-				    
-				    }
-			   }// end of for loop
-	       });//end of toArray
+			       updateGroupWhenComplete(toUpdate,toUpdate.length-1)
+			       //.then(function(){
+			//	   deferred.resolve("resolved")
+			//       })
+			       .fail(function(){
+				   deferred.resolve("resolved")
+			       })
+			         
+			   }
+			   else{
+			       //console.log("no groups to update")
+			       deferred.resolve("resolved")
+			   }
+	       }); //end of toArray
 
-//   } // end of while()
-    return deferred.promise
+
+  return deferred.promise
 };
 
 
-function updateGroupWhenComplete(toUpdate){
-    console.log("Running updateGroupWhenComplete()");
+function updateGroupWhenComplete(toUpdate,i){
+    
+    //console.log("Running updateGroupWhenComplete() " + i);
+    
     var deferred = Q.defer();
-    var result_set = '';
-    if(toUpdate.leaf)   result_set = result_set + ' leaf '   + toUpdate.leaf
-    if(toUpdate.flower) result_set = result_set + ' flower ' + toUpdate.flower
-    if(toUpdate.fruit)  result_set = result_set + ' fruit '  + toUpdate.fruit
-    if(toUpdate.entire) result_set = result_set + ' entire ' + toUpdate.entire
+    
+    if(i >= 0 && i < toUpdate.length){
+	
+	//var deferred2 = Q.defer();
 
-    console.log("Time to exec the combine.py script.")
-    //console.log("python ./ML/combine.py" + result_set)
+	var result_set = '';
+	if(toUpdate[i].leaf)   result_set = result_set + ' leaf '   + toUpdate[i].leaf
+	if(toUpdate[i].flower) result_set = result_set + ' flower ' + toUpdate[i].flower
+	if(toUpdate[i].fruit)  result_set = result_set + ' fruit '  + toUpdate[i].fruit
+	if(toUpdate[i].entire) result_set = result_set + ' entire ' + toUpdate[i].entire
 
-    //console.log("toUpdate: " + toUpdate._id);
+	console.log("Time to exec the combine.py script.")
+	exec("python ./ML/combine.py " + result_set, function(err,stdout,stderro){
 
-    exec("python ./ML/combine.py " + result_set, function(err,stdout,stderro){
+	    if(!err){
+		db.collection('groups').update({"_id": new BSON.ObjectID(String(toUpdate[i]._id))},{$set: {"classification": stdout, "group_status": "Classified" }}, function(err,res){
+		    
+		    console.log("** Classification added to group: " + toUpdate[i]._id + " **")
+		    deferred.resolve("resolved");
+		})
+            }
+            else {
+		console.log("Something went wrong with combine.py. Not updated group classification.");
+		deferred.resolve("error");
+	    }
+	}); // exec combine.py complete                                                         
+	
+    }
+    else{	
+	deferred.reject("rejected"); 	
+    }
 
-	if(!err){
-            db.collection('groups').update({"_id": new BSON.ObjectID(String(toUpdate._id))},{$set: {"classification": stdout, "group_status": "Classified" }}, function(err,res){
-		
-		console.log("** Classification added to group: " + toUpdate._id + " **")
-		deferred.resolve("Group classified");
-	    })
-         }
-         else {
-             console.log("Something went wrong with combine.py. Not updated group classification.");
-             deferred.reject(new Error("error"));
-	 }
-    }); // exec combine.py complete                                                         
+    return deferred.promise.then(function(){
+	return updateGroupWhenComplete(toUpdate,i-1);
+    })
 
-    return deferred.promise
 }
 
 
