@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "express": "*",
+    "express": "3.*.*",
     "jade": "*",
     "mongodb": "*",
     "restler": "*",
@@ -12,12 +12,16 @@
     "async": "*",
     "formidable": "*",
     "util": "*",
-    "mkdirp": "*"
+    "mkdirp": "*",
+    "body-parser": "*",
+    "cookie-parser": "*",
+    "method-override": "*",
+    "express-session": "*"
   },
   "devDependencies": {
     "mocha": "*",
     "should": "*",
     "istanbul": "*",
-    "supertest": "*"
+    "supertest": "0.11.0"
   }
 }
