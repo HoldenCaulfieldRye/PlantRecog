@@ -53,13 +53,13 @@ To test the Worker and Request servers we use Istanbul and Mocha, both of which 
 
 To run the tests type:
 
-make all_test
+   make all_test
 
 It is also possible to run tests for the individual servers using:
 
-make request_test
+   make request_test   
 or
-make worker_test
+	make worker_test
 
 Test results will be output to the console and coverage will be generated and placed in ./Nodejs/coverage/lcov-report
 
@@ -74,7 +74,7 @@ MongoDB can be launched, along with the servers, using the startup script within
 
 It can also be launched independently (which will run the database as the user 'mongodb').
 
-sudo su -c "mongod --config path-to-group-project-master/env/env_dev.conf &" -s /bin/sh mongodb
+   sudo su -c "mongod --config path-to-group-project-master/env/env_dev.conf &" -s /bin/sh mongodb
 
 Launching the Servers
 =====================
@@ -85,5 +85,5 @@ They can be initiated using the startup script within ./bin or they may be launc
 
 Please note that whilst the classification server will run, no results will be returned unless the ML portion of the stack is configured.
 
-node ./Nodejs/lib/AppServer/app.js ./env/pseudo-dist_dev_env.conf
-node ./Nodejs/lib/GraphicServer/graphic.js ./env/pseudo-dist_dev_env.conf
+       node ./Nodejs/lib/AppServer/app.js ./env/pseudo-dist_dev_env.conf
+       node ./Nodejs/lib/GraphicServer/graphic.js ./env/pseudo-dist_dev_env.conf
