@@ -1,13 +1,12 @@
-	README.md
+README.md
 
-================================
+=======================
 INSTALLING DEPENDENCIES
-================================
+=======================
 We use Node.js v0.10.* along with npm (node package manager).
 
 Ubuntu (our distribution of choice) contains a very old version of Node.js in its stable repositories. Node.js latest stable can be installed on Ubuntu either from source or via apt. Here we include instructions to install via the apt package manager.
 
-===============
 Install Node.js
 ===============
 
@@ -23,7 +22,6 @@ Install Node.js
 
 	sudo apt-get install python-software-properties python g++ make nodejs
 
-==========================
 Install required libraries
 ==========================
 
@@ -41,9 +39,9 @@ We store the macros in a makefile for easy deployment.
 
 	make install
 
-=========
-Run Tests
-=========
+=============
+RUNNING TESTS
+=============
 
 To test the Worker and Request servers we use Istanbul and Mocha, both of which are installed along as part of the dev-install command.
 
@@ -57,3 +55,8 @@ make request_test
 or
 make worker_test
 
+Test results will be output to the console and coverage will be generated and placed in ./Nodejs/coverage/lcov-report
+
+===================
+RUNNING THE SERVERS
+===================
