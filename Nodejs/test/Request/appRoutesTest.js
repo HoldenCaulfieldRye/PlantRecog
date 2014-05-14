@@ -55,9 +55,7 @@ describe('Application_server',function(){
 	/* Code to allow connection to mongo, gets new instance of MongoClient */
 
 	var server = new Server('theplant.guru','55517',{auto_reconnect:true, native_parser: true});
-	var server2 = new Server('theplant.guru','55517',{auto_reconnect:true, native_parser: true});
 	testDB = new Db('testing',server, {safe: true});
-	//testDB2 = new Db('testing',server2, {safe: true});
 
 	//Actually connect to the database.
 	testDB.open(function(err, testDB) {
