@@ -1,4 +1,4 @@
-47import unittest
+import unittest
 import os, sys
 import cPickle as pickle
 import libs 
@@ -14,13 +14,13 @@ class RunTests(unittest.TestCase):
 
 
     def test_without_params(self):
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(libs.run.MyError):
             sys.argv = ['run.py']
             libs.run.console(HERE+'test_data/run.cfg')
 
 
     def test_with_invalid_params(self):
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(libs.run.MyError):
             sys.argv = ['run.py','rando',HERE+'test_data/11.jpg']
             libs.run.console(HERE+'test_data/run.cfg')
 

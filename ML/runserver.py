@@ -66,9 +66,12 @@ def host_server():
     while True:
        print 'Server Up'
        conn, addr = s.accept()
-       data = recv_size(conn)
-       parsed_data = pickle.loads(data)
-       result = task.run_task(parsed_data)
+       try:
+           data = recv_size(conn)
+           parsed_data = pickle.loads(data)
+           result = task.run_task(parsed_data)
+       except:
+           result = run.INVALID_COMMAND_ARGS
        conn.send(str(result))
        conn.close()
 

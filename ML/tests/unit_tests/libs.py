@@ -12,4 +12,6 @@ import run
 import combine
 import dataset
 import script
+import predict
+import plantdataproviders
 import mongoHelperFunctions
