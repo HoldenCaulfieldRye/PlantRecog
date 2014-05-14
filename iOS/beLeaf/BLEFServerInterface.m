@@ -317,16 +317,21 @@ NSString * const BLEFNetworkRetryNotification = @"BLEFNetworkRetryNotification";
 - (BOOL) updateSpecimen:(NSManagedObjectID *)specimenID usingData:(NSData *)data andError:(NSError *)error;
 {
     NSDictionary *classification;
-    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+    NSError* error2 = NULL;
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error2];
     if (json){
         NSLog(@"%@", json);
         NSString *classificationSTR = json[@"classification"];
-        if ((classificationSTR != nil) && [classificationSTR length] > 2){
-            NSData *classificationDATA = [classificationSTR dataUsingEncoding:NSUTF8StringEncoding];
-            NSError *error;
-            classification = [NSJSONSerialization JSONObjectWithData:classificationDATA options:kNilOptions error:&error];
-            if (error){
-                return false;
+        if (classificationSTR != nil){
+            if ([[classificationSTR class] isSubclassOfClass:[NSString class]]){
+                NSData *classificationDATA = [classificationSTR dataUsingEncoding:NSUTF8StringEncoding];
+                NSError *error;
+                classification = [NSJSONSerialization JSONObjectWithData:classificationDATA options:kNilOptions error:&error];
+                if (error){
+                    return false;
+                }
+            } else if ([[classificationSTR class] isSubclassOfClass:[NSDictionary class]]){
+                classification = (NSDictionary*)classificationSTR;
             }
         }
     }
