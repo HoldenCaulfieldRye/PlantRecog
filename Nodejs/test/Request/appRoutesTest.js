@@ -128,16 +128,16 @@ describe('Application_server',function(){
 
 	    // Actual document in Database.
 	    var returnedObject = {
-  			"_id": "5329bda4ec1ac97a1820fafd",
-  			"classification": "{ \"crucifer\":0.326, \"sweet melon\":0.188, \"magnolia\":0.094, \"summer squash\":0.037, \"citrus\":0.026, }\n",
-		    "classified_count": 9,
-  			"entire": "/homes/sd3112/GroupProject/group-project-master/Nodejs/lib/GraphicServer/uploads/development/5329bda4ec1ac97a1820fafd/73be1f6bfa9a670b12a72f2e870e9208.jpg",
-  			"group_status": "Cancelled",
-		    "image_count": 1
-	    }
+  "_id": "53737e1cfd6d041012a14880",
+  "classification": "{ \"echinocactus\":0.738 , \"millet\":0.027 , \"reed grass\":0.021 , \"fern\":0.015 , \"cycad\":0.014 }\n",
+  "classified_count": 1,
+  "entire": "/homes/sd3112/GroupProject/group-project-master/Nodejs/lib/GraphicServer/uploads/development/53737e1cfd6d041012a14880/6ffde8b744cbdc6fedc10d5d763be9d5.jpg",
+  "group_status": "Classified",
+  "image_count": 1
+}
 
 	    request(app)
-		.get('/job/5329bda4ec1ac97a1820fafd')
+		.get('/job/53737e1cfd6d041012a14880')
 		.expect(200, returnedObject)
 		.end(function(err,res){
 		    if(err){
