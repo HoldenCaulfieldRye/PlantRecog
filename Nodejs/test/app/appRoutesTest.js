@@ -15,7 +15,7 @@ var app = express();
 // Custom Modules
 // Paths here are relative to the folder in which this script lies.
 
-var routes = require('../lib/AppServer/routes/index.js');
+var routes = require('../../lib/AppServer/routes/index.js');
 
 // Requirements for mongo connection
 var Server = mongo.Server,
