@@ -75,7 +75,7 @@ extern void __gcov_flush();
 
 - (void)testInit
 {
-    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    BLEFDatabase *database = [[BLEFDatabase alloc] initAndDisableSaves];
     [database setManagedObjectContext:testingContext];
     BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire", @"leaf"] usingDatabase:database];
     XCTAssertNotNil(testBuffer, @"Test init'ing buffer returns a reference");
@@ -95,7 +95,7 @@ extern void __gcov_flush();
 
 - (void)testAddandRetrieveData
 {
-    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    BLEFDatabase *database = [[BLEFDatabase alloc] initAndDisableSaves];
     [database setManagedObjectContext:testingContext];
     BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingDatabase:database];
     UIImage *testImage = [self generateTestImage];
@@ -111,7 +111,7 @@ extern void __gcov_flush();
 
 - (void)testAddAndDeleteData
 {
-    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    BLEFDatabase *database = [[BLEFDatabase alloc] initAndDisableSaves];
     [database setManagedObjectContext:testingContext];
     BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingDatabase:database];
     UIImage *testImage = [self generateTestImage];
@@ -123,7 +123,7 @@ extern void __gcov_flush();
 
 - (void)testSlotSave
 {
-    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    BLEFDatabase *database = [[BLEFDatabase alloc] initAndDisableSaves];
     [database setManagedObjectContext:testingContext];
     BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingDatabase:database];
     UIImage *testImage = [self generateTestImage];
@@ -146,7 +146,7 @@ extern void __gcov_flush();
 
 - (void)testCompleteCapture
 {
-    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    BLEFDatabase *database = [[BLEFDatabase alloc] initAndDisableSaves];
     [database setManagedObjectContext:testingContext];
     BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingDatabase:database];
     [testBuffer completeCapture];
@@ -154,7 +154,7 @@ extern void __gcov_flush();
 
 - (void)testDeleteSession
 {
-    BLEFDatabase *database = [[BLEFDatabase alloc] init];
+    BLEFDatabase *database = [[BLEFDatabase alloc] initAndDisableSaves];
     [database setManagedObjectContext:testingContext];
     BLEFCaptureBuffer *testBuffer = [[BLEFCaptureBuffer alloc] initWithSlots:@[@"entire"] usingDatabase:database];
     [testBuffer deleteSession];

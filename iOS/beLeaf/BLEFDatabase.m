@@ -23,6 +23,15 @@
     return self;
 }
 
+- (id)initAndDisableSaves
+{
+    self = [super init];
+    if (self){
+        _disableSaves = true;
+    }
+    return self;
+}
+
 - (void)finalize
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];

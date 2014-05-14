@@ -13,6 +13,7 @@
 
 @interface BLEFDatabase : NSObject
 
+- (id)initAndDisableSaves;
 - (NSArray*)getAllSpecimens;
 - (NSArray*)getSpecimenNeedingUpdate;
 - (NSFetchedResultsController*)fetchSpecimen;
