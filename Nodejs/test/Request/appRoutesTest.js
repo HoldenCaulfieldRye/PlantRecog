@@ -24,10 +24,21 @@ BSON = mongo.BSONPure;
 
 //app.use(express.bodyParser());
 
+//Function to check if something JSON
+function isValidJSON(string) {
+  try {
+    JSON.parse(string);
+  } catch (e) {
+    return false;
+  }
+
+  return true;
+}
+
 describe('Application_server',function(){
 
 	// RegExp to test id returned //
-	var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$")
+	var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
     var testDB;
     var configArgs = {};
     configArgs.db_port = "55517";
@@ -59,9 +70,11 @@ describe('Application_server',function(){
 	    	// Set up the middleware for testing
 	    	app.get('/job/:group_id', routes.getJob(testDB));
 	    	app.get('/job', routes.getJob(testDB));
+	    	app.get('/forceold', routes.forceOld(testDB));
 	    	app.post('/upload', routes.upload(testDB,configArgs));
 	    	app.post('/upload_no_db', routes.upload(null,configArgs));
 	    	app.put('/completion/:group_id', routes.putComplete(testDB));
+
 	    	done();
 	    }
 	});
@@ -422,5 +435,25 @@ describe('Application_server',function(){
 		});
 	});
 
+	describe('routes.forceOld', function(){
 
-})
+		it('should respond with a JSON object and 200', function(done){
+			this.timeout(4000);
+		    request(app)
+			.get('/forceold')
+			.expect(200)
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+			    setTimeout(done, 3000);
+			    };
+			});
+
+		});
+
+
+	});
+
+});
