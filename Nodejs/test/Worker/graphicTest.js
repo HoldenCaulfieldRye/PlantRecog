@@ -10,7 +10,7 @@ var assert = require('assert');
 var confFile = '../env/pseudo-dist_dev_env.conf';
 exports.conf = confFile;
 // Start the app
-var myApp = require('../lib/GraphicServer/graphic.js')
+var myApp = require('../../lib/GraphicServer/graphic.js')
 
 
 /******************************

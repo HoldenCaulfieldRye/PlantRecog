@@ -26,7 +26,7 @@ exports.classify = function(db,configArgs) {
 	        form.keepExtensions = true;
 
 	        try{
-				form.on('file', function(field, file) {
+		        form.on('file', function(field, file) {
 	            //rename the incoming file to the file's name
 	            	fs.renameSync(file.path, form.uploadDir + "/" + file.name);
 				})
@@ -40,22 +40,22 @@ exports.classify = function(db,configArgs) {
 				// Determine where to save the file
 				try{
 					groupLocation = path.join(form.uploadDir, fields.group_id)
-             		fileLocation = path.join(form.uploadDir, files.datafile.name)
-             		mkdirp.sync(groupLocation)
+             			        fileLocation = path.join(form.uploadDir, files.datafile.name)
+             			        mkdirp.sync(groupLocation)
 
 				} catch(err){
 					res.send("Insufficient arguments supplied")
 					return err;
 				}
 				
-             	try{
-   	    			fs.renameSync(fileLocation, groupLocation + "/" +  files.datafile.name)
-		    	} catch(err){	
-		    		res.send("Could not rename file")
-		    	return err;
+             		        try{
+   	    			    fs.renameSync(fileLocation, groupLocation + "/" +  files.datafile.name)
+		    		} catch(err){	
+		    		    res.send("Could not rename file")
+		    		    return err;
 		   		}  
 
-                console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
+			        console.log('POST request body is: \n' + util.inspect({fields: fields, files: files}) );
 
 	   			filePath = files.datafile.path;	
 	   			fileName = files.datafile.name;
