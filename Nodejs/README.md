@@ -39,6 +39,12 @@ We store the macros in a makefile for easy deployment.
 
 	make install
 
+Install MongoDB 
+===============
+
+MongoDB installation guides can be found here:
+http://docs.mongodb.org/manual/installation/
+
 =============
 RUNNING TESTS
 =============
@@ -60,3 +66,24 @@ Test results will be output to the console and coverage will be generated and pl
 ===================
 RUNNING THE SERVERS
 ===================
+
+Launching MongoDB
+=================
+
+MongoDB can be launched, along with the servers, using the startup script within the ./bin folder. 
+
+It can also be launched independently (which will run the database as the user 'mongodb').
+
+sudo su -c "mongod --config path-to-group-project-master/env/env_dev.conf &" -s /bin/sh mongodb
+
+Launching the Servers
+=====================
+
+The servers must be launched from the root of the repository (ie, above this ./Nodejs folder).
+
+They can be initiated using the startup script within ./bin or they may be launched independently (using a non-distributed environment) as follows.
+
+Please note that whilst the classification server will run, no results will be returned unless the ML portion of the stack is configured.
+
+node ./Nodejs/lib/AppServer/app.js ./env/pseudo-dist_dev_env.conf
+node ./Nodejs/lib/GraphicServer/graphic.js ./env/pseudo-dist_dev_env.conf
