@@ -24,6 +24,7 @@
 		5E2AD58F1863B6DA00595828 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E2AD5731863B6D900595828 /* CoreData.framework */; };
 		5E2AD5971863B6DA00595828 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5951863B6DA00595828 /* InfoPlist.strings */; };
 		5E2AD5A31863BB5A00595828 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E2AD5A21863BB5A00595828 /* iPhone.storyboard */; };
+		5E6C18BD191AD1F100E257BF /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E6C18BC191AD1F100E257BF /* StoreKit.framework */; };
 		E9100F6B18BA437800006AF0 /* beLeaf.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5E2AD5811863B6DA00595828 /* beLeaf.xcdatamodeld */; };
 		E9100F6D18BA439800006AF0 /* BLEFSpecimen.m in Sources */ = {isa = PBXBuildFile; fileRef = E9E396271897F8830067A991 /* BLEFSpecimen.m */; };
 		E9100F6E18BA439800006AF0 /* BLEFObservation.m in Sources */ = {isa = PBXBuildFile; fileRef = E9829C6C189D7662004DD07F /* BLEFObservation.m */; };
@@ -113,6 +114,7 @@
 		5E2AD5961863B6DA00595828 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5E2AD5A21863BB5A00595828 /* iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = iPhone.storyboard; sourceTree = "<group>"; };
 		5E5F527418E4778D00DC20DF /* beLeaf1.2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = beLeaf1.2.xcdatamodel; sourceTree = "<group>"; };
+		5E6C18BC191AD1F100E257BF /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		5E94AB3018D7231B0005C36F /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		9B5FD93065DA4C2E89495E05 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
 		A64737D915944062A1EA1E51 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -159,6 +161,7 @@
 				E9FB665918D8F94D00EB2EB5 /* QuartzCore.framework in Frameworks */,
 				E9772F6B18CF5DA800D15247 /* CoreLocation.framework in Frameworks */,
 				E95C853A1864564000CFEC40 /* AVFoundation.framework in Frameworks */,
+				5E6C18BD191AD1F100E257BF /* StoreKit.framework in Frameworks */,
 				5E2AD5701863B6D900595828 /* CoreGraphics.framework in Frameworks */,
 				5E2AD5741863B6D900595828 /* CoreData.framework in Frameworks */,
 				5E2AD5721863B6D900595828 /* UIKit.framework in Frameworks */,
@@ -221,6 +224,7 @@
 		5E2AD56C1863B6D900595828 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5E6C18BC191AD1F100E257BF /* StoreKit.framework */,
 				E9FB665718D8F94500EB2EB5 /* QuartzCore.framework */,
 				E9772F6A18CF5DA800D15247 /* CoreLocation.framework */,
 				5E0F64F418CA176400A04542 /* libPods-OHHTTPStubs.a */,
@@ -376,6 +380,11 @@
 				TargetAttributes = {
 					5E2AD5691863B6D900595828 = {
 						DevelopmentTeam = BQWPGCX46D;
+						SystemCapabilities = {
+							com.apple.InAppPurchase = {
+								enabled = 1;
+							};
+						};
 					};
 					E9FB662B18D8A70500EB2EB5 = {
 						DevelopmentTeam = BQWPGCX46D;
@@ -648,7 +657,7 @@
 				INFOPLIST_FILE = "beLeaf/beLeaf-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "B0B2BEFA-ADF6-4356-A3B5-0517AEC96266";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -669,7 +678,7 @@
 				INFOPLIST_FILE = "beLeaf/beLeaf-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "B0B2BEFA-ADF6-4356-A3B5-0517AEC96266";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -727,7 +736,7 @@
 				INFOPLIST_FILE = "whatPlant copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "whatPlant copy";
-				PROVISIONING_PROFILE = "A45CCA36-B3AE-4BF2-B422-A675EF9BCE16";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -748,7 +757,7 @@
 				INFOPLIST_FILE = "whatPlant copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "whatPlant copy";
-				PROVISIONING_PROFILE = "A45CCA36-B3AE-4BF2-B422-A675EF9BCE16";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
