@@ -28,7 +28,7 @@ describe('Graphic_server',function(){
     configArgs.db_port = "55517";
     configArgs.db_host = "theplant.guru";
     configArgs.db_database = "development";
-    configArgs.classifier_host = "localhost";
+    configArgs.classifier_host = "graphic02.doc.ic.ac.uk";
     configArgs.classifier_port = "55581";
     configArgs.appServer_port = "55580";
 
