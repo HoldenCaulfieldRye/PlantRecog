@@ -15,7 +15,7 @@ var app = express();
 // Custom Modules
 // Paths here are relative to the folder in which this script lies.
 
-var routes = require('../lib/AppServer/routes/index.js');
+var routes = require('../../lib/AppServer/routes/index.js');
 
 // Requirements for mongo connection
 var Server = mongo.Server,
@@ -24,10 +24,21 @@ BSON = mongo.BSONPure;
 
 //app.use(express.bodyParser());
 
+//Function to check if something JSON
+function isValidJSON(string) {
+  try {
+    JSON.parse(string);
+  } catch (e) {
+    return false;
+  }
+
+  return true;
+}
+
 describe('Application_server',function(){
 
 	// RegExp to test id returned //
-	var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$")
+	var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
     var testDB;
     var configArgs = {};
     configArgs.db_port = "55517";
@@ -59,9 +70,11 @@ describe('Application_server',function(){
 	    	// Set up the middleware for testing
 	    	app.get('/job/:group_id', routes.getJob(testDB));
 	    	app.get('/job', routes.getJob(testDB));
+	    	app.get('/forceold', routes.forceOld(testDB));
 	    	app.post('/upload', routes.upload(testDB,configArgs));
 	    	app.post('/upload_no_db', routes.upload(null,configArgs));
 	    	app.put('/completion/:group_id', routes.putComplete(testDB));
+
 	    	done();
 	    }
 	});
@@ -128,16 +141,16 @@ describe('Application_server',function(){
 
 	    // Actual document in Database.
 	    var returnedObject = {
-  			"_id": "5329bda4ec1ac97a1820fafd",
-  			"classification": "{ \"crucifer\":0.326, \"sweet melon\":0.188, \"magnolia\":0.094, \"summer squash\":0.037, \"citrus\":0.026, }\n",
-		    "classified_count": 9,
-  			"entire": "/homes/sd3112/GroupProject/group-project-master/Nodejs/lib/GraphicServer/uploads/development/5329bda4ec1ac97a1820fafd/73be1f6bfa9a670b12a72f2e870e9208.jpg",
-  			"group_status": "Cancelled",
-		    "image_count": 1
-	    }
+  "_id": "53737e1cfd6d041012a14880",
+  "classification": "{ \"echinocactus\":0.738 , \"millet\":0.027 , \"reed grass\":0.021 , \"fern\":0.015 , \"cycad\":0.014 }\n",
+  "classified_count": 1,
+  "entire": "/homes/sd3112/GroupProject/group-project-master/Nodejs/lib/GraphicServer/uploads/development/53737e1cfd6d041012a14880/6ffde8b744cbdc6fedc10d5d763be9d5.jpg",
+  "group_status": "Classified",
+  "image_count": 1
+}
 
 	    request(app)
-		.get('/job/5329bda4ec1ac97a1820fafd')
+		.get('/job/53737e1cfd6d041012a14880')
 		.expect(200, returnedObject)
 		.end(function(err,res){
 		    if(err){
@@ -422,5 +435,25 @@ describe('Application_server',function(){
 		});
 	});
 
+	describe('routes.forceOld', function(){
 
-})
+		it('should respond with a JSON object and 200', function(done){
+			this.timeout(4000);
+		    request(app)
+			.get('/forceold')
+			.expect(200)
+			.end(function(err,res){
+			    if(err){
+				done(err);
+			    }
+			    else {
+			    setTimeout(done, 3000);
+			    };
+			});
+
+		});
+
+
+	});
+
+});

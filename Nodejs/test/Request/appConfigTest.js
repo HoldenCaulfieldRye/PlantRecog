@@ -7,12 +7,12 @@ var assert = require('assert');
 
 // Custom Modules
 // Paths here are relative to the folder in which this script lies.
-var parseConfig = require('../lib/GraphicServer/config_parser').parseConfig;
+var parseConfig = require('../../lib/AppServer/config_parser').parseConfig;
 
 /******************************
 * Actual tests
 ******************************/
-describe('Graphic_server',function(){
+describe('Application_server',function(){
 	
 
 	describe('.parseConfig',function(){

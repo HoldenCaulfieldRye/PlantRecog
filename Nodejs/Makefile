@@ -6,16 +6,14 @@ install:
 dev-install:
 	npm install
 
-test_all:
-	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/ 
+request_test:
+	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/Request
 
-app_test:
-	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/appRoutesTest.js 
+worker_test:
+	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/Worker
 
-graphic_test:
-	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/graphicRoutesTest.js
+all_test:
+	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/**/*.js
 
-graphic_instantiation:
-	@NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/graphicTest.js	
 
-.PHONY: test graphic_test
+.PHONY: request_test worker_test all_test
