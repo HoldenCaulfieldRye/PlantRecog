@@ -11,7 +11,7 @@ class TagTests(unittest.TestCase):
 
     def test_collect_filenames(self):                             
         files = tag._collect_filenames_and_labels(HERE+'test_data/','*.jpg','.xml')
-        self.assertEqual(len(files),24)
+        self.assertEqual(len(files),25)
 
 
     def test_process_tag_item(self):

@@ -94,8 +94,8 @@ class AugmentLeafDataProvider(LabeledDataProvider):
         # Subtract the mean from the data and make sure that both data and
         # labels are in single-precision floating point.
         # This converts the data matrix to single precision and makes sure that it is C-ordered
-        if not self.test:
-            cropped = augment_illumination(cropped)
+        # if not self.test:
+        #    cropped = augment_illumination(cropped)
         cropped = n.require((cropped - self.data_mean), dtype=n.single, requirements='C')
         return epoch, batchnum, [cropped, self.data_dic['labels']]
 
