@@ -13,8 +13,7 @@ SETTING UP A NETWORK
 Unfortunately, it is not possible to store all of the weights required for a
 pre-trained network in this repository, as it is just too large.
 
-1. To train your
-own network, first setup the noccn scripts
+1. To train your own network, first setup the noccn scripts
 
     cd noccn/
     ./setup.sh
@@ -22,6 +21,11 @@ own network, first setup the noccn scripts
 2. Next, you need your data to be batched in a format that the CUDA
 program expects: https://code.google.com/p/cuda-convnet/wiki/Data
 You can find batch creators under noccn/noccn/dataset.py
+
+Using one of our template options.cfg files located in models to
+specify the parameters of your data batching, then call
+
+    ccn-make-batches /path/to/your/options.cfg
     
 3. Then, you need to setup 3 configuration files that configure your neural
 network:
@@ -45,8 +49,28 @@ created in the path you specified in options.cfg.
 
         make clean 
 
-	
+================================
+INTERFACING WITH THE NETWORK
+================================
 
+1. Setup the run.cfg in the main ML directory to look to the options.cfg files
+   for your trained network.  The run script can then be run with the following
+    command, component_type being one of Leaf,Flower,Fruit, Entire:
+
+    python run.py component_type /path/to/image1.jpg /path/to/image2.jpg
+
+2. This can then be combined with the combine script:
+
+    python combine.py Leaf /path/to/leaf.jpg Flower /path/to/flower.jpg
+
+3. To setup a server to remain in persistent memory:
+
+    python runserver.py &
+
+4. Requests can then be sent directly to the client as for the run.py script and
+   the combine script can be used as normal:
+
+   python runclient.py component_type /path/to/image1.jpg /path/to/image2.jpg
 
 
 =================================
